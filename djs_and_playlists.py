@@ -57,8 +57,6 @@ st.dataframe(df.sample(100))
 
 
 dj_id = st.text_input("Enter a Spotify displayname or user_id:")
-if not dj_id:
-    dj_id = 'Kasia Stepek'
 
 
 not_my_music = (df
