@@ -64,7 +64,7 @@ st.dataframe(df.sample(100))
 st.markdown("#### Enter a Spotify display name or user_id:")
 dj_id = st.text_input("ex. Kasia Stepek or 1185428002").lower().strip()
 
-st.markdown("#### What popular music don't I play, but others do?")
+st.markdown(f"#### What popular music doesn't {dj_id} play, but others do?")
 not_my_music = (df
                 #  .pipe(wcs_specific)
                 .filter(~pl.col('spotify').str.contains(dj_id)
@@ -95,7 +95,7 @@ st.dataframe(not_my_music)
 
 
 
-st.markdown("#### What music do only I play?")
+st.markdown(f"#### What music does only {dj_id} play?")
 
 only_i_play = (df
               #  .pipe(wcs_specific)
