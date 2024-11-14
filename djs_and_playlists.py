@@ -197,3 +197,7 @@ mena = (df
 st.dataframe(mena)
 
 
+
+
+
+st.text("If you have questions/feedback/suggestions, please leave a comment: \nhttps://forms.gle/19mALUpmM9Z5XCA28")
