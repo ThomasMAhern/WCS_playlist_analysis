@@ -112,3 +112,79 @@ st.dataframe(only_i_play)
 
 
 
+
+
+
+
+
+
+
+
+
+st.markdown(f"#### What are the most popular songs only played in Europe?")
+europe = (df
+          #  .pipe(wcs_specific)
+          .filter(pl.col('regions') == 'Europe')
+          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .unique()
+          .sort('num_djs', descending=True)
+          )
+
+st.dataframe(europe)
+
+
+
+
+
+
+
+
+st.markdown(f"#### What are the most popular songs only played in USA?")
+
+usa = (df
+          #  .pipe(wcs_specific)
+          .filter(pl.col('regions') == 'USA')
+          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .unique()
+          .sort('num_djs', descending=True)
+          )
+
+st.dataframe(usa)
+
+
+
+
+
+
+st.markdown(f"#### What are the most popular songs only played in Asia?")
+
+asia = (df
+          #  .pipe(wcs_specific)
+          .filter(pl.col('regions') == 'Asia')
+          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .unique()
+          .sort('num_djs', descending=True)
+          )
+
+st.dataframe(asia)
+
+
+
+
+
+
+
+
+
+st.markdown(f"#### What are the most popular songs only played in MENA?")
+mena = (df
+          #  .pipe(wcs_specific)
+          .filter(pl.col('regions') == 'MENA')
+          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .unique()
+          .sort('num_djs', descending=True)
+          )
+
+st.dataframe(mena)
+
+
