@@ -60,7 +60,7 @@ st.dataframe(df.sample(100))
 
 
 
-
+id_input = 'Kasia Stepek'
 st.markdown("#### Enter a Spotify display name or user_id:")
 id_input = st.text_input("ex. Kasia Stepek or 1185428002")
 dj_id = id_input.lower().strip()
