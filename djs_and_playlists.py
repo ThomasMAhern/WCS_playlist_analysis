@@ -29,12 +29,14 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
       #gets the counts of djs, playlists, and geographic regions a song is found in
       .with_columns(num_djs = pl.n_unique('owner.display_name').over(pl.col('song')),
                     num_playlists = pl.n_unique('name').over(pl.col('song')),
-                    num_regions = pl.n_unique('region').over('song') - 1,
                     regions = pl.col('region').over('song', mapping_strategy='join')
                                   .list.unique()
                                   .list.drop_nulls()
                                   .list.sort()
                                   .list.join(', '),)
+      .with_columns(num_regions = pl.when(pl.col('regions').str.len_bytes() != 0)
+                                    .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
+                                    .otherwise(0))
       )
 
 
