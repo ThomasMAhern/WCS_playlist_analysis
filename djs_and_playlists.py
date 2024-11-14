@@ -76,7 +76,7 @@ dj_id = id_input.lower().strip()
 st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
 dj_music = [i[0] for i in (df
             .filter(pl.col('spotify').str.contains(dj_id)
-                    | pl.col('owner.display_name').str.contains(dj_id))
+                    | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
             .select('track.id')
             .unique()
             .collect()
