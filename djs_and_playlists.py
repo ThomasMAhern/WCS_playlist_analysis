@@ -46,4 +46,4 @@ st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_speci
 
 
 
-st.dataframe(df)
+st.dataframe(df.sample(100))
