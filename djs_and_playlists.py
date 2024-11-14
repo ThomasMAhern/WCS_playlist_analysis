@@ -54,7 +54,7 @@ st.write(f"{df.select('name').unique().collect(streaming=True).shape[0]:,} Playl
 
 
 st.markdown("#### What the data looks like")
-st.dataframe(df._fetch(100))
+st.dataframe(df.collect().sample(100))
 
 
 
