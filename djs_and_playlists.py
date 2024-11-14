@@ -9,7 +9,7 @@ regex_year_abbreviated = r"'\d{2}"
 
 def wcs_specific(df_):
   '''given a df, filter to the records most likely to be west coast swing related'''
-  return (df_
+  return (df_.lazy()
           .filter(~(pl.col('name').str.contains(regex_year_first)
                   |pl.col('name').str.contains(regex_year_last)
                   |pl.col('name').str.contains(regex_year_abbreviated)
@@ -47,14 +47,14 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
 
 st.markdown("## Westie DJ-playlist Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
-st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} wcs specific)")
-st.write(f"{df.select('track.artists.id').unique().shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().shape[0]:,} wcs specific)")
-st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').unique().shape[0]:,} wcs specific)\n\n")
+st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
+st.write(f"{df.select('track.artists.id').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().collect(streaming=True).shape[0]:,} wcs specific)")
+st.write(f"{df.select('name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').collect(streaming=True).unique().shape[0]:,} wcs specific)\n\n")
 
 
 
 st.markdown("#### What the data looks like")
-st.dataframe(df.sample(100))
+st.dataframe(df._fetch(100))
 
 
 
@@ -79,6 +79,7 @@ dj_music = [i[0] for i in (df
                     | pl.col('owner.display_name').str.contains(dj_id))
             .select('track.id')
             .unique()
+            .collect(streaming=True)
             .iter_rows()
            )]
 
@@ -92,9 +93,10 @@ not_my_music = (df
                 .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
                 .unique()
                 .sort('num_playlists', descending=True)
+
                 )
 
-st.dataframe(not_my_music)
+st.dataframe(not_my_music.collect(streaming=True).head(200))
 
 
 
@@ -122,7 +124,7 @@ only_i_play = (df
               .sort('playlist_count', descending=True)
               )
 
-st.dataframe(only_i_play)
+st.dataframe(only_i_play.collect(streaming=True).head(500))
 
 
 
@@ -144,7 +146,7 @@ europe = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(europe)
+st.dataframe(europe.collect(streaming=True).head(200))
 
 
 
@@ -163,7 +165,7 @@ usa = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(usa)
+st.dataframe(usa.collect(streaming=True).head(200))
 
 
 
@@ -180,7 +182,7 @@ asia = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(asia)
+st.dataframe(asia.collect(streaming=True).head(200))
 
 
 
@@ -199,7 +201,7 @@ mena = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(mena)
+st.dataframe(mena.collect(streaming=True).head(200))
 
 
 
