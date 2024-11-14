@@ -37,12 +37,39 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
                                   .list.join(', '),)
       )
 
-st.markdown("# The current size of Westie DJ-playlist database")
+st.markdown("## The current size of Westie DJ-playlist database")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} wcs specific)")
 st.write(f"{df.select('track.artists.id').unique().shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().shape[0]:,} wcs specific)")
 st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').unique().shape[0]:,} wcs specific)\n\n")
 
 
 
-st.markdown("## sample of the data")
+st.markdown("### What the data looks like")
 st.dataframe(df.sample(100))
+
+
+
+
+
+
+
+
+
+
+dj_id = st.text_input("Enter a Spotify displayname or user_id:")
+if not dj_id:
+    dj_id = 'Kasia Stepek'
+
+
+not_my_music = (df
+                #  .pipe(wcs_specific)
+                .filter(~pl.col('spotify').str.contains(dj_id)
+                        | ~pl.col('owner.display_name').str.contains(dj_id))
+                .filter(pl.col('num_djs') > 5,
+                        pl.col('num_playlists') > 5)
+                .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+                .unique()
+                .sort('num_playlists', descending=True)
+                )
+
+st.dataframe(not_my_music)
