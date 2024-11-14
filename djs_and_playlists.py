@@ -74,15 +74,24 @@ id_input = st.text_input("ex. Kasia Stepek or 1185428002")
 dj_id = id_input.lower().strip()
 
 st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
+dj_music = [i[0] for i in (df
+            .filter(pl.col('spotify').str.contains(dj_id)
+                    | pl.col('owner.display_name').str.contains(dj_id))
+            .select('track.id')
+            .unique()
+            .iter_rows()
+           )]
+
 not_my_music = (df
                 #  .pipe(wcs_specific)
                 .filter(~pl.col('spotify').str.contains(dj_id)
-                        | ~pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
-                .filter(pl.col('dj_count') > 5,
-                        pl.col('playlist_count') > 5)
-                .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+                        | ~pl.col('owner.display_name').str.contains(dj_id))
+                .filter(~pl.col('track.id').is_in(dj_music))
+                .filter(pl.col('num_djs') > 5,
+                        pl.col('num_playlists') > 5)
+                .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
                 .unique()
-                .sort('playlist_count', descending=True)
+                .sort('num_playlists', descending=True)
                 )
 
 st.dataframe(not_my_music)
@@ -181,7 +190,7 @@ st.dataframe(asia)
 
 
 
-st.markdown(f"#### What are the most popular songs only played in MENA?")
+st.markdown(f"#### What are the most popular songs only played in Middle East/North Africa?")
 mena = (df
           #  .pipe(wcs_specific)
           .filter(pl.col('regions') == 'MENA')
