@@ -87,9 +87,9 @@ not_my_music = (df
                 .filter(~pl.col('spotify').str.contains(dj_id)
                         | ~pl.col('owner.display_name').str.contains(dj_id))
                 .filter(~pl.col('track.id').is_in(dj_music))
-                .filter(pl.col('num_djs') > 5,
-                        pl.col('num_playlists') > 5)
-                .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+                .filter(pl.col('dj_count') > 5,
+                        pl.col('playlist_count') > 5)
+                .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
                 .unique()
                 .sort('num_playlists', descending=True)
                 )
