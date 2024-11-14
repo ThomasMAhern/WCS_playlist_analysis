@@ -92,7 +92,7 @@ not_my_music = (df
                         pl.col('playlist_count') > 5)
                 .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
                 .unique()
-                .sort('num_playlists', descending=True)
+                .sort('playlist_count', descending=True)
 
                 )
 
