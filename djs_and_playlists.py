@@ -37,7 +37,14 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
                                   .list.join(', '),)
       )
 
+
+
+
+
+
+
 st.markdown("## Westie DJ-playlist Database:")
+st.text("Note: the data lacks most of the non-spotify playlists - please update https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=drive_link if you know a DJ who isn't included, and I'll scrape them up on the next pass.")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} wcs specific)")
 st.write(f"{df.select('track.artists.id').unique().shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().shape[0]:,} wcs specific)")
 st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').unique().shape[0]:,} wcs specific)\n\n")
