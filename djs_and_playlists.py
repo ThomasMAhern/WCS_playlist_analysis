@@ -121,7 +121,7 @@ st.dataframe(only_i_play)
 
 
 
-st.markdown(f"\n\n\n##Geographic Region Questions:")
+st.markdown(f"\n\n\n## Geographic Region Questions:")
 
 
 
