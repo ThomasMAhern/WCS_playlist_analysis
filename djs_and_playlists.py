@@ -44,7 +44,7 @@ st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_speci
 
 
 
-st.markdown("### What the data looks like")
+st.markdown("#### What the data looks like")
 st.dataframe(df.sample(100))
 
 
@@ -61,10 +61,10 @@ st.dataframe(df.sample(100))
 
 
 
+st.markdown("#### Enter a Spotify display name or user_id:")
+dj_id = st.text_input("ex. Kasia Stepek or 1185428002").lower().strip()
 
-dj_id = st.text_input("Enter a Spotify display name (Kasia Stepek) or user_id (1185428002):").lower()
-
-st.markdown("### What popular music don't I play, but others do?")
+st.markdown("#### What popular music don't I play, but others do?")
 not_my_music = (df
                 #  .pipe(wcs_specific)
                 .filter(~pl.col('spotify').str.contains(dj_id)
@@ -95,7 +95,7 @@ st.dataframe(not_my_music)
 
 
 
-st.markdown("### What music do only I play?")
+st.markdown("#### What music do only I play?")
 
 only_i_play = (df
               #  .pipe(wcs_specific)
