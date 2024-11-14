@@ -95,7 +95,7 @@ not_my_music = (df
                 .sort('playlist_count', descending=True)
                 )
 
-st.dataframe(not_my_music.collect(streaming=True).head(200))
+st.dataframe(not_my_music.head(200).collect(streaming=True))
 
 
 
@@ -123,7 +123,7 @@ only_i_play = (df
               .sort('playlist_count', descending=True)
               )
 
-st.dataframe(only_i_play.collect(streaming=True).head(500))
+st.dataframe(only_i_play.head(500).collect(streaming=True))
 
 
 
@@ -145,7 +145,7 @@ europe = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(europe.collect(streaming=True).head(200))
+st.dataframe(europe.head(200).collect(streaming=True))
 
 
 
@@ -164,7 +164,7 @@ usa = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(usa.collect(streaming=True).head(200))
+st.dataframe(usa.head(200).collect(streaming=True))
 
 
 
@@ -181,7 +181,7 @@ asia = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(asia.collect(streaming=True).head(200))
+st.dataframe(asia.head(200).collect(streaming=True))
 
 
 
@@ -200,7 +200,7 @@ mena = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(mena.collect(streaming=True).head(200))
+st.dataframe(mena.head(200).collect(streaming=True))
 
 
 
