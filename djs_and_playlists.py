@@ -1,3 +1,4 @@
+pip install polars
 import streamlit as st
 import polars as pl
 import re
