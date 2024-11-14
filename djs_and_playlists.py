@@ -37,13 +37,12 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
                                   .list.join(', '),)
       )
 
+st.markdown("#The current size of Westie DJ/playlist database")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().shape[0]:,} wcs specific)")
-
 st.write(f"{df.select('track.artists.id').unique().shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().shape[0]:,} wcs specific)")
-
 st.write(f"{df.select('name').unique().shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').unique().shape[0]:,} wcs specific)\n\n")
 
 
 
-
+st.markdown("# A sample of the data")
 st.dataframe(df.sample(100))
