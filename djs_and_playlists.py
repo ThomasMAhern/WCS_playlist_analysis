@@ -79,7 +79,7 @@ dj_music = [i[0] for i in (df
                     | pl.col('owner.display_name').str.contains(dj_id))
             .select('track.id')
             .unique()
-            .collect(streaming=True)
+            .collect()
             .iter_rows()
            )]
 
@@ -87,7 +87,7 @@ not_my_music = (df
                 #  .pipe(wcs_specific)
                 .filter(~pl.col('spotify').str.contains(dj_id)
                         | ~pl.col('owner.display_name').str.contains(dj_id))
-                .filter(~pl.col('track.id').str.contains_any(dj_music))
+                .filter(~pl.col('track.id').is_in(dj_music))
                 .filter(pl.col('dj_count') > 5,
                         pl.col('playlist_count') > 5)
                 .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
@@ -95,7 +95,7 @@ not_my_music = (df
                 .sort('playlist_count', descending=True)
                 )
 
-st.dataframe(not_my_music.head(200).collect(streaming=True))
+st.dataframe(not_my_music.head(200).collect())
 
 
 
