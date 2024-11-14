@@ -103,7 +103,7 @@ only_i_play = (df
                       &(pl.col('spotify').str.contains(dj_id)
                         |pl.col('owner.display_name').str.contains(dj_id))
                      )
-              .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+              .select('song', 'num_djs', 'owner.display_name', 'num_playlists', 'num_regions', 'regions')
               .unique()
               .sort('num_playlists', descending=True)
               )
