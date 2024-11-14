@@ -104,7 +104,7 @@ st.markdown(f"#### What music does only _{id_input}_ play?")
 st.text("(May be blank if there're multiple)")
 only_i_play = (df
               #  .pipe(wcs_specific)
-              .filter(pl.col('dj_count').lt(4)
+              .filter(pl.col('dj_count').eq(1)
                       &(pl.col('spotify').str.contains(dj_id)
                         |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                      )
