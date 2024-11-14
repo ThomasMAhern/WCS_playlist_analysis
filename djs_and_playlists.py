@@ -27,14 +27,14 @@ df = (pl.read_parquet('wcs_dj_spotify_playlists.parquet')
                     region = pl.col('location').str.split(' - ').list.get(0),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(num_djs = pl.n_unique('owner.display_name').over(pl.col('song')),
-                    num_playlists = pl.n_unique('name').over(pl.col('song')),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('song')),
+                    playlist_count = pl.n_unique('name').over(pl.col('song')),
                     regions = pl.col('region').over('song', mapping_strategy='join')
                                   .list.unique()
                                   .list.drop_nulls()
                                   .list.sort()
                                   .list.join(', '),)
-      .with_columns(num_regions = pl.when(pl.col('regions').str.len_bytes() != 0)
+      .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                     .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
                                     .otherwise(0))
       )
@@ -69,7 +69,7 @@ st.dataframe(df.sample(100))
 
 
 
-st.markdown("#### Enter a Spotify display name or user_id:")
+st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
 id_input = st.text_input("ex. Kasia Stepek or 1185428002")
 dj_id = id_input.lower().strip()
 
@@ -78,18 +78,14 @@ not_my_music = (df
                 #  .pipe(wcs_specific)
                 .filter(~pl.col('spotify').str.contains(dj_id)
                         | ~pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
-                .filter(pl.col('num_djs') > 5,
-                        pl.col('num_playlists') > 5)
-                .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+                .filter(pl.col('dj_count') > 5,
+                        pl.col('playlist_count') > 5)
+                .select('song', 'dj_count', 'playlist_count', 'geographic_region_count', 'regions')
                 .unique()
-                .sort('num_playlists', descending=True)
+                .sort('playlist_count', descending=True)
                 )
 
 st.dataframe(not_my_music)
-
-
-
-
 
 
 
@@ -108,13 +104,13 @@ st.markdown(f"#### What music does only _{id_input}_ play?")
 
 only_i_play = (df
               #  .pipe(wcs_specific)
-              .filter(pl.col('num_djs').eq(1)
+              .filter(pl.col('dj_count').eq(1)
                       &(pl.col('spotify').str.contains(dj_id)
                         |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                      )
-              .select('song', 'num_djs', 'owner.display_name', 'num_playlists', 'num_regions', 'regions')
+              .select('song', 'dj_count', 'owner.display_name', 'playlist_count', 'geographic_region_count', 'regions')
               .unique()
-              .sort('num_playlists', descending=True)
+              .sort('playlist_count', descending=True)
               )
 
 st.dataframe(only_i_play)
@@ -125,7 +121,7 @@ st.dataframe(only_i_play)
 
 
 
-
+st.markdown(f"## \n\nGeographic Region Questions:"
 
 
 
@@ -134,9 +130,9 @@ st.markdown(f"#### What are the most popular songs only played in Europe?")
 europe = (df
           #  .pipe(wcs_specific)
           .filter(pl.col('regions') == 'Europe')
-          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .select('song', 'dj_count', 'playlist_count', 'geographic_region_count', 'regions')
           .unique()
-          .sort('num_djs', descending=True)
+          .sort('dj_count', descending=True)
           )
 
 st.dataframe(europe)
@@ -153,9 +149,9 @@ st.markdown(f"#### What are the most popular songs only played in USA?")
 usa = (df
           #  .pipe(wcs_specific)
           .filter(pl.col('regions') == 'USA')
-          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .select('song', 'dj_count', 'playlist_count', 'geographic_region_count', 'regions')
           .unique()
-          .sort('num_djs', descending=True)
+          .sort('dj_count', descending=True)
           )
 
 st.dataframe(usa)
@@ -170,9 +166,9 @@ st.markdown(f"#### What are the most popular songs only played in Asia?")
 asia = (df
           #  .pipe(wcs_specific)
           .filter(pl.col('regions') == 'Asia')
-          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .select('song', 'dj_count', 'playlist_count', 'geographic_region_count', 'regions')
           .unique()
-          .sort('num_djs', descending=True)
+          .sort('dj_count', descending=True)
           )
 
 st.dataframe(asia)
@@ -189,9 +185,9 @@ st.markdown(f"#### What are the most popular songs only played in MENA?")
 mena = (df
           #  .pipe(wcs_specific)
           .filter(pl.col('regions') == 'MENA')
-          .select('song', 'num_djs', 'num_playlists', 'num_regions', 'regions')
+          .select('song', 'dj_count', 'playlist_count', 'geographic_region_count', 'regions')
           .unique()
-          .sort('num_djs', descending=True)
+          .sort('dj_count', descending=True)
           )
 
 st.dataframe(mena)
