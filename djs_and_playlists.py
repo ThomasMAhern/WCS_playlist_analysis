@@ -101,7 +101,7 @@ only_i_play = (df
               #  .pipe(wcs_specific)
               .filter(pl.col('num_djs').eq(1)
                       &(pl.col('spotify').str.contains(dj_id)
-                        |pl.col('owner.display_name').str.contains(dj_id))
+                        |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                      )
               .select('song', 'num_djs', 'owner.display_name', 'num_playlists', 'num_regions', 'regions')
               .unique()
