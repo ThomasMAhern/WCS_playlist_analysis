@@ -1,6 +1,5 @@
 import streamlit as st
 import polars as pl
-import re
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 
