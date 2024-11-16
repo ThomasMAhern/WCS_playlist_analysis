@@ -214,12 +214,12 @@ st.dataframe(df
  .unique()
  .sort('playlist_id', 'song_number')
  .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                             pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
                                             )),
                pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1),
-                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
                                             ))
               )
  .with_columns(pair = pl.concat_list('pair1', 'pair2'))
@@ -228,6 +228,7 @@ st.dataframe(df
         )
  .drop_nulls()
  .unique()
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
  .agg('name', 'owner.display_name',
       count_o_name = pl.col('name').len())
