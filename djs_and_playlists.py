@@ -166,7 +166,7 @@ st.dataframe(df
  .group_by('pair')
  .agg('name', 'owner.display_name',
       count_o_name = pl.n_unique('name'))
- .with_columns(pl.col('name').list.unique().list.join(' \n'),
+ .with_columns(pl.col('name').list.unique(),
               pl.col('owner.display_name').list.unique())
  .filter(~pl.col('name').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
         pl.col('count_o_name').gt(1),
