@@ -81,7 +81,7 @@ if search_dj_toggle:
     
     
     
-    st.markdown(f"#### What popular music doesn't _{search_dj_toggle}_ play, but others do?")
+    st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
     dj_music = [i[0] for i in (df
                 .filter(pl.col('owner.id').str.contains(dj_id)
                         | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
@@ -118,7 +118,7 @@ if search_dj_toggle:
 
 
 
-    st.markdown(f"#### What music does only _{search_dj_toggle}_ play?")
+    st.markdown(f"#### What music does only _{id_input}_ play?")
     st.text("(May be blank if there're multiple)")
     only_i_play = (df
                   #  .pipe(wcs_specific)
