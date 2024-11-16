@@ -164,16 +164,15 @@ st.dataframe(df
  .unique()
  .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
- .agg('name', 'owner.display_name',
-      count_o_name = pl.n_unique('name'))
+ .agg(pl.n_unique('name').alias('times_played_together'), 'name', 'owner.display_name',)
  .with_columns(pl.col('name').list.unique(),
               pl.col('owner.display_name').list.unique())
  .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('count_o_name').gt(1),
+        pl.col('times_played_together').gt(1),
         )
  .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
  .with_columns(pl.col('pair').str.split(' --- '))
- .sort('count_o_name',
+ .sort('times_played_together',
        pl.col('owner.display_name').list.len(), 
        descending=True)
  .head(100).collect()
@@ -183,7 +182,7 @@ st.dataframe(df
 
 
 
-st.markdown(f"#### Most common songs played after _{song_input}_:")
+st.markdown(f"#### Most common songs to play after _{song_input}_:")
 
 st.dataframe(df
  .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
@@ -207,16 +206,15 @@ st.dataframe(df
  .unique()
  .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
- .agg('name', 'owner.display_name',
-      count_o_name = pl.n_unique('name'))
+ .agg(pl.n_unique('name').alias('times_played_together'), 'name', 'owner.display_name',)
  .with_columns(pl.col('name').list.unique(),
               pl.col('owner.display_name').list.unique())
  .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('count_o_name').gt(1),
+        pl.col('times_played_together').gt(1),
         )
  .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped))
  .with_columns(pl.col('pair').str.split(' --- '))
- .sort('count_o_name',
+ .sort('times_played_together',
        pl.col('owner.display_name').list.len(), 
        descending=True)
  .head(100).collect()
@@ -224,7 +222,7 @@ st.dataframe(df
 
 
 
-st.markdown(f"#### Most common songs played before _{song_input}_:")
+st.markdown(f"#### Most common songs to play before _{song_input}_:")
 
 st.dataframe(df
  .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
@@ -248,16 +246,15 @@ st.dataframe(df
  .unique()
  .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
- .agg('name', 'owner.display_name',
-      count_o_name = pl.n_unique('name'))
+ .agg(pl.n_unique('name').alias('times_played_together'), 'name', 'owner.display_name',)
  .with_columns(pl.col('name').list.unique(),
               pl.col('owner.display_name').list.unique())
  .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('count_o_name').gt(1),
+        pl.col('times_played_together').gt(1),
         )
  .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped))
  .with_columns(pl.col('pair').str.split(' --- '))
- .sort('count_o_name',
+ .sort('times_played_together',
        pl.col('owner.display_name').list.len(), 
        descending=True)
  .head(100).collect()
