@@ -162,7 +162,7 @@ st.dataframe(df
         )
  .drop_nulls()
  .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort())
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
  .agg('name', 'owner.display_name',
       count_o_name = pl.n_unique('name'))
@@ -171,7 +171,8 @@ st.dataframe(df
  .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
         pl.col('count_o_name').gt(1),
         )
-  .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
+ .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
+ .with_columns(pl.col('pair').str.split(' --- '))
  .sort('count_o_name',
        pl.col('owner.display_name').list.len(), 
        descending=True)
