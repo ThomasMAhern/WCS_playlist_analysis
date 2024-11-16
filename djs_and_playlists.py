@@ -139,6 +139,7 @@ st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
 song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
 song_input_prepped = song_input.lower().strip()
 st.markdown(f"#### Most common songs played next to _{song_input}_:")
+st.text("the `track_id` after the song name is to distinguish between song versions")
 
 st.dataframe(df
  .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
