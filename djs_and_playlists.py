@@ -131,6 +131,63 @@ st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
+
+
+
+st.markdown(f"### Most common songs played back-to-back:")
+
+st.markdown("#### Enter a partial/full song name or `song_id`:")
+song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
+song_input_prepped = song_input.lower().strip()
+
+
+st.dataframe(df
+ .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
+ .unique()
+ .sort('playlist_id', 'song_number')
+ 
+ .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
+                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                            )),
+               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit('\n'),
+                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                            )),
+              )
+ .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+ .explode('pair')
+ .select('pair', 'name', 'owner.display_name'
+        )
+ .drop_nulls()
+ .unique()
+ .with_columns(pl.col('pair').str.split('\n').list.sort().list.join('\n'))
+ .group_by('pair')
+ .agg('name', 'owner.display_name',
+      count_o_name = pl.n_unique('name'))
+ .with_columns(pl.col('name').list.unique().list.join(' \n'),
+              pl.col('owner.display_name').list.unique())
+ .filter(~pl.col('name').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+        pl.col('count_o_name').gt(1),
+        )
+  .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
+ .sort('count_o_name',
+       pl.col('owner.display_name').list.len(), 
+       descending=True)
+ .head(100).collect()
+)
+
+
+
+
+
+
+
+
+
+
+
+
 st.markdown(f"\n\n\n## Geographic Region Questions:")
 
 
@@ -206,40 +263,6 @@ st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
-
-st.markdown(f"\n\n\n\n#### What are the most popular songs played back-to-back?")
-
-st.dataframe(df
- .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
- .unique()
- .sort('playlist_id', 'song_number')
- .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
-                                            )),
-               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
-                                            ))
-              )
- .with_columns(pair = pl.concat_list('pair1', 'pair2'))
- .explode('pair')
- .select('pair', 'name', 'owner.display_name'
-        )
- .drop_nulls()
- .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
- .group_by('pair')
- .agg('name', 'owner.display_name',
-      count_o_name = pl.col('name').len())
- .with_columns(pl.col('name').list.unique().list.join(' \n'),
-              pl.col('owner.display_name').list.unique())
- .filter(~pl.col('name').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('count_o_name').gt(3),
-        pl.col('owner.display_name').list.len() > 2)
- .sort('count_o_name', descending=True)
- .head(100).collect()
-)
 
 
 
