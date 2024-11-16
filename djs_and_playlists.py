@@ -54,6 +54,12 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
+on = st.toggle("View of data")
+
+if on:
+    st.markdown("#### What the data looks like")
+    st.dataframe(df.collect().sample(100))
+
 
 
 
@@ -71,6 +77,8 @@ st.markdown("# ")
 st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
 id_input = st.text_input("ex. Kasia Stepek or 1185428002")
 dj_id = id_input.lower().strip()
+
+
 
 st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
 dj_music = [i[0] for i in (df
@@ -363,10 +371,7 @@ st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
-st.markdown("# ")
 
-st.markdown("#### What the data looks like")
-st.dataframe(df.collect().sample(100))
 
 
 
