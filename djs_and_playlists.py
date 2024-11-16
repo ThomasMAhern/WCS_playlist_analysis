@@ -53,8 +53,6 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
-st.markdown("#### What the data looks like")
-st.dataframe(df.collect().sample(100))
 
 
 
@@ -365,6 +363,8 @@ st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
+st.markdown("#### What the data looks like")
+st.dataframe(df.collect().sample(100))
 
 
 
