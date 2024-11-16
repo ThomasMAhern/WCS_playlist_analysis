@@ -282,7 +282,6 @@ st.dataframe(df
 
 
 st.markdown("# ")
-st.markdown("# ")
 
 
 
@@ -344,6 +343,7 @@ st.dataframe(asia.head(100).collect(streaming=True))
 
 
 
+st.markdown("# ")
 
 
 
@@ -362,6 +362,7 @@ st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
+st.markdown("# ")
 
 st.markdown("#### What the data looks like")
 st.dataframe(df.collect().sample(100))
