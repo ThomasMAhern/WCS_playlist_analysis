@@ -71,7 +71,7 @@ if data_view_toggle:
 
 
 
-search_dj_toggle = st.toggle("See a DJ's music")
+search_dj_toggle = st.toggle("See a particular DJ's music")
 
 if search_dj_toggle:
 
