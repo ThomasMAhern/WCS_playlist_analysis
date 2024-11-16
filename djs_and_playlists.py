@@ -71,37 +71,46 @@ if data_view_toggle:
 
 
 st.markdown("# ")
+search_dj_toggle = st.toggle("See a DJ's music")
 
+if data_view_toggle:
 
-st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
-id_input = st.text_input("ex. Kasia Stepek or 1185428002")
-dj_id = id_input.lower().strip()
-
-
-
-st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
-dj_music = [i[0] for i in (df
-            .filter(pl.col('owner.id').str.contains(dj_id)
-                    | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
-            .select('track.id')
-            .unique()
-            .collect()
-            .iter_rows()
-           )]
-
-not_my_music = (df
-                #  .pipe(wcs_specific)
-                .filter(~pl.col('owner.id').str.contains(dj_id)
-                        | ~pl.col('owner.display_name').str.contains(dj_id))
-                .filter(~pl.col('track.id').is_in(dj_music))
-                .filter(pl.col('dj_count') > 5,
-                        pl.col('playlist_count') > 5)
-                .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+    st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
+    id_input = st.text_input("ex. Kasia Stepek or 1185428002")
+    dj_id = id_input.lower().strip()
+    
+    
+    
+    st.markdown(f"#### What popular music doesn't _{search_dj_toggle}_ play, but others do?")
+    dj_music = [i[0] for i in (df
+                .filter(pl.col('owner.id').str.contains(dj_id)
+                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
+                .select('track.id')
                 .unique()
-                .sort('playlist_count', descending=True)
-                )
+                .collect()
+                .iter_rows()
+               )]
+    
+    not_my_music = (df
+                    #  .pipe(wcs_specific)
+                    .filter(~pl.col('owner.id').str.contains(dj_id)
+                            | ~pl.col('owner.display_name').str.contains(dj_id))
+                    .filter(~pl.col('track.id').is_in(dj_music))
+                    .filter(pl.col('dj_count') > 5,
+                            pl.col('playlist_count') > 5)
+                    .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+                    .unique()
+                    .sort('playlist_count', descending=True)
+                    )
+    
+    st.dataframe(not_my_music.head(200).collect())
+    
+    
+    
+    
+    
+    
 
-st.dataframe(not_my_music.head(200).collect())
 
 
 
@@ -109,27 +118,20 @@ st.dataframe(not_my_music.head(200).collect())
 
 
 
-
-
-
-
-
-
-
-st.markdown(f"#### What music does only _{id_input}_ play?")
-st.text("(May be blank if there're multiple)")
-only_i_play = (df
-              #  .pipe(wcs_specific)
-              .filter(pl.col('dj_count').eq(1)
-                      &(pl.col('owner.id').str.contains(dj_id)
-                        |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
-                     )
-              .select('song', 'dj_count', 'owner.display_name', 'playlist_count', 'regions', 'geographic_region_count')
-              .unique()
-              .sort('playlist_count', descending=True)
-              )
-
-st.dataframe(only_i_play.head(200).collect(streaming=True))
+    st.markdown(f"#### What music does only _{search_dj_toggle}_ play?")
+    st.text("(May be blank if there're multiple)")
+    only_i_play = (df
+                  #  .pipe(wcs_specific)
+                  .filter(pl.col('dj_count').eq(1)
+                          &(pl.col('owner.id').str.contains(dj_id)
+                            |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
+                         )
+                  .select('song', 'dj_count', 'owner.display_name', 'playlist_count', 'regions', 'geographic_region_count')
+                  .unique()
+                  .sort('playlist_count', descending=True)
+                  )
+    
+    st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
