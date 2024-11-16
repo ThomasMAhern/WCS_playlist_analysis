@@ -66,7 +66,8 @@ st.dataframe(df.collect().sample(100))
 
 
 
-
+st.markdown("# ")
+st.markdown("# ")
 
 
 st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
@@ -183,7 +184,8 @@ st.dataframe(df
 
 
 
-
+st.markdown("# ")
+st.markdown("# ")
 
 
 
