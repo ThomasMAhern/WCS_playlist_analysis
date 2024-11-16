@@ -183,6 +183,107 @@ st.dataframe(df
 
 
 
+st.markdown(f"#### Most common songs played after _{song_input}_:")
+
+st.dataframe(df
+ .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
+ .unique()
+ .sort('playlist_id', 'song_number')
+ 
+ .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                            )),
+               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                            )),
+              )
+ .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+ .explode('pair')
+ .select('pair', 'name', 'owner.display_name'
+        )
+ .drop_nulls()
+ .unique()
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+ .group_by('pair')
+ .agg('name', 'owner.display_name',
+      count_o_name = pl.n_unique('name'))
+ .with_columns(pl.col('name').list.unique(),
+              pl.col('owner.display_name').list.unique())
+ .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+        pl.col('count_o_name').gt(1),
+        )
+ .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped))
+ .with_columns(pl.col('pair').str.split(' --- '))
+ .sort('count_o_name',
+       pl.col('owner.display_name').list.len(), 
+       descending=True)
+ .head(100).collect()
+)
+
+
+
+st.markdown(f"#### Most common songs played before _{song_input}_:")
+
+st.dataframe(df
+ .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
+ .unique()
+ .sort('playlist_id', 'song_number')
+ 
+ .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                            )),
+               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                            )),
+              )
+ .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+ .explode('pair')
+ .select('pair', 'name', 'owner.display_name'
+        )
+ .drop_nulls()
+ .unique()
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+ .group_by('pair')
+ .agg('name', 'owner.display_name',
+      count_o_name = pl.n_unique('name'))
+ .with_columns(pl.col('name').list.unique(),
+              pl.col('owner.display_name').list.unique())
+ .filter(~pl.col('name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+        pl.col('count_o_name').gt(1),
+        )
+ .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped))
+ .with_columns(pl.col('pair').str.split(' --- '))
+ .sort('count_o_name',
+       pl.col('owner.display_name').list.len(), 
+       descending=True)
+ .head(100).collect()
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 st.markdown("# ")
