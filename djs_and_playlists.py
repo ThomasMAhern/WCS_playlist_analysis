@@ -54,10 +54,9 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
-on = st.toggle("View of data")
+on = st.toggle("See what the raw data looks like")
 
 if on:
-    st.markdown("#### What the data looks like")
     st.dataframe(df.collect().sample(100))
 
 
