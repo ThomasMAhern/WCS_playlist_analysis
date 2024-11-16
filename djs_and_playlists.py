@@ -64,7 +64,7 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
-st.markdown("# ")
+
 st.markdown("# ")
 
 
@@ -129,7 +129,7 @@ st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
-st.markdown("# ")
+
 st.markdown("# ")
 
 
