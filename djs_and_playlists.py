@@ -130,11 +130,11 @@ st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
+st.markdown("# ")
+st.markdown("# ")
 
 
-
-
-st.markdown(f"\n### Most common songs played back-to-back")
+st.markdown(f"## Most common songs played back-to-back")
 
 st.markdown("#### Enter a partial/full song name or `song_id`:")
 song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
