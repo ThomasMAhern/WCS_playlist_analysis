@@ -70,10 +70,10 @@ if data_view_toggle:
 
 
 
-st.markdown("# ")
+
 search_dj_toggle = st.toggle("See a DJ's music")
 
-if data_view_toggle:
+if search_dj_toggle:
 
     st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
