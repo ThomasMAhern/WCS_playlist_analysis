@@ -48,7 +48,7 @@ df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
 st.markdown("## Westie DJ-playlist Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
-st.write(f"{df.select('track.artists.id').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().collect(streaming=True).shape[0]:,} wcs specific)")
+st.write(f"{df.select('artist').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('artist').unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('name').collect(streaming=True).unique().shape[0]:,} wcs specific)\n\n")
 
 
@@ -75,7 +75,7 @@ dj_id = id_input.lower().strip()
 
 st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
 dj_music = [i[0] for i in (df
-            .filter(pl.col('spotify').str.contains(dj_id)
+            .filter(pl.col('owner.id').str.contains(dj_id)
                     | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
             .select('track.id')
             .unique()
@@ -85,7 +85,7 @@ dj_music = [i[0] for i in (df
 
 not_my_music = (df
                 #  .pipe(wcs_specific)
-                .filter(~pl.col('spotify').str.contains(dj_id)
+                .filter(~pl.col('owner.id').str.contains(dj_id)
                         | ~pl.col('owner.display_name').str.contains(dj_id))
                 .filter(~pl.col('track.id').is_in(dj_music))
                 .filter(pl.col('dj_count') > 5,
@@ -115,7 +115,7 @@ st.text("(May be blank if there're multiple)")
 only_i_play = (df
               #  .pipe(wcs_specific)
               .filter(pl.col('dj_count').eq(1)
-                      &(pl.col('spotify').str.contains(dj_id)
+                      &(pl.col('owner.id').str.contains(dj_id)
                         |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                      )
               .select('song', 'dj_count', 'owner.display_name', 'playlist_count', 'regions', 'geographic_region_count')
