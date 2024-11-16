@@ -123,7 +123,7 @@ only_i_play = (df
               .sort('playlist_count', descending=True)
               )
 
-st.dataframe(only_i_play.head(500).collect(streaming=True))
+st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
@@ -145,7 +145,7 @@ europe = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(europe.head(200).collect(streaming=True))
+st.dataframe(europe.head(100).collect(streaming=True))
 
 
 
@@ -164,7 +164,7 @@ usa = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(usa.head(200).collect(streaming=True))
+st.dataframe(usa.head(100).collect(streaming=True))
 
 
 
@@ -181,7 +181,7 @@ asia = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(asia.head(200).collect(streaming=True))
+st.dataframe(asia.head(100).collect(streaming=True))
 
 
 
@@ -200,7 +200,7 @@ mena = (df
           .sort('dj_count', descending=True)
           )
 
-st.dataframe(mena.head(200).collect(streaming=True))
+st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
@@ -214,7 +214,7 @@ st.dataframe(df
  .unique()
  .sort('playlist_id', 'song_number')
  .with_columns(pair = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                             pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
                                             ))
                         
