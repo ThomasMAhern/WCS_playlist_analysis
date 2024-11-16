@@ -137,7 +137,7 @@ st.markdown("# ")
 
 st.markdown(f"## Most common songs played back-to-back")
 
-st.markdown("#### Enter a partial/full song name or `song_id`:")
+st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
 song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
 song_input_prepped = song_input.lower().strip()
 st.markdown(f"#### Most common songs played next to _{song_input}_:")
