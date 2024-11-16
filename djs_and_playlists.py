@@ -206,4 +206,38 @@ st.dataframe(mena.head(200).collect(streaming=True))
 
 
 
+
+st.markdown(f"#### What are the most popular songs played back-to-back?")
+
+st.dataframe(df
+ .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
+ .unique()
+ .sort('playlist_id', 'song_number')
+ .with_columns(pair = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
+                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                            ))
+                        
+              )
+ .select('pair', 'name', 'owner.display_name'
+        )
+ .drop_nulls()
+ .unique()
+ .group_by('pair')
+ .agg('name', 'owner.display_name',
+      count_o_name = pl.col('name').len())
+ .with_columns(pl.col('name').list.unique().list.join(' \n'),
+              pl.col('owner.display_name').list.unique())
+ .filter(~pl.col('name').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+        pl.col('count_o_name').gt(3),
+        pl.col('owner.display_name').list.len() > 2)
+ .sort('count_o_name', descending=True)
+ .head(100).collect()
+)
+
+
+
+
+
+
 st.text("\n\nIf you have questions/feedback/suggestions, please leave a comment: \nhttps://forms.gle/19mALUpmM9Z5XCA28")
