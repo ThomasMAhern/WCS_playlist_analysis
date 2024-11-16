@@ -162,7 +162,7 @@ st.dataframe(df
         )
  .drop_nulls()
  .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort())
  .group_by('pair')
  .agg('name', 'owner.display_name',
       count_o_name = pl.n_unique('name'))
