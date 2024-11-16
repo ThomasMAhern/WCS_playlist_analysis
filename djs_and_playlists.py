@@ -207,18 +207,23 @@ st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
-st.markdown(f"#### What are the most popular songs played back-to-back?")
+st.markdown(f"\n\n\n\n#### What are the most popular songs played back-to-back?")
 
 st.dataframe(df
  .select('song_number', 'track.name', 'name', 'track.id', 'playlist_id', 'owner.display_name')
  .unique()
  .sort('playlist_id', 'song_number')
- .with_columns(pair = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+ .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
                                             pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                            )),
+               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1),
+                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                             ))
-                        
               )
+ .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+ .explode('pair')
  .select('pair', 'name', 'owner.display_name'
         )
  .drop_nulls()
