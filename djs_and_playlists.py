@@ -54,9 +54,9 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
-on = st.toggle("See what the raw data looks like")
+data_view_toggle = st.toggle("See what the raw data looks like")
 
-if on:
+if data_view_toggle:
     st.dataframe(df.collect().sample(100))
 
 
@@ -294,15 +294,16 @@ st.markdown("# ")
 
 
 
-st.markdown(f"\n\n\n## Geographic Region Questions:")
+st.markdown(f"\n\n\n## Geographic Region Music:")
 
-
+region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
+                                ["Europe", "USA", "Asia", "MENA"])
 
 
 st.markdown(f"#### What are the most popular songs only played in Europe?")
 europe = (df
           #  .pipe(wcs_specific)
-          .filter(pl.col('regions') == 'Europe')
+          .filter(pl.col('regions') == region_selectbox)
           .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
           .unique()
           .sort('dj_count', descending=True)
@@ -314,57 +315,6 @@ st.dataframe(europe.head(100).collect(streaming=True))
 
 
 
-
-
-
-st.markdown(f"#### What are the most popular songs only played in USA?")
-
-usa = (df
-          #  .pipe(wcs_specific)
-          .filter(pl.col('regions') == 'USA')
-          .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
-          .unique()
-          .sort('dj_count', descending=True)
-          )
-
-st.dataframe(usa.head(100).collect(streaming=True))
-
-
-
-
-
-
-st.markdown(f"#### What are the most popular songs only played in Asia?")
-
-asia = (df
-          #  .pipe(wcs_specific)
-          .filter(pl.col('regions') == 'Asia')
-          .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
-          .unique()
-          .sort('dj_count', descending=True)
-          )
-
-st.dataframe(asia.head(100).collect(streaming=True))
-
-
-
-
-
-
-st.markdown("# ")
-
-
-
-st.markdown(f"#### What are the most popular songs only played in Middle East/North Africa?")
-mena = (df
-          #  .pipe(wcs_specific)
-          .filter(pl.col('regions') == 'MENA')
-          .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
-          .unique()
-          .sort('dj_count', descending=True)
-          )
-
-st.dataframe(mena.head(100).collect(streaming=True))
 
 
 
