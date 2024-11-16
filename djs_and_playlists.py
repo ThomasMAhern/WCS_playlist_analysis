@@ -134,7 +134,7 @@ st.dataframe(only_i_play.head(200).collect(streaming=True))
 
 
 
-st.markdown(f"### Most common songs played back-to-back:")
+st.markdown(f"### Most common songs played back-to-back with _{song_input}_:")
 
 st.markdown("#### Enter a partial/full song name or `song_id`:")
 song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
@@ -147,11 +147,11 @@ st.dataframe(df
  .sort('playlist_id', 'song_number')
  
  .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit('\n'),
+                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                             pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
                                             )),
                pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit('\n'),
+                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
                                             pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
                                             )),
               )
@@ -161,7 +161,7 @@ st.dataframe(df
         )
  .drop_nulls()
  .unique()
- .with_columns(pl.col('pair').str.split('\n').list.sort().list.join('\n'))
+ .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
  .group_by('pair')
  .agg('name', 'owner.display_name',
       count_o_name = pl.n_unique('name'))
