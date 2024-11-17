@@ -75,7 +75,7 @@ search_dj_toggle = st.toggle("Insights about a particular DJ")
 
 if search_dj_toggle:
 
-    st.markdown("#### Enter a full Spotify `display_name` or `user_id`:")
+    st.markdown("#### Enter a Spotify `display_name` or `user_id`:")
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
     
@@ -118,7 +118,7 @@ if search_dj_toggle:
 
 
 
-    st.markdown(f"#### Music only _{id_input}_ plays")
+    st.markdown(f"#### Music unique to _{id_input}_")
     only_i_play = (df
                   #  .pipe(wcs_specific)
                   .filter(pl.col('dj_count').eq(1)
