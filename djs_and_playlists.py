@@ -54,7 +54,7 @@ st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]
 
 
 
-data_view_toggle = st.toggle("See what the raw data looks like")
+data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
     st.dataframe(df.collect().sample(100))
@@ -71,7 +71,7 @@ if data_view_toggle:
 
 
 
-search_dj_toggle = st.toggle("See a particular DJ's music")
+search_dj_toggle = st.toggle("Insights about a particular DJ")
 
 if search_dj_toggle:
 
@@ -81,7 +81,7 @@ if search_dj_toggle:
     
     
     
-    st.markdown(f"#### What popular music doesn't _{id_input}_ play, but others do?")
+    st.markdown(f"#### Popular music _{id_input}_ doesn't play")
     dj_music = [i[0] for i in (df
                 .filter(pl.col('owner.id').str.contains(dj_id)
                         | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
@@ -118,8 +118,7 @@ if search_dj_toggle:
 
 
 
-    st.markdown(f"#### What music does only _{id_input}_ play?")
-    st.text("(May be blank if there're multiple)")
+    st.markdown(f"#### Music only _{id_input}_ plays")
     only_i_play = (df
                   #  .pipe(wcs_specific)
                   .filter(pl.col('dj_count').eq(1)
