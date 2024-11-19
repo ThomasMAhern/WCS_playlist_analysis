@@ -83,7 +83,7 @@ if playlist_locator_toggle:
      .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input))
      .group_by('playlist_name')
      .agg(pl.n_unique('song'), 'owner.display_name', pl.n_unique('artist'))
-     .with_columns(pl.col('song', 'owner.display_name', 'artist').list.unique().list.sort())
+     .with_columns(pl.col('owner.display_name').list.unique().list.sort())
      .collect()
     )
 
