@@ -95,7 +95,7 @@ if playlist_locator_toggle:
 
 
 
-
+#courtesy of Lino V
 search_dj_toggle = st.toggle("Insights about a particular DJ")
 
 if search_dj_toggle:
@@ -165,132 +165,135 @@ if search_dj_toggle:
 
 st.markdown("# ")
 
+#courtesy of Vincent M
+songs_together_toggle = st.toggle(""Songs most played together"")
 
-st.markdown(f"## Most common songs played back-to-back")
-
-st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
-song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
-song_input_prepped = song_input.lower().strip()
-st.markdown(f"#### Most common songs played next to _{song_input}_:")
-st.text("Song name: song_id (to distinguish between song versions)")
-
-st.dataframe(df
- .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
- .unique()
- .sort('playlist_id', 'song_number')
- 
- .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
-                                            )),
-               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
-                                            )),
-              )
- .with_columns(pair = pl.concat_list('pair1', 'pair2'))
- .explode('pair')
- .select('pair', 'playlist_name', 'owner.display_name'
-        )
- .drop_nulls()
- .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
- .group_by('pair')
- .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
- .with_columns(pl.col('playlist_name').list.unique(),
-              pl.col('owner.display_name').list.unique())
- .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('times_played_together').gt(1),
-        )
- .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
- .with_columns(pl.col('pair').str.split(' --- '))
- .sort('times_played_together',
-       pl.col('owner.display_name').list.len(), 
-       descending=True)
- .head(100).collect()
-)
-
-
-
-
-
-st.markdown(f"#### Most common songs to play after _{song_input}_:")
-
-st.dataframe(df
- .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
- .unique()
- .sort('playlist_id', 'song_number')
- 
- .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
-                                            )),
-               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
-                                            )),
-              )
- .with_columns(pair = pl.concat_list('pair1', 'pair2'))
- .explode('pair')
- .select('pair', 'playlist_name', 'owner.display_name'
-        )
- .drop_nulls()
- .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
- .group_by('pair')
- .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
- .with_columns(pl.col('playlist_name').list.unique(),
-              pl.col('owner.display_name').list.unique())
- .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('times_played_together').gt(1),
-        )
- .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped))
- .with_columns(pl.col('pair').str.split(' --- '))
- .sort('times_played_together',
-       pl.col('owner.display_name').list.len(), 
-       descending=True)
- .head(100).collect()
-)
-
-
-
-st.markdown(f"#### Most common songs to play before _{song_input}_:")
-
-st.dataframe(df
- .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
- .unique()
- .sort('playlist_id', 'song_number')
- 
- .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                            pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
-                                            )),
-               pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                        .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                            pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
-                                            )),
-              )
- .with_columns(pair = pl.concat_list('pair1', 'pair2'))
- .explode('pair')
- .select('pair', 'playlist_name', 'owner.display_name'
-        )
- .drop_nulls()
- .unique()
- .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
- .group_by('pair')
- .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
- .with_columns(pl.col('playlist_name').list.unique(),
-              pl.col('owner.display_name').list.unique())
- .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
-        pl.col('times_played_together').gt(1),
-        )
- .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped))
- .with_columns(pl.col('pair').str.split(' --- '))
- .sort('times_played_together',
-       pl.col('owner.display_name').list.len(), 
-       descending=True)
- .head(100).collect()
-)
+if songs_together_toggle:
+    st.markdown(f"## Most common songs played back-to-back")
+    
+    st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
+    song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
+    song_input_prepped = song_input.lower().strip()
+    st.markdown(f"#### Most common songs played next to _{song_input}_:")
+    st.text("Song name: song_id (to distinguish between song versions)")
+    
+    st.dataframe(df
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
+     .unique()
+     .sort('playlist_id', 'song_number')
+     
+     .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                                                pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                                )),
+                   pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                                pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                                )),
+                  )
+     .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+     .explode('pair')
+     .select('pair', 'playlist_name', 'owner.display_name'
+            )
+     .drop_nulls()
+     .unique()
+     .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+     .group_by('pair')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
+     .with_columns(pl.col('playlist_name').list.unique(),
+                  pl.col('owner.display_name').list.unique())
+     .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+            pl.col('times_played_together').gt(1),
+            )
+     .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
+     .with_columns(pl.col('pair').str.split(' --- '))
+     .sort('times_played_together',
+           pl.col('owner.display_name').list.len(), 
+           descending=True)
+     .head(100).collect()
+    )
+    
+    
+    
+    
+    
+    st.markdown(f"#### Most common songs to play after _{song_input}_:")
+    
+    st.dataframe(df
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
+     .unique()
+     .sort('playlist_id', 'song_number')
+     
+     .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                                                pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                                )),
+                   pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                                pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                                )),
+                  )
+     .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+     .explode('pair')
+     .select('pair', 'playlist_name', 'owner.display_name'
+            )
+     .drop_nulls()
+     .unique()
+     .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+     .group_by('pair')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
+     .with_columns(pl.col('playlist_name').list.unique(),
+                  pl.col('owner.display_name').list.unique())
+     .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+            pl.col('times_played_together').gt(1),
+            )
+     .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped))
+     .with_columns(pl.col('pair').str.split(' --- '))
+     .sort('times_played_together',
+           pl.col('owner.display_name').list.len(), 
+           descending=True)
+     .head(100).collect()
+    )
+    
+    
+    
+    st.markdown(f"#### Most common songs to play before _{song_input}_:")
+    
+    st.dataframe(df
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
+     .unique()
+     .sort('playlist_id', 'song_number')
+     
+     .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
+                                                pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                                )),
+                   pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
+                            .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
+                                                pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                                )),
+                  )
+     .with_columns(pair = pl.concat_list('pair1', 'pair2'))
+     .explode('pair')
+     .select('pair', 'playlist_name', 'owner.display_name'
+            )
+     .drop_nulls()
+     .unique()
+     .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
+     .group_by('pair')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
+     .with_columns(pl.col('playlist_name').list.unique(),
+                  pl.col('owner.display_name').list.unique())
+     .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+            pl.col('times_played_together').gt(1),
+            )
+     .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped))
+     .with_columns(pl.col('pair').str.split(' --- '))
+     .sort('times_played_together',
+           pl.col('owner.display_name').list.len(), 
+           descending=True)
+     .head(100).collect()
+    )
 
 
 
@@ -319,7 +322,7 @@ st.markdown("# ")
 
 
 
-
+#courtesy of Lino V
 st.markdown(f"\n\n\n## Geographic Region Music:")
 
 region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
