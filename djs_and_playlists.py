@@ -163,7 +163,10 @@ if search_dj_toggle:
 
 
 
-st.markdown("# ")
+
+
+
+
 
 #courtesy of Vincent M
 songs_together_toggle = st.toggle("Songs most played together")
@@ -318,27 +321,26 @@ if songs_together_toggle:
 
 
 
-st.markdown("# ")
-
 
 
 #courtesy of Lino V
-st.markdown(f"\n\n\n## Geographic Region Music:")
-
-region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
-                                ["Europe", "USA", "Asia", "MENA"])
-
-
-st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-europe = (df
-          #  .pipe(wcs_specific)
-          .filter(pl.col('regions') == region_selectbox)
-          .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
-          .unique()
-          .sort('dj_count', descending=True)
-          )
-
-st.dataframe(europe.head(100).collect(streaming=True))
+geo_region_toggle = st.toggle("Geographic-region insights")
+if geo_region_toggle:
+    st.markdown(f"\n\n\n## Geographic Region Music:")
+    region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
+                                    ["Europe", "USA", "Asia", "MENA"])
+    
+    
+    st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
+    europe = (df
+              #  .pipe(wcs_specific)
+              .filter(pl.col('regions') == region_selectbox)
+              .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+              .unique()
+              .sort('dj_count', descending=True)
+              )
+    
+    st.dataframe(europe.head(100).collect(streaming=True))
 
 
 
