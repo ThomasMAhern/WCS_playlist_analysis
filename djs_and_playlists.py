@@ -84,9 +84,11 @@ if song_locator_toggle:
 playlist_locator_toggle = st.toggle("Playlist locator")
 if playlist_locator_toggle:
     playlist_input = st.text_input("Input playlist name").lower()
+    song_input = st.text_input("Input a song name").lower()
     dj_input = st.text_input("Input dj name").lower()
     st.dataframe(df
      .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
+             pl.col('song').str.to_lowercase().str.contains(song_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('playlist_name')
      .agg('owner.display_name', pl.n_unique('song').alias('song_count'), pl.n_unique('artist').alias('artist_count'), 'song')
