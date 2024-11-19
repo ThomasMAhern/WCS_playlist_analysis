@@ -82,8 +82,8 @@ if playlist_locator_toggle:
     st.dataframe(df
      .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input))
      .group_by('playlist_name')
-     .agg('owner.display_name', song_count = pl.n_unique('song'), artist_count = pl.n_unique('artist'))
-     .with_columns(pl.col('owner.display_name').list.unique().list.sort())
+     .agg('owner.display_name', 'song', song_count = pl.n_unique('song'), artist_count = pl.n_unique('artist'))
+     .with_columns(pl.col('owner.display_name', 'song').list.unique().list.sort().list.join(' \n'))
      .collect()
     )
 
