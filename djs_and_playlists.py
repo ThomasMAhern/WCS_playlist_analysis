@@ -51,7 +51,8 @@ st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).un
 st.write(f"{df.select('artist').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('artist').unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)\n\n")
 
-
+st.markdown("## ")
+st.markdown("Choose your own adventure!")
 
 
 data_view_toggle = st.toggle("See sample of the raw data")
