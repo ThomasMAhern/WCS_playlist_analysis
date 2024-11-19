@@ -71,7 +71,19 @@ if song_locator_toggle:
      .filter(pl.col('song').str.to_lowercase().str.contains(song_input))
      .group_by('song')
      .agg('playlist_name', 'owner.display_name', 'artist')
-     .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique())
+     .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
+     .collect()
+    )
+
+#courtesy of Vishal S
+playlist_locator_toggle = st.toggle("Playlist locator")
+if playlist_locator_toggle:
+    playlist_input = st.text_input("Input playlist name").lower()
+    st.dataframe(df
+     .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input))
+     .group_by('playlist_name')
+     .agg('song', 'owner.display_name', 'artist')
+     .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
      .collect()
     )
 
