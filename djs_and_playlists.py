@@ -63,6 +63,17 @@ if data_view_toggle:
 
 
 
+#courtesy of Vishal S
+song_locator_toggle = st.toggle("Song locator")
+if song_locator_toggle:
+    song_input = st.text_input("Input song name").lower()
+    st.dataframe(df
+     .filter(pl.col('track.name').str.to_lowercase().str.contains('i miss you'.lower()))
+     .group_by('song')
+     .agg('name', 'owner.display_name', 'artist')
+     .with_columns(pl.col('name', 'owner.display_name', 'artist').list.unique())
+     .collect()
+    )
 
 
 
