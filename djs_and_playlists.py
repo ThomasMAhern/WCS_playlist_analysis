@@ -73,7 +73,7 @@ if song_locator_toggle:
     st.dataframe(df
      .filter(pl.col('song').str.to_lowercase().str.contains(song_input),
              pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
-             pl.col('playlist_name').str.to_lowercase().str.contains(dj_input))
+             pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('song')
      .agg('playlist_name', 'owner.display_name', 'artist')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
