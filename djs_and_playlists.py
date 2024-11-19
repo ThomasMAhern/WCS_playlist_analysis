@@ -166,7 +166,7 @@ if search_dj_toggle:
 st.markdown("# ")
 
 #courtesy of Vincent M
-songs_together_toggle = st.toggle(""Songs most played together"")
+songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
     st.markdown(f"## Most common songs played back-to-back")
