@@ -67,7 +67,7 @@ if data_view_toggle:
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Song locator")
 if song_locator_toggle:
-    song_input = st.text_input("Input song name").lower()
+    song_input = st.text_input("Song name").lower()
     playlist_input = st.text_input("Input a playlist name").lower()
     dj_input = st.text_input("Input the dj name").lower()
     st.dataframe(df
@@ -83,9 +83,9 @@ if song_locator_toggle:
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("Playlist locator")
 if playlist_locator_toggle:
-    playlist_input = st.text_input("Input playlist name").lower()
-    song_input = st.text_input("Input a song name").lower()
-    dj_input = st.text_input("Input dj name").lower()
+    playlist_input = st.text_input("Playlist name").lower()
+    song_input = st.text_input("Contains the song").lower()
+    dj_input = st.text_input("DJ name").lower()
     st.dataframe(df
      .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
              pl.col('song').str.to_lowercase().str.contains(song_input),
