@@ -68,10 +68,10 @@ if data_view_toggle:
 song_locator_toggle = st.toggle("Song locator")
 if song_locator_toggle:
     song_input = st.text_input("Input song name").lower()
-    playlist_input_1 = st.text_input("Input playlist name").lower()
+    playlist_input = st.text_input("Input a playlist name").lower()
     st.dataframe(df
      .filter(pl.col('song').str.to_lowercase().str.contains(song_input),
-             pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input_1))
+             pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input))
      .group_by('song')
      .agg('playlist_name', 'owner.display_name', 'artist')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
