@@ -34,6 +34,7 @@ df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
                                   .list.drop_nulls()
                                   .list.sort()
                                   .list.join(', '),
+                    song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
                     apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
                                       .then(pl.lit('beginning'))
                                       .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 34,
@@ -72,7 +73,7 @@ if data_view_toggle:
 
 
 #courtesy of Vishal S
-song_locator_toggle = st.toggle("Song locator")
+song_locator_toggle = st.toggle("Find a Song")
 if song_locator_toggle:
     song_input = st.text_input("Song name:").lower()
     playlist_input = st.text_input("In the playlist:").lower()
@@ -88,7 +89,7 @@ if song_locator_toggle:
     )
 
 #courtesy of Vishal S
-playlist_locator_toggle = st.toggle("Playlist locator")
+playlist_locator_toggle = st.toggle("Find a Playlist")
 if playlist_locator_toggle:
     playlist_input = st.text_input("Playlist name:").lower()
     song_input = st.text_input("Contains the song:").lower()
@@ -104,8 +105,16 @@ if playlist_locator_toggle:
     )
 
 
+
+
+
+
 #stats_toggle = st.toggle("Stats")
-#if stats_toggle
+#if stats_toggle:
+
+
+
+
 
 
 
