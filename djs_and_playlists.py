@@ -104,8 +104,8 @@ if playlist_locator_toggle:
     )
 
 
-stats_toggle = st.toggle("Stats")
-if stats_toggle
+#stats_toggle = st.toggle("Stats")
+#if stats_toggle
 
 
 
