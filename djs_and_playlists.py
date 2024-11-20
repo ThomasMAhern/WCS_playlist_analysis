@@ -33,7 +33,14 @@ df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
                                   .list.unique()
                                   .list.drop_nulls()
                                   .list.sort()
-                                  .list.join(', '),)
+                                  .list.join(', '),
+                    apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
+                                      .then(pl.lit('beginning'))
+                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 34,
+                                            (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
+                                      .then(pl.lit('middle'))
+                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 67)
+                                      .then(pl.lit('end')),)
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                     .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
                                     .otherwise(0))
@@ -96,6 +103,9 @@ if playlist_locator_toggle:
      .collect()
     )
 
+
+stats_toggle = st.toggle("Stats")
+if stats_toggle
 
 
 
