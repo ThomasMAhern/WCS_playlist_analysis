@@ -201,8 +201,9 @@ if songs_together_toggle:
     st.markdown(f"## Most common songs played back-to-back")
     
     st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
-    song_input = st.text_input("ex. 'purple' or '0bGH7ezs7WdDwpqnsvGf1z'")
+    song_input = st.text_input("Song name:")
     song_input_prepped = song_input.lower().strip()
+    artist_input = st.text_input('Artist name:').lower()
     st.markdown(f"#### Most common songs played next to _{song_input}_:")
     st.text("Song name: song_id (to distinguish between song versions)")
     
@@ -234,7 +235,8 @@ if songs_together_toggle:
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
-     .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped))
+     .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped),
+             pl.col('artist').str.to_lowercase().str.contains(artist_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
            pl.col('owner.display_name').list.len(), 
