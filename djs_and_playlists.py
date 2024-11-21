@@ -236,7 +236,7 @@ if songs_together_toggle:
             pl.col('times_played_together').gt(1),
             )
      .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped),
-             pl.col('artist').str.to_lowercase().str.contains(artist_name_input))
+             pl.col('artist').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
            pl.col('owner.display_name').list.len(), 
