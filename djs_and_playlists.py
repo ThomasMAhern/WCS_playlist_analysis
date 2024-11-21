@@ -223,13 +223,13 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name'
+     .select('pair', 'playlist_name', 'owner.display_name', 'artist',
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',)
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'artist')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
