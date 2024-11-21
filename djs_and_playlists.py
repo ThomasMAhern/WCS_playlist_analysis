@@ -208,7 +208,7 @@ if songs_together_toggle:
     st.text("Song name: song_id (to distinguish between song versions)")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name')
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'artist')
      .unique()
      .sort('playlist_id', 'song_number')
      
