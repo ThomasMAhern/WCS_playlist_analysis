@@ -383,7 +383,7 @@ if geo_region_toggle:
 
 lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
-        st.write(f"{df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
+        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         
         st.dataframe(df_lyrics
