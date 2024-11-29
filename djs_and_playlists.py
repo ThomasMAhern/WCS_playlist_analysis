@@ -382,15 +382,15 @@ if geo_region_toggle:
 
 
 lyrics_toggle = st.toggle("Search lyrics")
-st.write(f"{df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
 if lyrics_toggle:
+        st.write(f"{df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         
         st.dataframe(df_lyrics
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
          .with_columns(matched_lyrics = pl.col('lyrics')
                                         .str.extract_many(lyrics_input, ascii_case_insensitive=True)
-                                        .list.eval(pl.element().to_lowercase())
+                                        .list.eval(pl.element().str.to_lowercase())
                                         .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
