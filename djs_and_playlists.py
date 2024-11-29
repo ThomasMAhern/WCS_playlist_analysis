@@ -385,7 +385,7 @@ lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
         lyrics_input = st.text_input("Lyrics ():").split(',')
         
-        (df_lyrics
+        st.dataframe(df_lyrics
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
          ._fetch(100)
          )
