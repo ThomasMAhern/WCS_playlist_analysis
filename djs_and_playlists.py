@@ -383,10 +383,13 @@ if geo_region_toggle:
 
 lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
-        lyrics_input = st.text_input("Lyrics ():").split(',')
+        lyrics_input = st.text_input("Lyrics (comma-separated):").split(',')
         
         st.dataframe(df_lyrics
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
+         .with_columns(matched_lyrics = pl.col('lyrics').str.extract_all(lyrics_input),
+                       )
+         .sort(pl.col('matched_lyrics').list.len(), descending=True)
          ._fetch(100)
          )
 
