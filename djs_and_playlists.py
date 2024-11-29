@@ -387,7 +387,9 @@ if lyrics_toggle:
         
         st.dataframe(df_lyrics
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
-         .with_columns(matched_lyrics = pl.col('lyrics').str.extract_all(lyrics_input),
+         .with_columns(matched_lyrics = pl.col('lyrics')
+                                        .str.extract_many(lyrics_input, ascii_case_insensitive=True)
+                                        .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
          ._fetch(100)
