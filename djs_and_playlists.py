@@ -47,6 +47,7 @@ df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
                                     .otherwise(0))
       )
 
+df_lyrics = pl.scan_parquet('song_lyrics.parquet')
 
 
 
@@ -371,6 +372,25 @@ if geo_region_toggle:
               )
     
     st.dataframe(europe.head(100).collect(streaming=True))
+
+
+
+
+
+
+
+
+
+lyrics_toggle = st.toggle("Search lyrics")
+if lyrics_toggle:
+        lyrics_input = st.text_input("Lyrics ():").split(',')
+        
+        (df_lyrics
+         .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
+         ._fetch(100)
+         )
+
+
 
 
 
