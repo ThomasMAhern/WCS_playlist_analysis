@@ -47,7 +47,7 @@ df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
                                     .otherwise(0))
       )
 
-df_lyrics = pl.scan_parquet('song_lyrics.parquet')
+df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
 
 
 
