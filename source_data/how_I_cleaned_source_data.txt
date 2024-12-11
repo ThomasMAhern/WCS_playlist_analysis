@@ -1,0 +1,54 @@
+import polars as pl
+
+koichi_df = (pl.read_csv('Koichi_Sets_Sheet_data.csv')
+             .filter((pl.col('Measure Names') == 'Row #'),)  
+             .with_columns(name = pl.concat_str(pl.col('Date').str.replace_all('/', '.'),
+                                            pl.lit(' '),
+                                            pl.col('Venue'),
+                                            pl.lit(' '),
+                                            pl.col('Competition (Cleaned)'),
+                                            ignore_nulls=True
+                                           ),
+                          ) 
+             .rename({'Song':'track.name', 'Artist':'artist',})
+             .with_columns(pl.col('track.name').count().over('name').alias('tracks.total'),
+                           song_number = pl.col('track.name').cum_count().over('name'),
+                         )
+             .with_columns('song_number', 'tracks.total','track.name', 
+                     pl.lit('Koichi Tsunoda').alias('owner.display_name'),
+                     'artist', 
+                     pl.lit('ichikoo').alias('owner.id'),
+                     playlist_id = pl.col('Spotify').str.split('https://open.spotify.com/playlist/').list.get(1).str.split('?').list.get(0),
+                    )
+             .unique()
+            )
+koichi_df
+
+
+connie_df = (pl.read_csv('connie_wang_dj.csv')
+             .drop('Index')
+             .rename({'Track Name':'Song', 'Artist Name(s)':'Artist', 'DJ':'owner.display_name', 'Set':'name', 'Notes':'notes'})
+
+             .with_columns(pl.lit('Connie Wang - https://conniedoesdata.com/').alias('note_source'))
+             .drop('name', 'owner.display_name')
+             .unique()
+            .sort('Song')
+            .filter(~pl.concat_str('Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 
+                                  'Difficulty', 'Familiarity', 'Transition type', 'notes', ignore_nulls=True).str.len_bytes().eq(0)
+
+                   )
+            )
+connie_df
+
+
+
+gsdj_df = (pl.read_excel('Book1.xlsx')
+     .with_columns(pl.col('Song', 'Artist').str.strip_chars(),
+                   notes = pl.concat_str('Notes', 'Notes2', ignore_nulls=True),
+                   note_source = pl.lit('GSDJ - https://proswingdjs.com/'))
+     .drop('Notes', 'Notes2')
+           .unique()
+     # .rename('')
+     .write_csv('GSDJ_website_scraped.csv')
+    )
+gsdj_df
