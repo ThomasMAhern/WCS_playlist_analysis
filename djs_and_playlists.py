@@ -37,10 +37,10 @@ df = (pl.scan_parquet('data_playlists.parquet')
                     song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
                     apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
                                       .then(pl.lit('beginning'))
-                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 34,
+                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
                                             (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
                                       .then(pl.lit('middle'))
-                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 67)
+                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
                                       .then(pl.lit('end')),
                                       )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
