@@ -41,7 +41,7 @@ df = (pl.scan_parquet('data_playlists.parquet')
                                             (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
                                       .then(pl.lit('middle'))
                                       .when((pl.col('song_number')*100 / pl.col('tracks.total')) >= 67)
-                                      .then(pl.lit('end')).list.drop_nulls(),
+                                      .then(pl.lit('end')),
                                       )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                     .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
@@ -88,7 +88,8 @@ if song_locator_toggle:
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('track.name', 'track.id')
      .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.id', 'track.artists.name', 'notes', 'note_source')
-     .with_columns(pl.col('playlist_name', 'owner.display_name', 'track.artists.id', 'track.artists.name').list.unique().list.drop_nulls().list.sort(),
+     .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 
+                          'track.artists.id', 'track.artists.name').list.unique().list.drop_nulls().list.sort(),
                    pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
      .sort(pl.col('playlist_name').list.len(), descending=True)
      .head(200).collect()
