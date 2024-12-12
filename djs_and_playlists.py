@@ -16,7 +16,10 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|oirée|west coast|routine|blues|practice|practise|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
+df = (pl.scan_parquet('data_playlists.parquet')
+      .join(pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'}),
+            how='full',
+            on=['track.artists.name', 'track.name'])
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
@@ -127,9 +130,14 @@ search_dj_toggle = st.toggle("DJ insights")
 
 if search_dj_toggle:
 
-    st.markdown("#### Enter a Spotify `display_name` or `user_id`:")
+    st.markdown("#### Enter a Spotify display_name/user_id:")
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
+    
+
+    
+    
+    
     
     
     
