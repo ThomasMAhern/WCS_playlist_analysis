@@ -15,15 +15,24 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.contains(regex_year_abbreviated)
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|oirée|west coast|routine|blues|practice|practise|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
+  
+df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
+df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
-df = (pl.scan_parquet('data_playlists.parquet')
-      .rename({'name':'playlist_name', 'track.artists.id':'artist'})
+df = (pl.scan_parquet('data_playlists.parquet').join(df_notes,
+            how='full',
+            on=['track.artists.name', 'track.name'])
+#       .with_columns(pl.when(pl.col('track.name').is_null()
+#                       .then(pl.col())))
+      
+      .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
                                                     pl.col('playlist_name').str.extract_all(regex_year_last),
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
                 #     song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
+                            )
                     region = pl.col('location').str.split(' - ').list.get(0),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
@@ -47,8 +56,6 @@ df = (pl.scan_parquet('data_playlists.parquet')
                                     .otherwise(0))
       )
 
-df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
-df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
 
 
@@ -57,7 +64,7 @@ df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 
 st.markdown("## Westie DJ-playlist Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
-st.write(f"{df.select('artist').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('artist').unique().collect(streaming=True).shape[0]:,} wcs specific)")
+st.write(f"{df.select('track.artists.id').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.id').unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)\n\n")
 
 st.markdown("#### ")
@@ -86,8 +93,8 @@ if song_locator_toggle:
              pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('track.name', 'track.id')
-     .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist', 'notes', 'note_source')
-     .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort(),
+     .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source')
+     .with_columns(pl.col('playlist_name', 'owner.display_name', 'track.artists.id').list.unique().list.sort(),
                    pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
      .sort(pl.col('playlist_name').list.len(), descending=True)
      .head(200).collect()
@@ -104,7 +111,7 @@ if playlist_locator_toggle:
              pl.col('track.name').str.to_lowercase().str.contains(song_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('playlist_name')
-     .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('artist').alias('artist_count'), 'track.name')
+     .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
      .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
      .head(200).collect()
     )
@@ -218,7 +225,7 @@ if songs_together_toggle:
     st.text("Song name: song_id (to distinguish between song versions)")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'artist')
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.id')
      .unique()
      .sort('playlist_id', 'song_number')
      
@@ -233,20 +240,20 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', 'artist',
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.id',
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'artist')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.id')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
      .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped),
-             pl.col('artist').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
+             pl.col('track.artists.id').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
            pl.col('owner.display_name').list.len(), 
@@ -261,7 +268,7 @@ if songs_together_toggle:
     st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'artist')
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.id')
      .unique()
      .sort('playlist_id', 'song_number')
      
@@ -276,20 +283,20 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', 'artist'
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name'
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'artist')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
      .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped),
-             pl.col('artist').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
+             pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
            pl.col('owner.display_name').list.len(), 
@@ -302,7 +309,7 @@ if songs_together_toggle:
     st.markdown(f"#### Most common songs to play before _{song_input}_:")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'artist')
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.name')
      .unique()
      .sort('playlist_id', 'song_number')
      
@@ -317,20 +324,20 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', 'artist', 
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'artist')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
      .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped),
-             pl.col('artist').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
+             pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
            pl.col('owner.display_name').list.len(), 
@@ -392,7 +399,7 @@ if geo_region_toggle:
 
 lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
-        st.write(f"from {df_lyrics.select('artist', 'track.name').unique().collect(streaming=True).shape[0]:,} songs")
+        st.write(f"from {df_lyrics.select('track.artists.name', 'track.name').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         
         st.dataframe(df_lyrics
