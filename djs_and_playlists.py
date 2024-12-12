@@ -19,11 +19,11 @@ def wcs_specific(df_):
 df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
 df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
-df = (pl.scan_parquet('data_playlists.parquet').join(df_notes,
+df = (pl.scan_parquet('data_playlists.parquet')
+      .join(df_notes,
             how='full',
             on=['track.artists.name', 'track.name'])
-#       .with_columns(pl.when(pl.col('track.name').is_null()
-#                       .then(pl.col())))
+#       .with_columns(pl.when(pl.col('track.name').is_null().then(pl.col()))
       
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
@@ -32,7 +32,6 @@ df = (pl.scan_parquet('data_playlists.parquet').join(df_notes,
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
                 #     song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
-                            )
                     region = pl.col('location').str.split(' - ').list.get(0),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
