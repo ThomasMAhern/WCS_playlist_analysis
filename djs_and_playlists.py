@@ -86,7 +86,7 @@ if song_locator_toggle:
              pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('track.name', 'track.id')
-     .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist')
+     .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist', 'notes', 'note_source')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
      .sort(pl.col('playlist_name').list.len(), descending=True)
      .head(200).collect()
