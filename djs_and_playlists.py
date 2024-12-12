@@ -80,7 +80,8 @@ if song_locator_toggle:
     song_input = st.text_input("Song name:").lower()
     playlist_input = st.text_input("In the playlist:").lower()
     dj_input = st.text_input("Input the dj name:").lower()
-    st.dataframe(df.join(df_notes,
+    st.dataframe(df
+                 .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
                 .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
@@ -91,7 +92,10 @@ if song_locator_toggle:
                         'track.artists.name', 'notes', 'note_source', 
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 
-                                        'track.artists.id', 'track.artists.name').list.unique().list.drop_nulls().list.sort().list.head(50),
+                                        'track.artists.id', 'track.artists.name',
+                                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        'Familiarity', 'Transition type'
+                                        ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
                 .sort(pl.col('playlist_name').list.len(), descending=True)
                 .head(200).collect()
