@@ -27,8 +27,8 @@ df = (pl.scan_parquet('data_playlists.parquet')
                     region = pl.col('location').str.split(' - ').list.get(0),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.name', 'track.id')),
-                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.name', 'track.id')),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id')),
+                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id')),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.drop_nulls()
