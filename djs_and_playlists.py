@@ -17,7 +17,7 @@ def wcs_specific(df_):
       )
 
 df = (pl.scan_parquet('data_playlists.parquet')
-      .rename({'name':'playlist_name'})
+      .rename({'name':'playlist_name', 'track.artists.id':'artist'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
                                                     pl.col('playlist_name').str.extract_all(regex_year_last),
