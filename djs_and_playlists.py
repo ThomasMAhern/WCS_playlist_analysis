@@ -86,6 +86,7 @@ if song_locator_toggle:
      .group_by('track.name', 'track.id')
      .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
+     .sort(pl.col('playlist_name').list.len(), descending=True)
      .head(200).collect()
     )
 
