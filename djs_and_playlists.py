@@ -138,10 +138,17 @@ if search_dj_toggle:
                         |pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                         )
                 .group_by('owner.display_name')
-                .agg(song_count = pl.n_unique('track.name'),
-                artist_count = pl.n_unique('track.artists.name'),
-                playlist_count = pl.n_unique('playlist_name'),
-                )
+                .agg('playlist_name', 
+                     song_count = pl.n_unique('track.name'),
+                     artist_count = pl.n_unique('track.artists.name'),
+                     playlist_count = pl.n_unique('playlist_name'),
+                     )
+                .with_columns(pl.col('playlist_name')
+                              .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
+                                           .then(pl.element()))
+                              .list.unique()
+                              .list.drop_nulls()
+                              )
                 .head(50)
                 .collect()
                 ))
