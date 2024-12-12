@@ -36,13 +36,13 @@ df = (pl.scan_parquet('data_playlists.parquet')
                                   .list.join(', '),
                     song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
                     apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
-                                      .then(pl.lit('beginning'))
-                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
-                                            (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
-                                      .then(pl.lit('middle'))
-                                      .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
-                                      .then(pl.lit('end')),
-                                      )
+                                                        .then(pl.lit('beginning'))
+                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
+                                                                (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
+                                                        .then(pl.lit('middle'))
+                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
+                                                        .then(pl.lit('end')),
+                                                        )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                     .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
                                     .otherwise(0))
@@ -81,19 +81,21 @@ if song_locator_toggle:
     playlist_input = st.text_input("In the playlist:").lower()
     dj_input = st.text_input("Input the dj name:").lower()
     st.dataframe(df.join(df_notes,
-            how='full',
-            on=['track.artists.name', 'track.name'])
-     .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
-             pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
-             pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-     .group_by('track.name', 'track.id')
-     .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.id', 'track.artists.name', 'notes', 'note_source')
-     .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 
-                          'track.artists.id', 'track.artists.name').list.unique().list.drop_nulls().list.sort(),
-                   pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
-     .sort(pl.col('playlist_name').list.len(), descending=True)
-     .head(200).collect()
-    )
+                        how='full',
+                        on=['track.artists.name', 'track.name'])
+                .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
+                        pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
+                        pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
+                .group_by('track.name', 'track.id')
+                .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.id', 
+                        'track.artists.name', 'notes', 'note_source', 
+                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
+                .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 
+                                        'track.artists.id', 'track.artists.name').list.unique().list.drop_nulls().list.sort().list.head(50),
+                                pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
+                .sort(pl.col('playlist_name').list.len(), descending=True)
+                .head(200).collect()
+                )
 
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("Find a Playlist")
