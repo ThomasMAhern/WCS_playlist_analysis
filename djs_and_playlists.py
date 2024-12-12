@@ -139,7 +139,7 @@ if search_dj_toggle:
                 artist_count = pl.n_unique('track.artists.name'),
                 playlist_count = pl.n_unique('playlist_name'),
                 )
-                # ._fetch(500)
+                .head(50)
                 .collect()
                 ))
     
