@@ -48,7 +48,7 @@ df = (pl.scan_parquet('data_playlists.parquet')
       )
 
 df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
-df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'}
+df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
 
 
