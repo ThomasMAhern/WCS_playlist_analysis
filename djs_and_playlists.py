@@ -261,7 +261,7 @@ if songs_together_toggle:
     st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.id')
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.id', 'track.artists.name')
      .unique()
      .sort('playlist_id', 'song_number')
      
@@ -276,13 +276,13 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name'
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name',
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
@@ -317,13 +317,13 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 
+     .select('pair', 'playlist_name', 'owner.display_name', , 'track.artists.name', 'track.name'
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name')
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', , 'track.artists.name', 'track.name')
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
