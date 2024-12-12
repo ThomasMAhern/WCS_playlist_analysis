@@ -86,7 +86,7 @@ if song_locator_toggle:
      .group_by('song')
      .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
-     .fetch(200)
+     .head(200).collect()
     )
 
 #courtesy of Vishal S
@@ -102,7 +102,7 @@ if playlist_locator_toggle:
      .group_by('playlist_name')
      .agg('owner.display_name', pl.n_unique('song').alias('song_count'), pl.n_unique('artist').alias('artist_count'), 'song')
      .with_columns(pl.col('owner.display_name', 'song').list.unique().list.sort(),)
-     .fetch(200)
+     .head(200).collect()
     )
 
 
