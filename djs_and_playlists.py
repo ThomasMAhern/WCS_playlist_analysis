@@ -16,10 +16,7 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|oirée|west coast|routine|blues|practice|practise|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-df = (pl.scan_parquet('data_playlists.parquet')
-      .join(pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'}),
-            how='full',
-            on=['track.artists.name', 'track.name'])
+df = (pl.scan_parquet('wcs_dj_spotify_playlists.parquet')
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
