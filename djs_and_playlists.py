@@ -67,7 +67,7 @@ st.markdown("#### Choose your own adventure!")
 data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
-    st.dataframe(df.fetch(200))
+    st.dataframe(df._fetch(200))
 
 
 
@@ -114,12 +114,6 @@ if playlist_locator_toggle:
 
 
 
-#stats_toggle = st.toggle("Stats")
-#if stats_toggle:
-
-
-
-
 
 
 
@@ -135,8 +129,19 @@ if search_dj_toggle:
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
     
-
-    
+    st.text("DJ stats")
+    st.dataframe((df
+                .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                        )
+                .group_by('owner.display_name')
+                .agg(song_count = pl.n_unique('track.name'),
+                artist_count = pl.n_unique('track.artists.name'),
+                playlist_count = pl.n_unique('playlist_name'),
+                )
+                # ._fetch(500)
+                .collect()
+                ))
     
     
     
