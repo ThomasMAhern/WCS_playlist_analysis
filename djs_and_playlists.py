@@ -23,13 +23,13 @@ df = (pl.scan_parquet('data_playlists.parquet')
                                                     pl.col('playlist_name').str.extract_all(regex_year_last),
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
-                    song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
+                #     song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
                     region = pl.col('location').str.split(' - ').list.get(0),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('song')),
-                    playlist_count = pl.n_unique('playlist_name').over(pl.col('song')),
-                    regions = pl.col('region').over('song', mapping_strategy='join')
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.name', 'track.id')),
+                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.name', 'track.id')),
+                    regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.drop_nulls()
                                   .list.sort()
@@ -80,10 +80,10 @@ if song_locator_toggle:
     playlist_input = st.text_input("In the playlist:").lower()
     dj_input = st.text_input("Input the dj name:").lower()
     st.dataframe(df
-     .filter(pl.col('song').str.to_lowercase().str.contains(song_input),
+     .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
              pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-     .group_by('song')
+     .group_by('track.name', 'track.id')
      .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'artist')
      .with_columns(pl.col('playlist_name', 'owner.display_name', 'artist').list.unique().list.sort())
      .head(200).collect()
@@ -97,11 +97,11 @@ if playlist_locator_toggle:
     dj_input = st.text_input("DJ name:").lower()
     st.dataframe(df
      .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
-             pl.col('song').str.to_lowercase().str.contains(song_input),
+             pl.col('track.name').str.to_lowercase().str.contains(song_input),
              pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
      .group_by('playlist_name')
-     .agg('owner.display_name', pl.n_unique('song').alias('song_count'), pl.n_unique('artist').alias('artist_count'), 'song')
-     .with_columns(pl.col('owner.display_name', 'song').list.unique().list.sort(),)
+     .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('artist').alias('artist_count'), 'song')
+     .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
      .head(200).collect()
     )
 
@@ -155,7 +155,7 @@ if search_dj_toggle:
                     .filter(~pl.col('track.id').is_in(dj_music))
                     .filter(pl.col('dj_count') > 5,
                             pl.col('playlist_count') > 5)
-                    .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+                    .select('track.name', 'track.id', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
                     .unique()
                     .sort('playlist_count', descending=True)
                     )
@@ -182,7 +182,7 @@ if search_dj_toggle:
                           &(pl.col('owner.id').str.contains(dj_id)
                             |pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                          )
-                  .select('song', 'dj_count', 'owner.display_name', 'playlist_count', 'regions', 'geographic_region_count')
+                  .select('track.name', 'track.id', 'dj_count', 'owner.display_name', 'playlist_count', 'regions', 'geographic_region_count')
                   .unique()
                   .sort('playlist_count', descending=True)
                   )
@@ -371,7 +371,7 @@ if geo_region_toggle:
     europe = (df
               #  .pipe(wcs_specific)
               .filter(pl.col('regions') == region_selectbox)
-              .select('song', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+              .select('track.name', 'track.id', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
               .unique()
               .sort('dj_count', descending=True)
               )
@@ -388,7 +388,7 @@ if geo_region_toggle:
 
 lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
-        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
+        st.write(f"from {df_lyrics.select('artist', 'track.name').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         
         st.dataframe(df_lyrics
