@@ -135,7 +135,7 @@ if search_dj_toggle:
     st.dataframe((df
                 .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                         |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                        &pl.col('playlist_name').str.to_lowercase().str.contains_any(dj_playlist_input),
+                        |pl.col('playlist_name').str.to_lowercase().str.contains_any(dj_playlist_input),
                         )
                 .group_by('owner.display_name')
                 .agg('playlist_name', 
