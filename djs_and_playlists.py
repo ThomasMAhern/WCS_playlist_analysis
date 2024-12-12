@@ -149,6 +149,7 @@ if search_dj_toggle:
                               .list.unique()
                               .list.drop_nulls()
                               )
+                .sort(pl.col('playlist_name').list.len(), descending=True)
                 .head(50)
                 .collect()
                 ))
