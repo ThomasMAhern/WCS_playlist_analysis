@@ -129,10 +129,13 @@ if search_dj_toggle:
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
     
+    dj_playlist_input = st.text_input("With a playlist name:").lower()
+    
     st.text("DJ stats")
     st.dataframe((df
                 .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                         |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                        |pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                         )
                 .group_by('owner.display_name')
                 .agg(song_count = pl.n_unique('track.name'),
