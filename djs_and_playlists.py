@@ -317,7 +317,7 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', , 'track.artists.name', 'track.name'
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name'
             )
      .drop_nulls()
      .unique()
