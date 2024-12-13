@@ -68,7 +68,7 @@ st.markdown("#### Choose your own adventure!")
 data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
-    st.dataframe(df.head(200).collect())
+    st.dataframe(df._fetch(200))
 
 
 
