@@ -167,7 +167,7 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_name').list.len(), descending=True)
-                .head(50)
+                .head(200)
                 .collect(streaming=True)
                 ))
     
