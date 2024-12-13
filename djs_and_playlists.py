@@ -7,6 +7,11 @@ regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
 regex_year_abbreviated = r"'\d{2}"
 
+def gen(iterable):
+    '''converts iterable item to generator to save on memory'''
+    for _ in iterable:
+        yield _
+
 def wcs_specific(df_):
   '''given a df, filter to the records most likely to be west coast swing related'''
   return (df_.lazy()
@@ -172,14 +177,14 @@ if search_dj_toggle:
     if id_input:
         st.markdown(f"#### Popular music _{id_input}_ doesn't play")
         
-        dj_music = [i[0] for i in (df
-                        .filter(pl.col('owner.id').str.contains(dj_id)
-                                | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
-                        .select('track.id')
-                        .unique()
-                        .collect()
-                        .iter_rows()
-                )]
+        dj_music = gen([i[0] for i in (df
+                                .filter(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
+                                .select('track.id')
+                                .unique()
+                                .collect(streaming=True)
+                                .iter_rows()
+                )])
         
         not_my_music = (df
                         #  .pipe(wcs_specific)
