@@ -167,8 +167,8 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_name').list.len(), descending=True)
-                ._fetch(50)
-                # .collect(streaming=True)
+                .head(50)
+                .collect(streaming=True)
                 ))
     
     
@@ -177,15 +177,14 @@ if search_dj_toggle:
     if id_input:
         st.markdown(f"#### Popular music _{id_input}_ doesn't play")
         ##too much data now that we have more music, that list is blowing up the streamlit
-        dj_music = [i[0] for i in (df
-                                .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
-                                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                                        )
+        dj_music = gen(i[0] for i in (df
+                                .filter(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
                                 .select('track.id')
                                 .unique()
                                 .collect(streaming=True)
                                 .iter_rows()
-                )]
+                ))
         
         not_my_music = (df
                         #  .pipe(wcs_specific)
@@ -199,7 +198,7 @@ if search_dj_toggle:
                         .sort('playlist_count', descending=True)
                         )
         
-        st.dataframe(not_my_music._fetch(200))
+        st.dataframe(not_my_music.head(200).collect(streaming=True))
         
         
         
