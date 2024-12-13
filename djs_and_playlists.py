@@ -167,8 +167,8 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_name').list.len(), descending=True)
-                .head(50)
-                .collect(streaming=True)
+                ._fetch(50)
+                # .collect(streaming=True)
                 ))
     
     
@@ -199,7 +199,7 @@ if search_dj_toggle:
                         .sort('playlist_count', descending=True)
                         )
         
-        st.dataframe(not_my_music.head(200).collect(streaming=True))
+        st.dataframe(not_my_music._fetch(200))
         
         
         
