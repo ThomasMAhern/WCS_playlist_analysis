@@ -178,8 +178,9 @@ if search_dj_toggle:
         st.markdown(f"#### Popular music _{id_input}_ doesn't play")
         ##too much data now that we have more music, that list is blowing up the streamlit
         dj_music = [i[0] for i in (df
-                                .filter(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id))
+                                .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                        )
                                 .select('track.id')
                                 .unique()
                                 .collect(streaming=True)
