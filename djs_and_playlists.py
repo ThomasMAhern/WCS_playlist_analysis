@@ -419,7 +419,7 @@ if geo_region_toggle:
               .sort('dj_count', descending=True)
               )
     
-    st.dataframe(europe._fetch(100))
+    st.dataframe(europe.head(50).collect(streaming=True))
 
 
 
