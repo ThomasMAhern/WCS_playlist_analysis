@@ -16,7 +16,7 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|oirée|west coast|routine|blues|practice|practise|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-df = (pl.scan_parquet('data_playlists.parquet')
+df = (pl.scan_parquet('data_playlists_*.parquet')
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
@@ -88,13 +88,12 @@ if song_locator_toggle:
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'track.id')
-                .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', #'track.artists.id', 
+                .agg('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.id', 
                         'track.artists.name', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-                .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 
-                                        #'track.artists.id', 
-                                        'track.artists.name',
+                .with_columns(pl.col('playlist_name', 'owner.display_name', 'apprx_song_position_in_playlist', 'track.artists.name',
+                                        'track.artists.id', 
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
@@ -247,7 +246,7 @@ if songs_together_toggle:
     st.text("Song name: song_id (to distinguish between song versions)")
     
     st.dataframe(df
-     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', #'track.artists.id'
+     .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 'owner.display_name', 'track.artists.id'
              )
      .unique()
      .sort('playlist_id', 'song_number')
@@ -263,13 +262,13 @@ if songs_together_toggle:
                   )
      .with_columns(pair = pl.concat_list('pair1', 'pair2'))
      .explode('pair')
-     .select('pair', 'playlist_name', 'owner.display_name', #'track.artists.id',
+     .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.id',
             )
      .drop_nulls()
      .unique()
      .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
      .group_by('pair')
-     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', #'track.artists.id',
+     .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.id',
           )
      .with_columns(pl.col('playlist_name').list.unique(),
                   pl.col('owner.display_name').list.unique())
@@ -277,7 +276,7 @@ if songs_together_toggle:
             pl.col('times_played_together').gt(1),
             )
      .filter(pl.col('pair').str.to_lowercase().str.contains(song_input_prepped),
-        #      pl.col('track.artists.id').list.join(', ').str.to_lowercase().str.contains(artist_name_input)
+             pl.col('track.artists.id').list.join(', ').str.to_lowercase().str.contains(artist_name_input)
              )
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
@@ -294,7 +293,7 @@ if songs_together_toggle:
     
     st.dataframe(df
      .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_id', 
-             'owner.display_name', 'track.artists.name', #'track.artists.id',
+             'owner.display_name', 'track.artists.name', 'track.artists.id',
              )
      .unique()
      .sort('playlist_id', 'song_number')
