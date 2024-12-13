@@ -144,13 +144,13 @@ if search_dj_toggle:
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
     
-    dj_playlist_input = st.text_input("With a playlist name:").lower().split(',')
+    dj_playlist_input = st.text_input("With a playlist name:").lower()
     
     st.text("DJ stats")
     st.dataframe((df
-                .filter(pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
-                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                        |pl.col('playlist_name').str.to_lowercase().str.contains_any(dj_playlist_input),
+                .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
+                        &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                         )
                 .group_by('owner.display_name')
                 .agg('playlist_name', 
@@ -159,7 +159,7 @@ if search_dj_toggle:
                      playlist_count = pl.n_unique('playlist_name'),
                      )
                 .with_columns(pl.col('playlist_name')
-                              .list.eval(pl.when(pl.element().str.to_lowercase().str.contains_any(dj_playlist_input))
+                              .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
                                            .then(pl.element()))
                               .list.unique()
                               .list.drop_nulls()
