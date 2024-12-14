@@ -192,7 +192,10 @@ if search_dj_toggle:
         
         st.dataframe(others_music.join(djs_music, how='anti', 
                         on=['track.name', 'track.artists.name', 'dj_count', 
-                        'playlist_count']).sort('dj_count', 'playlist_count', descending=True).head(200).collect(streaming=True))
+                        'playlist_count'])
+                     .group_by(pl.all().exclude('owner.display_name'))
+                     .agg('owner.display_name')
+                     .sort('dj_count', 'playlist_count', descending=True).head(200).collect(streaming=True))
         
         
         
