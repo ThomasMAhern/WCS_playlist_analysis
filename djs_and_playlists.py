@@ -187,11 +187,12 @@ if search_dj_toggle:
                 .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
                         | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
                 .select('track.name', 'track.artists.name', 'dj_count', 'playlist_count')
+                .unique()
                 )
         
         st.dataframe(others_music.join(djs_music, how='anti', 
                         on=['track.name', 'track.artists.name', 'dj_count', 
-                        'playlist_count']).sort('playlist_count', descending=True).head(200).collect())
+                        'playlist_count']).sort('playlist_count', descending=True).head(200).collect(streaming=True))
         
         
         
@@ -210,7 +211,7 @@ if search_dj_toggle:
         
         st.dataframe(djs_music.join(others_music, how='anti', 
                 on=['track.name', 'track.artists.name', 'dj_count', 
-                        'playlist_count']).sort('playlist_count', descending=True).filter(pl.col('dj_count').eq(1)).head(200).collect())
+                        'playlist_count']).sort('playlist_count', descending=True).filter(pl.col('dj_count').eq(1)).head(200).collect(streaming=True))
 
 
 
