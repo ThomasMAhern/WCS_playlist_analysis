@@ -195,6 +195,7 @@ if search_dj_toggle:
                         'playlist_count'])
                      .group_by(pl.all().exclude('owner.display_name'))
                      .agg('owner.display_name')
+                     .with_columns(pl.col('owner.display_name').list.head(50))
                      .sort('dj_count', 'playlist_count', descending=True).head(200).collect(streaming=True))
         
         
