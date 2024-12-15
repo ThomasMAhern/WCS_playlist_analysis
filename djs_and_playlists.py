@@ -219,6 +219,8 @@ if search_dj_toggle:
                                     how='anti', 
                                     on=['track.name', 'track.artists.name', 'owner.display_name', 
                                         'dj_count', 'playlist_count'])
+                     .group_by(pl.all().exclude('playlist_name'))
+                     .agg('playlist_name')
                      .sort('playlist_count', descending=True)
                      .filter(pl.col('dj_count').eq(1))
                      .head(200)
