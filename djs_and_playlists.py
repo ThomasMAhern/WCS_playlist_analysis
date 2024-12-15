@@ -441,7 +441,8 @@ if lyrics_toggle:
                                         .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
-         ._fetch(100)
+         .head(100)
+         .collect(streaming=True)
          )
 
 
