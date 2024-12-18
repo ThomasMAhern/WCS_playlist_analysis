@@ -36,7 +36,6 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                     playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id')),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
-                                  .list.drop_nulls()
                                   .list.sort()
                                   .list.join(', '),
                     song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
@@ -49,7 +48,7 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                         .then(pl.lit('end')),
                                                         )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
-                                    .then(pl.col('regions').str.split(', ').list.drop_nulls().list.len())
+                                    .then(pl.col('regions').str.split(', ').list.len())
                                     .otherwise(0))
       )
 
