@@ -405,6 +405,13 @@ if songs_together_toggle:
 geo_region_toggle = st.toggle("Geographic-region insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
+    st.dataframe(df
+                 .group_by('regions')
+                 .agg(pl.n_unique('track.name'), pl.n_unique('playlist_name'), pl.n_unique('owner.display_name'),
+                      'owner.display_name')
+                 .collect(streaming=True)
+    )
+    
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
                                     ["Europe", "North America", "Asia", "MENA", "Oceania"])
     
