@@ -29,7 +29,7 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
                 #     song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
-                    region = pl.col('location').str.split(' - ').list.get(0),)
+                    region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
       .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id')),
@@ -325,7 +325,7 @@ if songs_together_toggle:
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
-     .filter(pl.col('pair').str.split(' --- ').list.get(0).str.to_lowercase().str.contains(song_input_prepped),
+     .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
              pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
@@ -366,7 +366,7 @@ if songs_together_toggle:
      .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
             pl.col('times_played_together').gt(1),
             )
-     .filter(pl.col('pair').str.split(' --- ').list.get(1).str.to_lowercase().str.contains(song_input_prepped),
+     .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
              pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
      .with_columns(pl.col('pair').str.split(' --- '))
      .sort('times_played_together',
