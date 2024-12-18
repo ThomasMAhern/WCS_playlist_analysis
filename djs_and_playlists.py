@@ -423,8 +423,8 @@ if geo_region_toggle:
     st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
     europe = (df
               #  .pipe(wcs_specific)
-              .filter(pl.col('regions') == region_selectbox)
-              .select('track.name', 'track.id', 'dj_count', 'playlist_count', 'regions', 'geographic_region_count')
+              .filter(pl.col('region') == region_selectbox)
+              .select('track.name', 'track.id', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
               .unique()
               .sort('dj_count', descending=True)
               )
