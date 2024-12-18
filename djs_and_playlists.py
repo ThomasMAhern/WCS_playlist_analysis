@@ -406,7 +406,7 @@ geo_region_toggle = st.toggle("Geographic-region insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
-                                    ["Europe", "USA", "Asia", "MENA"])
+                                    ["Europe", "North America", "Asia", "MENA", "Oceania"])
     
     
     st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
