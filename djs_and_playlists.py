@@ -406,7 +406,7 @@ geo_region_toggle = st.toggle("Geographic-region insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
     st.dataframe(df
-                 .group_by('regions')
+                 .group_by('region')
                  .agg(song_count = pl.n_unique('track.name'), 
                       playlist_count = pl.n_unique('playlist_name'), 
                       dj_count = pl.n_unique('owner.display_name'),
