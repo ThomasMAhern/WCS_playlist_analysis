@@ -412,6 +412,7 @@ if geo_region_toggle:
                       dj_count = pl.n_unique('owner.display_name'),
                       djs = pl.col('owner.display_name'),
                       )
+                 .with_columns(pl.col('djs').list.unique().list.head(50))
                  .collect(streaming=True)
     )
     
