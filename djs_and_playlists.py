@@ -407,8 +407,11 @@ if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
     st.dataframe(df
                  .group_by('regions')
-                 .agg(pl.n_unique('track.name'), pl.n_unique('playlist_name'), pl.n_unique('owner.display_name'),
-                      'owner.display_name')
+                 .agg(song_count = pl.n_unique('track.name'), 
+                      playlist_count = pl.n_unique('playlist_name'), 
+                      dj_count = pl.n_unique('owner.display_name'),
+                      djs = pl.col('owner.display_name'),
+                      )
                  .collect(streaming=True)
     )
     
