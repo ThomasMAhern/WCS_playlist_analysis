@@ -99,7 +99,7 @@ if song_locator_toggle:
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
-                                     'apprx_song_position_in_playlist', 'track.artists.name',
+                                     'apprx_song_position_in_playlist',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
