@@ -28,7 +28,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                     pl.col('playlist_name').str.extract_all(regex_year_last),
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
-                #     song = pl.concat_str('track.name', pl.lit(' - https://open.spotify.com/track/'), 'track.id', ignore_nulls=True),
+                    song_url = pl.when(pl.col('track.id').is_not_null())
+                               pl.then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id', ignore_nulls=True)),
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
@@ -72,7 +73,9 @@ st.markdown("#### Choose your own adventure!")
 data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
-    st.dataframe(df._fetch(200))
+    st.dataframe(df._fetch(200), column_config={
+        "song_url": st.column_config.LinkColumn()
+    })
 
 
 
