@@ -430,11 +430,11 @@ if geo_region_toggle:
                       pl.col('geographic_region_count').eq(1))
               .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
               .unique()
-              .sort('dj_count', descending=True), 
-                 column_config={"song_url": st.column_config.LinkColumn()}
+              .sort('dj_count', descending=True)
               )
     
-    st.dataframe(europe._fetch(50000))
+    st.dataframe(europe._fetch(50000), 
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
