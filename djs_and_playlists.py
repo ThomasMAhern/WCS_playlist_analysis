@@ -32,8 +32,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id')),
-                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id')),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id', 'track.name', 'track.artists.name')),
+                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id', 'track.name', 'track.artists.name')),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
@@ -100,7 +100,6 @@ if song_locator_toggle:
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
                                      'apprx_song_position_in_playlist', 'track.artists.name',
-                                         
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
