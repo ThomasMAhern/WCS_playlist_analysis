@@ -48,8 +48,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                         .then(pl.lit('end')),
                                                         )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
-                                    .then(pl.col('regions').str.split(', ').list.len())
-                                    .otherwise(0))
+                                                .then(pl.col('regions').str.split(', ').list.len())
+                                                .otherwise(0))
       )
 
 df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
@@ -144,7 +144,6 @@ if search_dj_toggle:
     st.markdown("#### Enter a Spotify display_name/user_id:")
     id_input = st.text_input("ex. Kasia Stepek or 1185428002")
     dj_id = id_input.lower().strip()
-    
     dj_playlist_input = st.text_input("With a playlist name:").lower()
     
     st.text("DJ stats")
@@ -445,9 +444,14 @@ lyrics_toggle = st.toggle("Search lyrics")
 if lyrics_toggle:
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
+        song_input = st.text_input("Song:")
+        artist_input = st.text_input("Artist:")
         
         st.dataframe(df_lyrics
-         .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True))
+         .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
+                 pl.col('artist').str.contains_any([song_input], ascii_case_insensitive=True),
+                 pl.col('song').str.contains_any([artist_input], ascii_case_insensitive=True),
+                 )
          .with_columns(matched_lyrics = pl.col('lyrics')
                                         .str.extract_many(lyrics_input, ascii_case_insensitive=True)
                                         .list.eval(pl.element().str.to_lowercase())
