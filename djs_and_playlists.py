@@ -32,8 +32,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id')),
-                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id')),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(pl.col('track.id', 'track.name', 'track.artists.name')),
+                    playlist_count = pl.n_unique('playlist_name').over(pl.col('track.id', 'track.name', 'track.artists.name')),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
@@ -94,7 +94,7 @@ if song_locator_toggle:
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'track.id')
-                .agg('playlist_name', 'track.artists.name', 'owner.display_name', 
+                .agg('playlist_name', 'track.artists.name', 'owner.display_name',  pl.n_unique('playlist_name').alias('playlist_count'),
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
@@ -104,6 +104,7 @@ if song_locator_toggle:
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
+                               
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
                 .sort(pl.col('playlist_name').list.len(), descending=True)
                 .head(200).collect()
