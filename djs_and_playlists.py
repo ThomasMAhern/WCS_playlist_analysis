@@ -93,13 +93,13 @@ if song_locator_toggle:
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-                .group_by('track.name', 'track.id', 'track.artists.name', 'playlist_count', 'dj_count')
-                .agg('playlist_name', 'owner.display_name', 
+                .group_by('track.name', 'track.id', 'playlist_count', 'dj_count')
+                .agg('playlist_name', 'track.artists.name', 'owner.display_name', 
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
-                                     'apprx_song_position_in_playlist',
+                                     'apprx_song_position_in_playlist', 'track.artists.name',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
