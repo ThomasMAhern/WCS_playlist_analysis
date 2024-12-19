@@ -29,7 +29,7 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                     pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
                     song_url = pl.when(pl.col('track.id').is_not_null())
-                               pl.then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id', ignore_nulls=True)),
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
