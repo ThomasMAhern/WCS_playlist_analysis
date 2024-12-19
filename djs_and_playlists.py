@@ -96,7 +96,7 @@ if song_locator_toggle:
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-                .group_by('track.name', 'track.id', 'playlist_count', 'dj_count')
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg('playlist_name', 'track.artists.name', 'owner.display_name', 
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
@@ -428,7 +428,7 @@ if geo_region_toggle:
               #  .pipe(wcs_specific)
               .filter(pl.col('region') == region_selectbox,
                       pl.col('geographic_region_count').eq(1))
-              .select('track.name', 'track.artists.name', 'track.id', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
               .unique()
               .sort('dj_count', descending=True)
               )
