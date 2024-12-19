@@ -105,7 +105,7 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
-                .sort(pl.col('playlist_name').list.len(), descending=True)
+                .sort(pl.col('playlist_count'), descending=True)
                 .head(200).collect()
                 )
 
