@@ -73,9 +73,8 @@ st.markdown("#### Choose your own adventure!")
 data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
-    st.dataframe(df._fetch(200), column_config={
-        "song_url": st.column_config.LinkColumn()
-    })
+    st.dataframe(df._fetch(200), 
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
@@ -109,7 +108,8 @@ if song_locator_toggle:
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
                 .sort(pl.col('playlist_count'), descending=True)
-                .head(200).collect()
+                .head(200).collect(), 
+                 column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
 #courtesy of Vishal S
@@ -430,7 +430,8 @@ if geo_region_toggle:
                       pl.col('geographic_region_count').eq(1))
               .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
               .unique()
-              .sort('dj_count', descending=True)
+              .sort('dj_count', descending=True), 
+                 column_config={"song_url": st.column_config.LinkColumn()}
               )
     
     st.dataframe(europe._fetch(50000))
