@@ -339,7 +339,7 @@ if songs_together_toggle:
                         )
                 .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
                         pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
-                .with_columns(pl.col('pair').str.split(' --- '))
+                .with_columns(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True))
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
@@ -381,7 +381,7 @@ if songs_together_toggle:
                         )
                 .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
                         pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
-                .with_columns(pl.col('pair').str.split(' --- '))
+                .with_columns(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True))
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
