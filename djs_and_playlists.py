@@ -32,6 +32,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/playlist/'), 'playlist_id')),
+                    owner_url = pl.when(pl.col('owner_id').is_not_null())
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner_id')),
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
@@ -154,12 +156,12 @@ if search_dj_toggle:
     dj_playlist_input = st.text_input("With a playlist name:").lower()
     
     st.text("DJ stats")
-    st.dataframe((df
+    st.dataframe(df
                 .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                         |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
                         &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                         )
-                .group_by('owner.display_name')
+                .group_by('owner.display_name', 'owner_url')
                 .agg(pl.n_unique('track.name').alias('song_count'),
                      pl.n_unique('track.artists.name').alias('artist_count'),
                      pl.n_unique('playlist_name').alias('playlist_count'),
@@ -175,8 +177,9 @@ if search_dj_toggle:
                               )
                 .sort(pl.col('playlist_count'), descending=True)
                 .head(200)
-                .collect(streaming=True)
-                ))
+                .collect(streaming=True), 
+                 column_config={"owner_url": st.column_config.LinkColumn()}
+                )
     
     
     
