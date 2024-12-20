@@ -76,7 +76,8 @@ data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
     st.dataframe(df._fetch(200), 
-                 column_config={"song_url": st.column_config.LinkColumn()})
+                 column_config={"song_url": st.column_config.LinkColumn(),
+                                "playlist_url": st.column_config.LinkColumn()})
 
 
 
@@ -186,25 +187,26 @@ if search_dj_toggle:
         others_music = (df
                         .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
                                 | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                        .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count')
+                        .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                         )
 
         djs_music = (df
                 .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
                         | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name')
+                .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
                 .unique()
                 )
         
         st.dataframe(others_music.join(djs_music, how='anti', 
                         on=['track.name', 'track.artists.name', 'dj_count', 
-                        'playlist_count'])
+                        'playlist_count', 'song_url'])
                      .group_by(pl.all().exclude('owner.display_name'))
                      .agg('owner.display_name')
                      .with_columns(pl.col('owner.display_name').list.head(50))
                      .sort('dj_count', 'playlist_count', descending=True)
                      .head(200)
-                     .collect(streaming=True))
+                     .collect(streaming=True), 
+                 column_config={"song_url": st.column_config.LinkColumn()})
         
         
         
@@ -224,13 +226,14 @@ if search_dj_toggle:
         st.dataframe(djs_music.join(others_music, 
                                     how='anti', 
                                     on=['track.name', 'track.artists.name', 'owner.display_name', 
-                                        'dj_count', 'playlist_count'])
+                                        'dj_count', 'playlist_count', 'song_url'])
                      .group_by(pl.all().exclude('playlist_name'))
                      .agg('playlist_name')
                      .sort('playlist_count', descending=True)
                      .filter(pl.col('dj_count').eq(1))
                      .head(200)
-                     .collect(streaming=True))
+                     .collect(streaming=True), 
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
@@ -304,11 +307,11 @@ if songs_together_toggle:
     st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
     st.dataframe(df
-                .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_url', 
+                .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                         'owner.display_name', 'track.artists.name', 'track.artists.id',
                         )
                 .unique()
-                .sort('playlist_url', 'song_number')
+                .sort('playlist_name', 'song_number')
                 
                 .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
                                         .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
@@ -321,13 +324,14 @@ if songs_together_toggle:
                                 )
                 .with_columns(pair = pl.concat_list('pair1', 'pair2'))
                 .explode('pair')
-                .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name',
+                .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url',
                         )
                 .drop_nulls()
                 .unique()
                 .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                 .group_by('pair')
-                .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name')
+                .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 
+                     'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                 .with_columns(pl.col('playlist_name').list.unique(),
                                 pl.col('owner.display_name').list.unique())
                 .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
@@ -340,7 +344,7 @@ if songs_together_toggle:
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
                 .head(100).collect(), 
-                 column_config={"playlist_url": st.column_config.LinkColumn()}
+                 column_config={"song_url": st.column_config.LinkColumn()}
                 )
     
     
@@ -348,10 +352,9 @@ if songs_together_toggle:
     st.markdown(f"#### Most common songs to play before _{song_input}_:")
     
     st.dataframe(df
-                .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_url', 'owner.display_name', 'track.artists.name')
+                .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 'owner.display_name', 'track.artists.name')
                 .unique()
-                .sort('playlist_url', 'song_number')
-                
+                .sort('playlist_name', 'song_number')
                 .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
                                         .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                                                 pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
@@ -363,13 +366,14 @@ if songs_together_toggle:
                                 )
                 .with_columns(pair = pl.concat_list('pair1', 'pair2'))
                 .explode('pair')
-                .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name'
+                .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url',
                         )
                 .drop_nulls()
                 .unique()
                 .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                 .group_by('pair')
-                .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name')
+                .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 
+                     'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                 .with_columns(pl.col('playlist_name').list.unique(),
                                 pl.col('owner.display_name').list.unique())
                 .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
@@ -382,7 +386,7 @@ if songs_together_toggle:
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
                 .head(100).collect(), 
-                 column_config={"playlist_url": st.column_config.LinkColumn()}
+                 column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
 
