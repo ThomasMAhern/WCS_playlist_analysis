@@ -112,7 +112,7 @@ if song_locator_toggle:
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
                 .sort(pl.col('playlist_count'), descending=True)
                 .head(200).collect(), 
-                 column_config={"playlist_url": st.column_config.LinkColumn()}
+                 column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
 #courtesy of Vishal S
