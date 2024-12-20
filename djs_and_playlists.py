@@ -160,10 +160,10 @@ if search_dj_toggle:
                         &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                         )
                 .group_by('owner.display_name')
-                .agg('playlist_name', 
-                     song_count = pl.n_unique('track.name'),
-                     artist_count = pl.n_unique('track.artists.name'),
-                     playlist_count = pl.n_unique('playlist_name'),
+                .agg(pl.n_unique('track.name').alias('song_count'),
+                     pl.n_unique('track.artists.name').alias('artist_count'),
+                     pl.n_unique('playlist_name').alias('playlist_count'),
+                     'playlist_name', 
                      )
                 .with_columns(pl.col('playlist_name')
                               .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
@@ -339,7 +339,7 @@ if songs_together_toggle:
                         )
                 .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
                         pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
-                .with_columns(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True))
+                .with_columns(pl.col('pair').str.split(' --- '))
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
@@ -381,7 +381,7 @@ if songs_together_toggle:
                         )
                 .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
                         pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
-                .with_columns(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True))
+                .with_columns(pl.col('pair').str.split(' --- '))
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
