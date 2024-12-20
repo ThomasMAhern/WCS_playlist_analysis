@@ -79,7 +79,8 @@ data_view_toggle = st.toggle("See sample of the raw data")
 if data_view_toggle:
     st.dataframe(df._fetch(200), 
                  column_config={"song_url": st.column_config.LinkColumn(),
-                                "playlist_url": st.column_config.LinkColumn()})
+                                "playlist_url": st.column_config.LinkColumn(),
+                                "owner_url": st.column_config.LinkColumn()})
 
 
 
