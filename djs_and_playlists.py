@@ -32,8 +32,8 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/playlist/'), 'playlist_id')),
-                    owner_url = pl.when(pl.col('owner_id').is_not_null())
-                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner_id')),
+                    owner_url = pl.when(pl.col('owner.id').is_not_null())
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner.id')),
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
