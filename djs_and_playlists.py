@@ -177,7 +177,7 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_count'), descending=True)
-                .head(200)
+                .head(1000)
                 .collect(streaming=True), 
                  column_config={"owner_url": st.column_config.LinkColumn()}
                 )
