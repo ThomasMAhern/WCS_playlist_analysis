@@ -18,7 +18,7 @@ def wcs_specific(df_):
           .filter(~(pl.col('playlist_name').str.contains(regex_year_first)
                   |pl.col('playlist_name').str.contains(regex_year_last)
                   |pl.col('playlist_name').str.contains(regex_year_abbreviated)
-                  |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|oirée|west coast|routine|blues|practice|practise|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
+                  |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|soirée|west coast|westcoast|routine|practice|practise|westie|party|beginner|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
 df = (pl.scan_parquet('data_playlists_*.parquet')
@@ -466,6 +466,10 @@ if lyrics_toggle:
         artist_input = st.text_input("Artist:")
         
         st.dataframe(df_lyrics
+        .join(df.select('song_url', 
+                        song = pl.col('track.name'), 
+                        artist = pl.col('track.artists.name')), 
+                how='left', on=['song', 'artist'])
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
                  pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
                  pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
