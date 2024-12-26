@@ -480,7 +480,7 @@ if lyrics_toggle:
          .collect(streaming=True)
          .join(df.select('song_url', 
                         song = pl.col('track.name'), 
-                        artist = pl.col('track.artists.name')).collect(streaming=True), 
+                        artist = pl.col('track.artists.name')).collect(streaming=True).unique(), 
                 how='left', on=['song', 'artist']), 
                  column_config={"song_url": st.column_config.LinkColumn()}
          )
