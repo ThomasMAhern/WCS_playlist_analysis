@@ -481,7 +481,8 @@ if lyrics_toggle:
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
          .head(100)
-         .collect(streaming=True)
+         .collect(streaming=True), 
+                 column_config={"song_url": st.column_config.LinkColumn()}
          )
 
 
