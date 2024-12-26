@@ -466,10 +466,6 @@ if lyrics_toggle:
         artist_input = st.text_input("Artist:")
         
         st.dataframe(df_lyrics
-        .join(df.select('song_url', 
-                        song = pl.col('track.name'), 
-                        artist = pl.col('track.artists.name')).unique(), 
-                how='left', on=['song', 'artist'])
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
                  pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
                  pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
@@ -480,9 +476,12 @@ if lyrics_toggle:
                                         .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
-         .unique()
          .head(100)
-         .collect(streaming=True), 
+         .collect(streaming=True)
+         .join(df.select('song_url', 
+                        song = pl.col('track.name'), 
+                        artist = pl.col('track.artists.name')).unique(), 
+                how='left', on=['song', 'artist']), 
                  column_config={"song_url": st.column_config.LinkColumn()}
          )
 
