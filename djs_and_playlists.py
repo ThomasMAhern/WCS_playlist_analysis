@@ -468,7 +468,7 @@ if lyrics_toggle:
         st.dataframe(df_lyrics
         .join(df.select('song_url', 
                         song = pl.col('track.name'), 
-                        artist = pl.col('track.artists.name')), 
+                        artist = pl.col('track.artists.name')).unique(), 
                 how='left', on=['song', 'artist'])
          .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
                  pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
