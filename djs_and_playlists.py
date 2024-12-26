@@ -480,6 +480,7 @@ if lyrics_toggle:
                                         .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
+         .unique()
          .head(100)
          .collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
