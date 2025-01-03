@@ -68,8 +68,9 @@ st.markdown("## Westie DJ-playlist Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('track.artists.name').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]:,} wcs specific)")
-st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)\n\n")
-
+st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)")
+st.write(f"{df.select('owner.display_name').unique().collect(streaming=True).shape[0]:,} DJ's\n\n")
+         
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
 
@@ -480,9 +481,9 @@ if lyrics_toggle:
                                         .list.unique(),
                        )
          .sort(pl.col('matched_lyrics').list.len(), descending=True)
-         .group_by(pl.all().exclude('song_url'))
+         .group_by(pl.all().exclude('song_url')) #otherwise there will be multiple rows for each song variation
          .agg('song_url')
-         .with_columns(pl.col('song_url').list.get(0))
+         .with_columns(pl.col('song_url').list.get(0)) #otherwise multiple urls will be smashed together
          .head(100)
          .collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
