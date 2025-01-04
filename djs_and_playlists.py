@@ -34,12 +34,17 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/playlist/'), 'playlist_id')),
                     owner_url = pl.when(pl.col('owner.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner.id')),
-                    region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),)
+                    region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),
+                    sub_region = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
       .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name', 'track.artists.name']),
                     playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name', 'track.artists.name']),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
+                                  .list.unique()
+                                  .list.sort()
+                                  .list.join(', '),
+                    sub_regions = pl.col('sub_region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
                                   .list.join(', '),
@@ -69,7 +74,7 @@ st.text("Note: this database lacks most of the non-spotify playlists - but if yo
 st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('track.artists.name').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]:,} wcs specific)")
 st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)")
-st.write(f"{df.select('owner.display_name').unique().collect(streaming=True).shape[0]:,} DJ's\n\n")
+st.write(f"{df.select('owner.display_name').unique().collect(streaming=True).shape[0]:,} DJ's/Westies\n\n")
          
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
