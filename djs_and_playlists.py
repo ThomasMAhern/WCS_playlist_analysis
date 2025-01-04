@@ -44,7 +44,7 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                   .list.unique()
                                   .list.sort()
                                   .list.join(', '),
-                    countries = pl.col('countryf').over('track.name', mapping_strategy='join')
+                    countries = pl.col('country').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
                                   .list.join(', '),
