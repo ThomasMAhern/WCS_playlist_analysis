@@ -438,8 +438,8 @@ if geo_region_toggle:
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .collect(streaming=True)
     )
-    regions = df['region'].unique().to_list()
-    countries = df['country'].unique().to_list()
+    regions = df['region'].unique().collect().to_list()
+    countries = df['country'].unique().collect().to_list()
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
                                     regions)
 
