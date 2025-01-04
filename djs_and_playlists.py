@@ -460,8 +460,8 @@ if geo_region_toggle:
 
 
     st.markdown(f"#### Compare Countries' music:")
-    country_1_selectbox = st.selectbox("Compare this country's music:", countries)
-    country_2_selectbox = st.selectbox("To this country's music:", countries)
+    country_1_selectbox = st.selectbox("Compare this country's music:", countries[0])
+    country_2_selectbox = st.selectbox("To this country's music:", countries[1])
     
     country_1_df = (df
               .filter(pl.col('region') == country_1_selectbox)
