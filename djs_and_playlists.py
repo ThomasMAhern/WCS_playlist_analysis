@@ -473,9 +473,11 @@ if geo_region_toggle:
               .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
               )
     
-    st.dataframe(country_1_df.join(country_2_df, how='anti', on=['track.name', 'track.artists.name', 
-                                                                 'song_url', 'dj_count', 'playlist_count', 
-                                                                 'region', 'geographic_region_count'])
+    st.dataframe(country_1_df.join(country_2_df, 
+                                   how='anti', 
+                                #    on=['track.name', 'track.artists.name', 'song_url', 
+                                #        'dj_count', 'playlist_count', 'region', 'geographic_region_count']
+                                )
                  .sort(['dj_count', 'playlist_count'], descending=True)
                  .head(100).collect(streaming=True) , 
                  column_config={"song_url": st.column_config.LinkColumn()})
