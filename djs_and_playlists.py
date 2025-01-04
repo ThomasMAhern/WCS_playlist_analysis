@@ -438,10 +438,11 @@ if geo_region_toggle:
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .collect(streaming=True)
     )
-    
+    regions = df['region'].unique().to_list()
+    countries = df['country'].unique().to_list()
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
-                                    ["Europe", "North America", "Asia", "MENA", "Oceania"])
-    
+                                    regions)
+
     
     st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
     europe = (df
@@ -458,6 +459,27 @@ if geo_region_toggle:
 
 
 
+    st.markdown(f"#### Compare Countries' music:")
+    country_1_selectbox = st.selectbox("Compare this country's music:", countries)
+    country_2_selectbox = st.selectbox("To this country's music:", countries)
+    
+    country_1_df = (df
+              #  .pipe(wcs_specific)
+              .filter(pl.col('region') == country_1_selectbox)
+              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+              .unique()
+              .sort('dj_count', descending=True)
+              )
+    country_2_df = (df
+              #  .pipe(wcs_specific)
+              .filter(pl.col('region') == country_2_selectbox)
+              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+              .unique()
+              .sort('dj_count', descending=True)
+              )
+    
+    st.dataframe(country_1_df.join(country_2_df, how='anti') , 
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
