@@ -478,7 +478,7 @@ if geo_region_toggle:
               .sort('dj_count', descending=True)
               )
     
-    st.dataframe(country_1_df.join(country_2_df, how='anti') , 
+    st.dataframe(country_1_df.join(country_2_df, how='anti').head(100).collect(streaming=True) , 
                  column_config={"song_url": st.column_config.LinkColumn()})
 
 
