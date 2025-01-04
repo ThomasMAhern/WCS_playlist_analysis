@@ -466,19 +466,18 @@ if geo_region_toggle:
     country_1_df = (df
               .filter(pl.col('region') == country_1_selectbox)
               .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-              .unique()
-              .sort(['dj_count', 'playlist_count'], descending=True)
+              
               )
     country_2_df = (df
               .filter(pl.col('region') == country_2_selectbox)
               .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-              .unique()
-              .sort(['dj_count', 'playlist_count'], descending=True)
               )
     
     st.dataframe(country_1_df.join(country_2_df, how='anti', on=['track.name', 'track.artists.name', 
                                                                  'song_url', 'dj_count', 'playlist_count', 
-                                                                 'region', 'geographic_region_count']).head(100).collect(streaming=True) , 
+                                                                 'region', 'geographic_region_count'])
+                 .sort(['dj_count', 'playlist_count'], descending=True)
+                 .head(100).collect(streaming=True) , 
                  column_config={"song_url": st.column_config.LinkColumn()})
 
 
