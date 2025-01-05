@@ -481,7 +481,7 @@ if country_region_toggle:
     
     st.dataframe(country_1_df.join(country_2_df, 
                                    how='anti', 
-                                   on=['track.name', 'track.artists.name', 'song_url', 
+                                   left_on=['track.name', 'track.artists.name', 'song_url', 
                                        'dj_count', 'playlist_count', 'region', 'geographic_region_count']
                                 )
                  .sort(['dj_count', 'playlist_count'], descending=True)
