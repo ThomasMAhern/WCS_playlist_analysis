@@ -490,7 +490,8 @@ if country_region_toggle:
                                         on=['track.name', 'track.artists.name', 'song_url', 
                                         'dj_count', 'playlist_count', 'country', 'geographic_region_count']
                                         )
-                        .filter(pl.col(['dj_count', 'playlist_count']).gt(1))
+                        .filter(pl.col('dj_count').gt(1), 
+                                pl.col('playlist_count').gt(1))
                         .sort(['dj_count', 'playlist_count'], descending=True)
                         .head(100).collect(streaming=True) , 
                         column_config={"song_url": st.column_config.LinkColumn()})
