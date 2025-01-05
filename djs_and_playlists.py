@@ -460,12 +460,14 @@ if geo_region_toggle:
 #courtesy of Lino V
 country_region_toggle = st.toggle("Country comparison")
 if country_region_toggle:
+    regions = ['Europe', 'North America', 'MENA', 'Oceania', 'Asia']
+    countries = df.select('country').unique().collect(streaming=True)['country'].to_list()    
+    
     st.markdown(f"#### Compare Countries' music:")
     country_1_selectbox = st.selectbox("Compare this country's music:", countries)
     country_2_selectbox = st.selectbox("To this country's music:", countries)
     
-    regions = ['Europe', 'North America', 'MENA', 'Oceania', 'Asia']
-    countries = df.select('country').unique().collect(streaming=True)['country'].to_list()
+
     
     country_1_df = (df
               .filter(pl.col('region') == country_1_selectbox)
