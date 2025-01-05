@@ -495,7 +495,7 @@ if country_region_toggle:
                                         on=['track.name', 'track.artists.name', 'song_url', 
                                         'dj_count', 'playlist_count', 'country', 'geographic_region_count']
                                         )
-                        .sort(['dj_count', 'playlist_count'], descending=True)
+                        .sort('dj_count', descending=True)
                         .unique()
                         # .head(100).collect(streaming=True) ,
                         ._fetch(100000),
@@ -506,7 +506,7 @@ if country_region_toggle:
                                         on=['track.name', 'track.artists.name', 'song_url', 
                                         'dj_count', 'playlist_count', 'country', 'geographic_region_count']
                                         )
-                        .sort(['dj_count', 'playlist_count'], descending=True)
+                        .sort('dj_count', descending=True)
                         .unique()
                         # .head(100).collect(streaming=True) ,
                         ._fetch(100000),
