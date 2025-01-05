@@ -473,17 +473,19 @@ if country_region_toggle:
     st.markdown(f"#### Compare Countries' music:")
     countries_selectbox = st.multiselect("Compare this country's music:", countries)
     
-    countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox)
-                              .filter(pl.col('dj_count').gt(1), 
-                                      pl.col('playlist_count').gt(1)))
+    countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
+                             pl.col('dj_count').gt(1), 
+                             pl.col('playlist_count').gt(1))
     
     if len(countries_selectbox) >= 2:
         country_1_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[0])
+                .filter(pl.col('country') == countries_selectbox[0],
+                        ~(pl.col('country') == countries_selectbox[1]),)
                 .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
                 )
         country_2_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[1])
+                .filter(pl.col('country') == countries_selectbox[1],
+                        ~(pl.col('country') == countries_selectbox[0]))
                 .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
                 )
         # st.dataframe(country_1_df._fetch(10000))
@@ -492,8 +494,6 @@ if country_region_toggle:
                                         on=['track.name', 'track.artists.name', 'song_url', 
                                         'dj_count', 'playlist_count', 'country', 'geographic_region_count']
                                         )
-                        .filter(pl.col('dj_count').gt(1), 
-                                pl.col('playlist_count').gt(1))
                         .sort(['dj_count', 'playlist_count'], descending=True)
                         .head(100).collect(streaming=True) , 
                         column_config={"song_url": st.column_config.LinkColumn()})
