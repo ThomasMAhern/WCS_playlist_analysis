@@ -484,7 +484,7 @@ if country_region_toggle:
                 .filter(pl.col('country') == countries_selectbox[1])
                 .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
                 )
-        st.dataframe(countries_df.head(100).collect(streaming=True))
+        st.dataframe(country_1_df._fetch(10000))
         # st.dataframe(country_1_df.join(country_2_df, 
         #                                 how='anti', 
         #                                 on=['track.name', 'track.artists.name', 'song_url', 
