@@ -473,7 +473,9 @@ if country_region_toggle:
     st.markdown(f"#### Compare Countries' music:")
     countries_selectbox = st.multiselect("Compare this country's music:", countries)
     
-    countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox))
+    countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox)
+                              .filter(pl.col('dj_count').gt(1), 
+                                      pl.col('playlist_count').gt(1)))
     
     if len(countries_selectbox) >= 2:
         country_1_df = (countries_df
