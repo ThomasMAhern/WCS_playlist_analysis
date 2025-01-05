@@ -464,8 +464,8 @@ if geo_region_toggle:
 
 
 
-# countries = sorted(df.select('country').unique().collect(streaming=True)['country'].to_list())
-countries = ['Australia', 'USA', 'Germany', 'France']
+countries = sorted(df.select('country').unique().collect(streaming=True)['country'].to_list())
+# countries = ['Australia', 'USA', 'Germany', 'France']
 #courtesy of Lino V
 country_region_toggle = st.toggle("Country comparison")
 if country_region_toggle:
