@@ -457,35 +457,41 @@ if geo_region_toggle:
                  column_config={"song_url": st.column_config.LinkColumn()})
 
 
+
+
+
+
+
+
+
+countries = df.select('country').unique().collect(streaming=True)['country'].to_list()
 #courtesy of Lino V
 country_region_toggle = st.toggle("Country comparison")
 if country_region_toggle:
-    countries = df.select('country').unique().collect(streaming=True)['country'].to_list()    
     
     st.markdown(f"#### Compare Countries' music:")
     country_1_selectbox = st.selectbox("Compare this country's music:", countries)
     country_2_selectbox = st.selectbox("To this country's music:", countries)
     
-
-    
-    country_1_df = (df
-              .filter(pl.col('country') == country_1_selectbox)
-              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
-              
-              )
-    country_2_df = (df
-              .filter(pl.col('country') == country_2_selectbox)
-              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
-              )
-    
-    st.dataframe(country_1_df.join(country_2_df, 
-                                   how='anti', 
-                                   on=['track.name', 'track.artists.name', 'song_url', 
-                                       'dj_count', 'playlist_count', 'country', 'geographic_region_count']
-                                )
-                 .sort(['dj_count', 'playlist_count'], descending=True)
-                 .head(100).collect(streaming=True) , 
-                 column_config={"song_url": st.column_config.LinkColumn()})
+    if country_1_selectbox != country_2_selectbox:
+        country_1_df = (df
+                .filter(pl.col('country') == country_1_selectbox)
+                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
+                
+                )
+        country_2_df = (df
+                .filter(pl.col('country') == country_2_selectbox)
+                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
+                )
+        
+        st.dataframe(country_1_df.join(country_2_df, 
+                                        how='anti', 
+                                        on=['track.name', 'track.artists.name', 'song_url', 
+                                        'dj_count', 'playlist_count', 'country', 'geographic_region_count']
+                                        )
+                        .sort(['dj_count', 'playlist_count'], descending=True)
+                        .head(100).collect(streaming=True) , 
+                        column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
