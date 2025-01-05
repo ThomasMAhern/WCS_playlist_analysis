@@ -471,11 +471,11 @@ country_region_toggle = st.toggle("Country comparison")
 if country_region_toggle:
     
     st.markdown(f"#### Compare Countries' music:")
-    countries_selectbox = st.multiselect("Compare this country's music:", countries)
+    countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
     countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
-                             pl.col('dj_count').gt(1), 
-                             pl.col('playlist_count').gt(1))
+                             pl.col('dj_count').gt(3), 
+                             pl.col('playlist_count').gt(3))
     
     if len(countries_selectbox) >= 2:
         country_1_df = (countries_df
@@ -497,8 +497,8 @@ if country_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        # .head(100).collect(streaming=True) ,
-                        ._fetch(10000),
+                        .head(100).collect(streaming=True) ,
+                        # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
         st.dataframe(country_2_df.join(country_1_df, 
@@ -508,8 +508,8 @@ if country_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        # .head(100).collect(streaming=True) ,
-                        ._fetch(10000),
+                        .head(100).collect(streaming=True) ,
+                        # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
