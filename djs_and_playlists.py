@@ -481,35 +481,35 @@ if country_region_toggle:
         country_1_df = (countries_df
                 .filter(pl.col('country') == countries_selectbox[0],
                         ~(pl.col('country') == countries_selectbox[1]),)
-                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
+                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country')
                 )
         country_2_df = (countries_df
                 .filter(pl.col('country') == countries_selectbox[1],
                         ~(pl.col('country') == countries_selectbox[0]))
-                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country', 'geographic_region_count')
+                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'country')
                 )
         # st.dataframe(country_1_df._fetch(10000))
         st.text(f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
         st.dataframe(country_1_df.join(country_2_df, 
                                         how='anti', 
                                         on=['track.name', 'track.artists.name', 'song_url', 
-                                        'dj_count', 'playlist_count', 'country', 'geographic_region_count']
+                                        'dj_count', 'playlist_count', 'country']
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(100).collect(streaming=True) ,
-                        # ._fetch(100000),
+                        # .head(100).collect(streaming=True) ,
+                        ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
         st.dataframe(country_2_df.join(country_1_df, 
                                         how='anti', 
                                         on=['track.name', 'track.artists.name', 'song_url', 
-                                        'dj_count', 'playlist_count', 'country', 'geographic_region_count']
+                                        'dj_count', 'playlist_count', 'country']
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(100).collect(streaming=True) ,
-                        # ._fetch(100000),
+                        # .head(100).collect(streaming=True) ,
+                        ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
