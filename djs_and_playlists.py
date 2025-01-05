@@ -438,7 +438,7 @@ if geo_region_toggle:
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .collect(streaming=True)
     )
-    regions = df.select('region').unique().collect(streaming=True)['region'].to_list()
+    regions = ['Europe', 'North America', 'MENA', 'Oceania', 'Asia']
     countries = df.select('country').unique().collect(streaming=True)['country'].to_list()
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
                                     regions)
@@ -460,8 +460,8 @@ if geo_region_toggle:
 
 
     st.markdown(f"#### Compare Countries' music:")
-    country_1_selectbox = st.selectbox("Compare this country's music:", countries[0])
-    country_2_selectbox = st.selectbox("To this country's music:", countries[1])
+    country_1_selectbox = st.selectbox("Compare this country's music:", countries)
+    country_2_selectbox = st.selectbox("To this country's music:", countries)
     
     country_1_df = (df
               .filter(pl.col('region') == country_1_selectbox)
