@@ -493,7 +493,7 @@ if country_region_toggle:
         st.dataframe(country_1_df.join(country_2_df, 
                                         how='anti', 
                                         on=['track.name', 'track.artists.name', 'song_url', 
-                                        'dj_count', 'playlist_count', 'country']
+                                        'dj_count', 'playlist_count']
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
@@ -504,7 +504,7 @@ if country_region_toggle:
         st.dataframe(country_2_df.join(country_1_df, 
                                         how='anti', 
                                         on=['track.name', 'track.artists.name', 'song_url', 
-                                        'dj_count', 'playlist_count', 'country']
+                                        'dj_count', 'playlist_count']
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
