@@ -497,8 +497,8 @@ if country_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        # .head(100).collect(streaming=True) ,
-                        ._fetch(100000),
+                        .head(100).collect(streaming=True) ,
+                        # ._fetch(100000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
         st.dataframe(country_2_df.join(country_1_df, 
@@ -508,8 +508,8 @@ if country_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        # .head(100).collect(streaming=True) ,
-                        ._fetch(100000),
+                        .head(100).collect(streaming=True) ,
+                        # ._fetch(100000),
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
