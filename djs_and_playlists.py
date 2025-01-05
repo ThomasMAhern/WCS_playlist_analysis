@@ -496,7 +496,7 @@ if country_region_toggle:
                                         )
                         .sort(['dj_count', 'playlist_count'], descending=True)
                         # .head(100).collect(streaming=True) ,
-                        ._fetch(10000) 
+                        ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
