@@ -464,15 +464,14 @@ if geo_region_toggle:
 
 
 
-# # countries = sorted(df.select('country').unique().collect(streaming=True)['country'].to_list())
-# countries = ['Australia', 'USA', 'Germany', 'France']
-# #courtesy of Lino V
-# country_region_toggle = st.toggle("Country comparison")
-# if country_region_toggle:
+# countries = sorted(df.select('country').unique().collect(streaming=True)['country'].to_list())
+countries = ['Australia', 'USA', 'Germany', 'France']
+#courtesy of Lino V
+country_region_toggle = st.toggle("Country comparison")
+if country_region_toggle:
     
-#     st.markdown(f"#### Compare Countries' music:")
-#     country_1_selectbox = st.selectbox("Compare this country's music:", countries)
-#     country_2_selectbox = st.selectbox("To this country's music:", countries)
+    st.markdown(f"#### Compare Countries' music:")
+    countries_selectbox = st.multiselect("Compare this country's music:", countries)
     
 #     if country_1_selectbox != country_2_selectbox:
 #         country_1_df = (df
