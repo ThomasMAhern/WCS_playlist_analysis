@@ -84,7 +84,7 @@ st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
 
 
-data_view_toggle = st.toggle("📊 See sample of the raw data")
+data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         num_records = st.slider("How many records?", 1, 1000, 50)
