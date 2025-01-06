@@ -97,7 +97,7 @@ song_locator_toggle = st.toggle("Find a Song")
 if song_locator_toggle:
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
-        playlist_input = st.text_input("In the playlist (try: 'late night', '80', or 'beginner'):").lower()
+        playlist_input = st.text_input("In the playlist (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         st.dataframe(df
                  .join(df_notes,
@@ -105,7 +105,7 @@ if song_locator_toggle:
                         on=['track.artists.name', 'track.name'])
                 .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                        pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
+                        pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'playlist_name', 'track.artists.name', 'owner.display_name', 
@@ -119,7 +119,7 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
-                .sort(pl.col('playlist_name').list.len(), descending=True)
+                .sort('matching_playlist_count', descending=True)
                 .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
