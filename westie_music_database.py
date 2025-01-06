@@ -99,6 +99,8 @@ if song_locator_toggle:
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("In the playlist (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
+        
+        num_songs = st.slider("How many songs?", 1, 1000, 50)
         st.dataframe(df
                  .join(df_notes,
                         how='full',
@@ -120,7 +122,7 @@ if song_locator_toggle:
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
                 .sort('matching_playlist_count', descending=True)
-                .head(1000).collect(), 
+                .head(num_songs).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
