@@ -2,7 +2,7 @@ import streamlit as st
 import polars as pl
 
 
-st.markdown("#### You've found an old link")
+st.markdown("# You've found an old link")
 st.link_button('New, updated link!', 
                    url='https://wcs-music-database.streamlit.app/')
 st.link_button('You could also click this one', 
@@ -16,10 +16,12 @@ st.link_button('This one is just spam',
 st.markdown("#### ")
 st.markdown("#### ")
 st.markdown("#### ")
-st.markdown("#### I'll keep this as backup, but you want the one with newer features")
+st.markdown("## I'll keep this as backup, but you want the one with newer features")
 st.link_button('Newer, sexier features, CLICK ME', 
                    url='https://wcs-music-database.streamlit.app/')
-
+st.markdown("#### ")
+st.markdown("#### ")
+st.markdown("#### ")
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 
