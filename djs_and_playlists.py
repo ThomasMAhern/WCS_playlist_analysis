@@ -289,7 +289,7 @@ if len(djs_selectbox) >= 2:
                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                 .unique()
                 )
-        st.text(f"{djs_selectbox[0]} music not in {djs_selectbox[1]}")
+        st.text(f"Music {djs_selectbox[0]} has, but {djs_selectbox[1]} doesn't.")
         st.dataframe(dj_1_df.join(dj_2_df, 
                                         how='anti', 
                                         on=['track.name', 'song_url', 
@@ -300,7 +300,7 @@ if len(djs_selectbox) >= 2:
                         .head(300).collect(streaming=True) ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
-        st.text(f"{djs_selectbox[1]} music not in {djs_selectbox[0]}")
+        st.text(f"Music {djs_selectbox[1]} has, but {djs_selectbox[0]} doesn't")
         st.dataframe(dj_2_df.join(dj_1_df, 
                                         how='anti', 
                                         on=['track.name', 'song_url', 
