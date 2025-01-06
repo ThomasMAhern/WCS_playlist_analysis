@@ -132,7 +132,7 @@ if song_locator_toggle:
         st.markdown(f"#### ")
 
 #courtesy of Vishal S
-playlist_locator_toggle = st.toggle("Find a Playlist")
+playlist_locator_toggle = st.toggle("💿 Find a Playlist")
 if playlist_locator_toggle:
         playlist_input = st.text_input("Playlist name:").lower()
         song_input = st.text_input("Contains the song:").lower()
