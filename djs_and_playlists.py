@@ -425,9 +425,9 @@ if songs_together_toggle:
 
 
 #courtesy of Lino V
-geo_region_toggle = st.toggle("Geographic-region insights")
+geo_region_toggle = st.toggle("Geographic Insights")
 if geo_region_toggle:
-    st.markdown(f"\n\n\n## Geographic Region Music:")
+    st.markdown(f"\n\n\n## Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
     st.link_button('Add your info to help make it more accurate!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
@@ -464,8 +464,7 @@ if geo_region_toggle:
 
 
     countries = sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
-    st.markdown(f"#### Compare Countries' music:")
-    countries_selectbox = st.multiselect("Compare these countries' music:", countries)
+    st.markdown(f"#### Comparing Countries' music:")
     st.dataframe(df
                  .group_by('country')
                  .agg(song_count = pl.n_unique('track.name'), 
@@ -477,6 +476,7 @@ if geo_region_toggle:
                  .sort('country')
                  .collect(streaming=True)
         )
+    countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
     if len(countries_selectbox) >= 2:
         countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
