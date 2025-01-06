@@ -274,7 +274,7 @@ if search_dj_toggle:
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         .unique()
                         )
-                st.text(f"Music   {djs_selectbox[0]}   has, but   {djs_selectbox[1]}   doesn't.")
+                st.text(f"Music _{djs_selectbox[0]}_ has, but _{djs_selectbox[1]}_ doesn't.")
                 st.dataframe(dj_1_df.join(dj_2_df, 
                                                 how='anti', 
                                                 on=['track.name', 'song_url', 
@@ -285,7 +285,7 @@ if search_dj_toggle:
                                 .head(300).collect(streaming=True) ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
-                st.text(f"Music   {djs_selectbox[1]}   has, but   {djs_selectbox[0]}   doesn't")
+                st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
                 st.dataframe(dj_2_df.join(dj_1_df, 
                                                 how='anti', 
                                                 on=['track.name', 'song_url', 
