@@ -251,66 +251,66 @@ if search_dj_toggle:
     
     
         
-        dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
-        st.markdown(f"#### Comparing DJ's music:")
+dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+st.markdown(f"#### Comparing DJ's music:")
+st.dataframe(df
+                .group_by('owner.display_name')
+                .agg(song_count = pl.n_unique('track.name'), 
+                        playlist_count = pl.n_unique('playlist_name'), 
+                        dj_count = pl.n_unique('owner.display_name'),
+                        )
+                .sort('owner.display_name')
+                .collect(streaming=True)
+        )
+djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
+
+if len(djs_selectbox) >= 2:
         st.dataframe(df
-                        .group_by('owner.display_name')
-                        .agg(song_count = pl.n_unique('track.name'), 
-                             playlist_count = pl.n_unique('playlist_name'), 
-                             dj_count = pl.n_unique('owner.display_name'),
-                             )
-                        .sort('owner.display_name')
-                        .collect(streaming=True)
-                )
-        djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
-        
-        if len(djs_selectbox) >= 2:
-                st.dataframe(df
-                        .filter(pl.col('owner.display_name').str.contains_any(djs_selectbox))
-                        .group_by('owner.display_name')
-                        .agg(song_count = pl.n_unique('track.name'), 
-                                playlist_count = pl.n_unique('playlist_name'), 
-                                dj_count = pl.n_unique('owner.display_name'),
-                                )
-                        .sort('owner.display_name')
-                        .collect(streaming=True)
-                )
+                .filter(pl.col('owner.display_name').str.contains_any(djs_selectbox))
+                .group_by('owner.display_name')
+                .agg(song_count = pl.n_unique('track.name'), 
+                        playlist_count = pl.n_unique('playlist_name'), 
+                        dj_count = pl.n_unique('owner.display_name'),
+                        )
+                .sort('owner.display_name')
+                .collect(streaming=True)
+        )
 
 
-                dj_1_df = (df
-                        .filter(pl.col('owner.display_name') == djs_selectbox[0],
-                                ~(pl.col('owner.display_name') == djs_selectbox[1]),)
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
+        dj_1_df = (df
+                .filter(pl.col('owner.display_name') == djs_selectbox[0],
+                        ~(pl.col('owner.display_name') == djs_selectbox[1]),)
+                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
+                .unique()
+                )
+        dj_2_df = (df
+                .filter(pl.col('owner.display_name') == djs_selectbox[1],
+                        ~(pl.col('owner.display_name') == djs_selectbox[0]))
+                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
+                .unique()
+                )
+        st.text(f"{djs_selectbox[0]} music not in {djs_selectbox[1]}")
+        st.dataframe(dj_1_df.join(dj_2_df, 
+                                        how='anti', 
+                                        on=['track.name', 'song_url', 
+                                        'dj_count', 'playlist_count']
+                                        )
                         .unique()
-                        )
-                dj_2_df = (df
-                        .filter(pl.col('owner.display_name') == djs_selectbox[1],
-                                ~(pl.col('owner.display_name') == djs_selectbox[0]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
+                        .sort('dj_count', descending=True)
+                        .head(300).collect(streaming=True) ,
+                        # ._fetch(10000),
+                        column_config={"song_url": st.column_config.LinkColumn()})
+        st.text(f"{djs_selectbox[1]} music not in {djs_selectbox[0]}")
+        st.dataframe(dj_2_df.join(dj_1_df, 
+                                        how='anti', 
+                                        on=['track.name', 'song_url', 
+                                        'dj_count', 'playlist_count']
+                                        )
                         .unique()
-                        )
-                st.text(f"{djs_selectbox[0]} music not in {djs_selectbox[1]}")
-                st.dataframe(dj_1_df.join(dj_2_df, 
-                                                how='anti', 
-                                                on=['track.name', 'song_url', 
-                                                'dj_count', 'playlist_count']
-                                                )
-                                .unique()
-                                .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
-                                # ._fetch(10000),
-                                column_config={"song_url": st.column_config.LinkColumn()})
-                st.text(f"{djs_selectbox[1]} music not in {djs_selectbox[0]}")
-                st.dataframe(dj_2_df.join(dj_1_df, 
-                                                how='anti', 
-                                                on=['track.name', 'song_url', 
-                                                'dj_count', 'playlist_count']
-                                                )
-                                .unique()
-                                .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
-                                # ._fetch(10000),
-                                column_config={"song_url": st.column_config.LinkColumn()})
+                        .sort('dj_count', descending=True)
+                        .head(300).collect(streaming=True) ,
+                        # ._fetch(10000),
+                        column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
