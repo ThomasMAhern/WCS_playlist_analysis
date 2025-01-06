@@ -189,51 +189,51 @@ if search_dj_toggle:
                 )
         
         
-        
-        st.markdown(f"#### Popular music _{id_input}_ doesn't play")
-        ##too much data now that we have more music, that list is blowing up the streamlit
-        others_music = (df
-                        .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                                | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                        .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
-                        )
+        if dj_id:
+                st.markdown(f"#### Popular music _{id_input}_ doesn't play")
+                ##too much data now that we have more music, that list is blowing up the streamlit
+                others_music = (df
+                                .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
+                                .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
+                                )
 
-        djs_music = (df
-                .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
-                .unique()
-                )
-        
-        st.dataframe(others_music.join(djs_music, how='anti', 
-                        on=['track.name', 'track.artists.name', 'dj_count', 
-                        'playlist_count', 'song_url'])
-                     .group_by(pl.all().exclude('owner.display_name'))
-                     .agg('owner.display_name')
-                     .with_columns(pl.col('owner.display_name').list.head(50))
-                     .sort('dj_count', 'playlist_count', descending=True)
-                     .head(200)
-                     .collect(streaming=True), 
-                 column_config={"song_url": st.column_config.LinkColumn()})
-        
-        
+                djs_music = (df
+                        .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
+                        .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
+                        .unique()
+                        )
+                
+                st.dataframe(others_music.join(djs_music, how='anti', 
+                                on=['track.name', 'track.artists.name', 'dj_count', 
+                                'playlist_count', 'song_url'])
+                        .group_by(pl.all().exclude('owner.display_name'))
+                        .agg('owner.display_name')
+                        .with_columns(pl.col('owner.display_name').list.head(50))
+                        .sort('dj_count', 'playlist_count', descending=True)
+                        .head(200)
+                        .collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
         
         
         
         
-        st.markdown(f"#### Music unique to _{id_input}_")
-        st.dataframe(djs_music.join(others_music, 
-                                    how='anti', 
-                                    on=['track.name', 'track.artists.name', 'owner.display_name', 
-                                        'dj_count', 'playlist_count', 'song_url'])
-                     .group_by(pl.all().exclude('playlist_name'))
-                     .agg('playlist_name')
-                     .sort('playlist_count', descending=True)
-                     .filter(pl.col('dj_count').eq(1))
-                     .head(200)
-                     .collect(streaming=True), 
-                 column_config={"song_url": st.column_config.LinkColumn()})
         
+        
+                st.markdown(f"#### Music unique to _{id_input}_")
+                st.dataframe(djs_music.join(others_music, 
+                                        how='anti', 
+                                        on=['track.name', 'track.artists.name', 'owner.display_name', 
+                                                'dj_count', 'playlist_count', 'song_url'])
+                        .group_by(pl.all().exclude('playlist_name'))
+                        .agg('playlist_name')
+                        .sort('playlist_count', descending=True)
+                        .filter(pl.col('dj_count').eq(1))
+                        .head(200)
+                        .collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
 
         st.markdown(f"#### Comparing DJ's music:")
         dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
