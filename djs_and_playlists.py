@@ -467,8 +467,7 @@ if geo_region_toggle:
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     st.dataframe(df
-                 .filter(pl.col('country').eq(countries_selectbox[0])
-                         | pl.col('country').eq(countries_selectbox[1]))
+                 .filter(pl.col('country').str.contains_any(countries_selectbox))
                  .group_by('country')
                  .agg(song_count = pl.n_unique('track.name'), 
                       playlist_count = pl.n_unique('playlist_name'), 
