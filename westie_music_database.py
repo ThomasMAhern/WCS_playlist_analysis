@@ -97,7 +97,7 @@ song_locator_toggle = st.toggle("Find a Song")
 if song_locator_toggle:
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
-        playlist_input = st.text_input("In the playlist:").lower()
+        playlist_input = st.text_input("In the playlist (try: 'late night', '80', or 'beginner'):").lower()
         dj_input = st.text_input("Input the dj name:").lower()
         st.dataframe(df
                  .join(df_notes,
@@ -105,6 +105,7 @@ if song_locator_toggle:
                         on=['track.artists.name', 'track.name'])
                 .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
+                        pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input).list.len().alias('search-specific playlists')
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
