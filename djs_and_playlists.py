@@ -438,23 +438,23 @@ if geo_region_toggle:
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .collect(streaming=True)
     )
-    regions = ['Europe', 'North America', 'MENA', 'Oceania', 'Asia']
+    regions = ['Select One', 'Europe', 'North America', 'MENA', 'Oceania', 'Asia']
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
                                     regions)
 
-    
-    st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-    europe = (df
-              #  .pipe(wcs_specific)
-              .filter(pl.col('region') == region_selectbox,
-                      pl.col('geographic_region_count').eq(1))
-              .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-              .unique()
-              .sort('dj_count', descending=True)
-              )
-    
-    st.dataframe(europe._fetch(50000), 
-                 column_config={"song_url": st.column_config.LinkColumn()})
+    if region_selectbox != 'Select One':
+        st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
+        europe = (df
+                #  .pipe(wcs_specific)
+                .filter(pl.col('region') == region_selectbox,
+                        pl.col('geographic_region_count').eq(1))
+                .select('track.name', 'track.artists.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+                .unique()
+                .sort('dj_count', descending=True)
+                )
+        
+        st.dataframe(europe._fetch(50000), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
