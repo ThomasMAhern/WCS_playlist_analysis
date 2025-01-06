@@ -428,6 +428,7 @@ if songs_together_toggle:
 geo_region_toggle = st.toggle("Geographic-region insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
+    st.text(f"Disclaimer: Insights are based on available data - which may not be accurate or representative of reality.")
     st.dataframe(df
                  .group_by('region')
                  .agg(song_count = pl.n_unique('track.name'), 
@@ -459,15 +460,7 @@ if geo_region_toggle:
 
 
 
-
-
-
-
     countries = sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
-# countries = ['Australia', 'USA', 'Germany', 'France']
-#courtesy of Lino V
-# country_region_toggle = st.toggle("Country comparison")
-# if country_region_toggle:
     st.markdown(f"#### Compare Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
