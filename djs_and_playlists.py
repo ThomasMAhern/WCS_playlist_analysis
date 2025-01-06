@@ -463,56 +463,54 @@ if geo_region_toggle:
 
 
 
-
-countries = sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
+    countries = sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
 # countries = ['Australia', 'USA', 'Germany', 'France']
 #courtesy of Lino V
-country_region_toggle = st.toggle("Country comparison")
-if country_region_toggle:
-    
+# country_region_toggle = st.toggle("Country comparison")
+# if country_region_toggle:
     st.markdown(f"#### Compare Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
-    countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
-                             pl.col('dj_count').gt(3), 
-                             pl.col('playlist_count').gt(3))
-    
     if len(countries_selectbox) >= 2:
-        country_1_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[0],
-                        ~(pl.col('country') == countries_selectbox[1]),)
-                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                .unique()
-                )
-        country_2_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[1],
-                        ~(pl.col('country') == countries_selectbox[0]))
-                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                .unique()
-                )
-        # st.dataframe(country_1_df._fetch(10000))
-        st.text(f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
-        st.dataframe(country_1_df.join(country_2_df, 
-                                        how='anti', 
-                                        on=['track.name', 'song_url', 
-                                        'dj_count', 'playlist_count']
-                                        )
+        countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
+                                pl.col('dj_count').gt(3), 
+                                pl.col('playlist_count').gt(3))
+        
+                country_1_df = (countries_df
+                        .filter(pl.col('country') == countries_selectbox[0],
+                                ~(pl.col('country') == countries_selectbox[1]),)
+                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         .unique()
-                        .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
-                        # ._fetch(10000),
-                        column_config={"song_url": st.column_config.LinkColumn()})
-        st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
-        st.dataframe(country_2_df.join(country_1_df, 
-                                        how='anti', 
-                                        on=['track.name', 'song_url', 
-                                        'dj_count', 'playlist_count']
-                                        )
+                        )
+                country_2_df = (countries_df
+                        .filter(pl.col('country') == countries_selectbox[1],
+                                ~(pl.col('country') == countries_selectbox[0]))
+                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         .unique()
-                        .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
-                        # ._fetch(10000),
-                        column_config={"song_url": st.column_config.LinkColumn()})
+                        )
+                # st.dataframe(country_1_df._fetch(10000))
+                st.text(f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
+                st.dataframe(country_1_df.join(country_2_df, 
+                                                how='anti', 
+                                                on=['track.name', 'song_url', 
+                                                'dj_count', 'playlist_count']
+                                                )
+                                .unique()
+                                .sort('dj_count', descending=True)
+                                .head(300).collect(streaming=True) ,
+                                # ._fetch(10000),
+                                column_config={"song_url": st.column_config.LinkColumn()})
+                st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
+                st.dataframe(country_2_df.join(country_1_df, 
+                                                how='anti', 
+                                                on=['track.name', 'song_url', 
+                                                'dj_count', 'playlist_count']
+                                                )
+                                .unique()
+                                .sort('dj_count', descending=True)
+                                .head(300).collect(streaming=True) ,
+                                # ._fetch(10000),
+                                column_config={"song_url": st.column_config.LinkColumn()})
 
 
 
