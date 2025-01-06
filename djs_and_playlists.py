@@ -295,7 +295,7 @@ if search_dj_toggle:
                                 .head(300).collect(streaming=True) ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
-
+        st.markdown(f"#### ")
 
 
 
@@ -316,7 +316,6 @@ if songs_together_toggle:
     song_input = st.text_input("Song name/ID:")
     song_input_prepped = song_input.lower()
     artist_name_input = st.text_input("Artist's name:").lower()
-    st.markdown(f"#### Most common songs played next to _{song_input}_:")
     st.text("Song name: song_id (to distinguish between song versions)")
     
     st.dataframe(df
@@ -448,7 +447,7 @@ if songs_together_toggle:
                 .head(100).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
-
+        st.markdown(f"#### ")
 
 
 
@@ -580,7 +579,7 @@ if geo_region_toggle:
                         .head(300).collect(streaming=True) ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
-
+        st.markdown(f"#### ")
 
 
 
