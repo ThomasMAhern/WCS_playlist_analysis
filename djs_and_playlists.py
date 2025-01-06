@@ -428,7 +428,9 @@ if songs_together_toggle:
 geo_region_toggle = st.toggle("Geographic-region insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n## Geographic Region Music:")
-    st.text(f"Disclaimer: Insights are based on available data - which may not be accurate or representative of reality.")
+    st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
+    st.link_button('Add your info to help make it more accurate!', 
+                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
     st.dataframe(df
                  .group_by('region')
                  .agg(song_count = pl.n_unique('track.name'), 
