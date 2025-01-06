@@ -427,7 +427,7 @@ if songs_together_toggle:
 #courtesy of Lino V
 geo_region_toggle = st.toggle("Geographic Insights")
 if geo_region_toggle:
-    st.markdown(f"\n\n\n## Region-Specific Music:")
+    st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
     st.link_button('Add your info to help make it more accurate!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
