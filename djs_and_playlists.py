@@ -246,12 +246,9 @@ if search_dj_toggle:
                  column_config={"song_url": st.column_config.LinkColumn()})
         
         
-    
-    
-    
-    
-        dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         st.markdown(f"#### Comparing DJ's music:")
+        dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        
         # st.dataframe(df
         #                 .group_by('owner.display_name')
         #                 .agg(song_count = pl.n_unique('track.name'), 
