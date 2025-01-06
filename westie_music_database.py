@@ -105,7 +105,6 @@ if song_locator_toggle:
                         on=['track.artists.name', 'track.name'])
                 .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                        pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input).list.len().alias('search-specific playlists'),
                         pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
@@ -113,7 +112,9 @@ if song_locator_toggle:
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-                .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
+                .with_columns(pl.col('playlist_name', 
+                                     pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input).list.len().alias('search-specific_playlists_count'),
+                                     'track.artists.id', 'owner.display_name', 
                                      'apprx_song_position_in_playlist', 'track.artists.name',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
