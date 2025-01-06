@@ -479,8 +479,7 @@ geo_region_toggle = st.toggle("Geographic Insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
-    st.link_button('Add your info to help make it more accurate!', 
-                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
+    
     st.dataframe(df
                  .group_by('region')
                  .agg(song_count = pl.n_unique('track.name'), 
@@ -633,5 +632,9 @@ if lyrics_toggle:
 
 
 st.markdown("#### ")
+st.link_button('Add your info to help make it more accurate!', 
+                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
+st.link_button('Find dance location near you!',
+               url='https://www.affinityswing.com/classes')
 st.link_button('Leave feedback/suggestions!', 
                    url='https://forms.gle/19mALUpmM9Z5XCA28')
