@@ -583,5 +583,5 @@ if lyrics_toggle:
 
 
 st.markdown("#### ")
-st.link_button('If you have questions/feedback/suggestions, please leave a comment', 
+st.link_button('Leave feedback/suggestions!', 
                    url='https://forms.gle/19mALUpmM9Z5XCA28')
