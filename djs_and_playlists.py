@@ -3,6 +3,7 @@ import polars as pl
 
 
 st.markdown("# You've found an old link")
+st.markdown("#### ")
 st.link_button('New, updated link!', 
                    url='https://wcs-music-database.streamlit.app/')
 st.link_button('You could also click this one', 
@@ -17,6 +18,7 @@ st.markdown("#### ")
 st.markdown("#### ")
 st.markdown("#### ")
 st.markdown("## I'll keep this as backup, but you want the one with newer features")
+st.markdown("#### ")
 st.link_button('Newer, sexier features, CLICK ME', 
                    url='https://wcs-music-database.streamlit.app/')
 st.markdown("#### ")
