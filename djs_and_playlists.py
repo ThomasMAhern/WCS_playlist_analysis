@@ -253,15 +253,15 @@ if search_dj_toggle:
         
 dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
 st.markdown(f"#### Comparing DJ's music:")
-st.dataframe(df
-                .group_by('owner.display_name')
-                .agg(song_count = pl.n_unique('track.name'), 
-                        playlist_count = pl.n_unique('playlist_name'), 
-                        dj_count = pl.n_unique('owner.display_name'),
-                        )
-                .sort('owner.display_name')
-                .collect(streaming=True)
-        )
+# st.dataframe(df
+#                 .group_by('owner.display_name')
+#                 .agg(song_count = pl.n_unique('track.name'), 
+#                         playlist_count = pl.n_unique('playlist_name'), 
+#                         dj_count = pl.n_unique('owner.display_name'),
+#                         )
+#                 .sort('owner.display_name')
+#                 .collect(streaming=True)
+#         )
 djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
 
 if len(djs_selectbox) >= 2:
