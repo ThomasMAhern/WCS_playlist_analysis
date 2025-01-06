@@ -119,7 +119,7 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls())
-                .sort(pl.col('playlist_count'), descending=True)
+                .sort(pl.col('playlist_name').list.len(), descending=True)
                 .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
@@ -638,3 +638,4 @@ st.link_button('Find a WCS class near you!',
                url='https://www.affinityswing.com/classes')
 st.link_button('Leave feedback/suggestions!', 
                    url='https://forms.gle/19mALUpmM9Z5XCA28')
+
