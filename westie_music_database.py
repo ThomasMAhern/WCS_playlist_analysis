@@ -84,7 +84,7 @@ data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
         num_records = st.slider("How many records?", 1, 1000, 50)
-        st.dataframe(df._fetch(50), 
+        st.dataframe(df._fetch(num_records), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
@@ -98,7 +98,7 @@ song_locator_toggle = st.toggle("Find a Song")
 if song_locator_toggle:
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
-        playlist_input = st.text_input("In the playlist (try 'late night', '80', or 'beginner'):").lower().split(',')
+        playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         
         st.dataframe(df
