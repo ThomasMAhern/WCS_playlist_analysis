@@ -235,7 +235,7 @@ if search_dj_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
 
-        st.markdown(f"#### Comparing DJ's music:")
+        st.markdown(f"#### Compare DJ's:")
         dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
         # st.dataframe(df
@@ -311,11 +311,10 @@ if search_dj_toggle:
 songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
-    st.markdown(f"## Most common songs played back-to-back")
+    st.markdown(f"#### Most common songs played back-to-back")
     
-    st.markdown("#### Enter a partial/full `track.name` or `song_id`:")
-    song_input = st.text_input("Song name:")
-    song_input_prepped = song_input.lower().strip()
+    song_input = st.text_input("Song name/ID:")
+    song_input_prepped = song_input.lower()
     artist_name_input = st.text_input("Artist's name:").lower()
     st.markdown(f"#### Most common songs played next to _{song_input}_:")
     st.text("Song name: song_id (to distinguish between song versions)")
