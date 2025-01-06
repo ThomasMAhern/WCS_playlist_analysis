@@ -437,6 +437,7 @@ if geo_region_toggle:
                       djs = pl.col('owner.display_name'),
                       )
                  .with_columns(pl.col('djs').list.unique().list.head(50))
+                 .sort('region')
                  .collect(streaming=True)
     )
     regions = ['Select One', 'Europe', 'North America', 'MENA', 'Oceania', 'Asia']
