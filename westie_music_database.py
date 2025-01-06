@@ -98,7 +98,7 @@ if data_view_toggle:
 
 
 #courtesy of Vishal S
-song_locator_toggle = st.toggle("Find a Song")
+song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
@@ -160,7 +160,7 @@ if playlist_locator_toggle:
 
 
 #courtesy of Lino V
-search_dj_toggle = st.toggle("DJ insights")
+search_dj_toggle = st.toggle("🎧 DJ insights")
 
 if search_dj_toggle:
 
@@ -481,7 +481,7 @@ if songs_together_toggle:
 
 
 #courtesy of Lino V
-geo_region_toggle = st.toggle("Geographic Insights")
+geo_region_toggle = st.toggle("🌎 Geographic Insights")
 if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
@@ -591,7 +591,7 @@ if geo_region_toggle:
 
 
 
-lyrics_toggle = st.toggle("Search lyrics")
+lyrics_toggle = st.toggle("📋 Search lyrics")
 if lyrics_toggle:
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
