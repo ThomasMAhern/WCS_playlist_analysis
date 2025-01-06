@@ -83,11 +83,11 @@ st.markdown("#### Choose your own adventure!")
 data_view_toggle = st.toggle("See sample of the raw data")
 
 if data_view_toggle:
-    st.dataframe(df._fetch(200), 
+        st.dataframe(df._fetch(200), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
-
+        st.markdown(f"#### ")
 
 
 
@@ -95,11 +95,11 @@ if data_view_toggle:
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song")
 if song_locator_toggle:
-    song_input = st.text_input("Song name:").lower()
-    artist_name = st.text_input("Artist name:").lower()
-    playlist_input = st.text_input("In the playlist:").lower()
-    dj_input = st.text_input("Input the dj name:").lower()
-    st.dataframe(df
+        song_input = st.text_input("Song name:").lower()
+        artist_name = st.text_input("Artist name:").lower()
+        playlist_input = st.text_input("In the playlist:").lower()
+        dj_input = st.text_input("Input the dj name:").lower()
+        st.dataframe(df
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
@@ -123,14 +123,15 @@ if song_locator_toggle:
                 .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
+        st.markdown(f"#### ")
 
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("Find a Playlist")
 if playlist_locator_toggle:
-    playlist_input = st.text_input("Playlist name:").lower()
-    song_input = st.text_input("Contains the song:").lower()
-    dj_input = st.text_input("DJ name:").lower()
-    st.dataframe(df
+        playlist_input = st.text_input("Playlist name:").lower()
+        song_input = st.text_input("Contains the song:").lower()
+        dj_input = st.text_input("DJ name:").lower()
+        st.dataframe(df
                 .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                         pl.col('track.name').str.to_lowercase().str.contains(song_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
@@ -140,7 +141,7 @@ if playlist_locator_toggle:
                 .head(200).collect(), 
                  column_config={"playlist_url": st.column_config.LinkColumn()}
                 )
-
+        st.markdown(f"#### ")
 
 
 
