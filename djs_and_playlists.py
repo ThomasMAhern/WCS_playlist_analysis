@@ -157,13 +157,13 @@ search_dj_toggle = st.toggle("DJ insights")
 
 if search_dj_toggle:
 
-    st.markdown("#### Enter a Spotify display_name/user_id:")
-    id_input = st.text_input("ex. Kasia Stepek or 1185428002")
-    dj_id = id_input.lower().strip()
-    dj_playlist_input = st.text_input("With a playlist name:").lower()
-    
-    st.text("DJ stats")
-    st.dataframe(df
+        st.markdown("#### Enter a Spotify display_name/user_id:")
+        id_input = st.text_input("ex. Kasia Stepek or 1185428002")
+        dj_id = id_input.lower().strip()
+        dj_playlist_input = st.text_input("With a playlist name:").lower()
+
+        st.text("DJ stats")
+        st.dataframe(df
                 .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                         |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
                         &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
@@ -187,11 +187,9 @@ if search_dj_toggle:
                 .collect(streaming=True), 
                  column_config={"owner_url": st.column_config.LinkColumn()}
                 )
-    
-    
-    
-    
-    if id_input:
+        
+        
+        
         st.markdown(f"#### Popular music _{id_input}_ doesn't play")
         ##too much data now that we have more music, that list is blowing up the streamlit
         others_music = (df
@@ -223,16 +221,7 @@ if search_dj_toggle:
         
         
         
-
-
-
-
-
-
-
-
         st.markdown(f"#### Music unique to _{id_input}_")
-        
         st.dataframe(djs_music.join(others_music, 
                                     how='anti', 
                                     on=['track.name', 'track.artists.name', 'owner.display_name', 
@@ -245,7 +234,7 @@ if search_dj_toggle:
                      .collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()})
         
-        
+
         st.markdown(f"#### Comparing DJ's music:")
         dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
