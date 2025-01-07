@@ -132,7 +132,7 @@ if song_locator_toggle:
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
-                     'playlist_name', 'track.artists.name', 'owner.display_name', 
+                     'playlist_name', 'track.artists.name', 'owner.display_name',
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
@@ -143,7 +143,7 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                hit_terms = pl.col('name')
+                                hit_terms = pl.col('playlist_name')
                                                 .list.join(', ')
                                                 .str.extract_all(playlist_input)
                                                 .list.drop_nulls()
