@@ -143,7 +143,7 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                hit_terms = pl.when(len(playlist_input)!=0)
+                                hit_terms = pl.when(len(playlist_input) > 0)
                                               .then(pl.col('playlist_name')
                                                         .list.join(', ')
                                                         .str.to_lowercase()
@@ -151,7 +151,7 @@ if song_locator_toggle:
                                                         .list.drop_nulls()
                                                         .list.unique()
                                                         .list.sort())
-                                              ,
+                                              .otherwise(None),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
