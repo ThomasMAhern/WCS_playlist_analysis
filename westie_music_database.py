@@ -146,8 +146,8 @@ if song_locator_toggle:
                                 hit_terms = pl.col('playlist_name')
                                                 .list.join(', ')
                                                 .str.extract_all(playlist_input)
-                                                .list.drop_nulls()
-                                                .list.unique(),
+                                                # .list.drop_nulls()
+                                                # .list.unique(),
                                 )
                 .sort(['matching_playlist_count'], descending=True)
                 .head(1000).collect(), 
