@@ -149,7 +149,7 @@ if song_locator_toggle:
                                                 .list.drop_nulls()
                                                 .list.unique(),
                                 )
-                .sort(['matching_playlist_count'], descending=True)
+                .sort([pl.col('hit_terms').list.len(), 'matching_playlist_count'], descending=True)
                 .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
