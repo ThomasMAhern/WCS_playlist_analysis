@@ -148,7 +148,8 @@ if song_locator_toggle:
                                                 .str.to_lowercase()
                                                 .str.extract_many(playlist_input)
                                                 .list.drop_nulls()
-                                                .list.unique(),
+                                                .list.unique()
+                                                .list.sort(),
                                 )
                 .sort([pl.col('hit_terms').list.len(), 'matching_playlist_count'], descending=True)
                 .head(1000).collect(), 
