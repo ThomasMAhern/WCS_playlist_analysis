@@ -145,6 +145,7 @@ if song_locator_toggle:
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 hit_terms = pl.col('playlist_name')
                                                 .list.join(', ')
+                                                .str.to_lowercase()
                                                 .str.extract_many(playlist_input, ascii_case_insensitive=True)
                                                 .list.drop_nulls()
                                                 .list.unique()
