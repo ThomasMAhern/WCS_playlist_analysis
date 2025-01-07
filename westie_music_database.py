@@ -151,7 +151,7 @@ if song_locator_toggle:
                                                         .list.drop_nulls()
                                                         .list.unique()
                                                         .list.sort())
-                                              .otherwise(pl.List(None)),
+                                              .otherwise(pl.List(pl.String)),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
