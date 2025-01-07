@@ -376,10 +376,9 @@ if geo_region_toggle:
                 #  .pipe(wcs_specific)
                 .filter(pl.col('region') == region_selectbox,
                         pl.col('geographic_region_count').eq(1))
-                .select('track.name', 'song_url', 'dj_count', 
-                        pl.col('owner.display_name').over('track.name'),
-                        'playlist_count', 'region', 'geographic_region_count')
-                .unique()
+                .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+                .agg('owner.display_name')
+                # .unique()
                 .sort('dj_count', descending=True)
                 )
         
