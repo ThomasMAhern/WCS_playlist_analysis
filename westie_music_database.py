@@ -130,7 +130,14 @@ if song_locator_toggle:
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                         pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 
+                          hit_terms = pl.col('playlist_name')
+                                                .list.join(', ')
+                                                .str.to_lowercase()
+                                                .str.extract_many(playlist_input)
+                                                .list.drop_nulls()
+                                                .list.unique()
+                                                .list.sort(),)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name',
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
@@ -143,14 +150,15 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                hit_terms = pl.col('playlist_name')
-                                                .list.join(', ')
-                                                .str.to_lowercase()
-                                                .str.extract_many(playlist_input)
-                                                .list.drop_nulls()
-                                                .list.unique()
-                                                .list.sort(),
+                                # hit_terms = pl.col('playlist_name')
+                                #                 .list.join(', ')
+                                #                 .str.to_lowercase()
+                                #                 .str.extract_many(playlist_input)
+                                #                 .list.drop_nulls()
+                                #                 .list.unique()
+                                #                 .list.sort(),
                                 )
+                .select('track.name', )
                 .sort([pl.col('hit_terms').list.len(), 'matching_playlist_count'], descending=True)
                 .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
