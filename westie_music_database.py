@@ -121,8 +121,6 @@ if song_locator_toggle:
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
-        if not playlist_input:
-                playlist_input = ' '
         
         st.dataframe(df
                  .join(df_notes,
@@ -145,18 +143,19 @@ if song_locator_toggle:
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                hit_terms = pl.col('playlist_name')
-                                                .list.join(', ')
-                                                .str.to_lowercase()
-                                                .str.extract_many(playlist_input, ascii_case_insensitive=True)
-                                                .list.drop_nulls()
-                                                .list.unique()
-                                                .list.sort(),
+                                # hit_terms = pl.col('playlist_name')
+                                #                 .list.join(', ')
+                                #                 .str.to_lowercase()
+                                #                 .str.extract_many(playlist_input, ascii_case_insensitive=True)
+                                #                 .list.drop_nulls()
+                                #                 .list.unique()
+                                #                 .list.sort(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
-                .sort([pl.col('hit_terms').list.len(), 'matching_playlist_count'], descending=True)
-                .head(500).collect(), 
+                # .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
+                #         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
+                .sort([#pl.col('hit_terms').list.len(), 
+                       'matching_playlist_count'], descending=True)
+                .head(1000).collect(), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
