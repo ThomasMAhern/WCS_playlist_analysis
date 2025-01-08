@@ -150,8 +150,10 @@ if song_locator_toggle:
                                                         .str.extract_many(playlist_input, ascii_case_insensitive=True)
                                                         .list.drop_nulls()
                                                         .list.unique()
-                                                        .list.sort())
-                                              .otherwise([0]),
+                                                        .list.sort()
+                                                        .list.join(','))
+                                              .otherwise('')
+                                              .str.split(','),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
