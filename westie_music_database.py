@@ -121,6 +121,8 @@ if song_locator_toggle:
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
+        if not playlist_input:
+                playlist_input = ' '
         
         st.dataframe(df
                  .join(df_notes,
