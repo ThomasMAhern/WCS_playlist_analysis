@@ -152,8 +152,8 @@ if song_locator_toggle:
                                                         .list.unique()
                                                         .list.sort()
                                                         .list.join(','))
-                                              .otherwise(',')
-                                              .str.split(',', null_on_oob=True),
+                                              .otherwise(' , ')
+                                              .str.split(','),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
