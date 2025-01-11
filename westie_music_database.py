@@ -134,7 +134,7 @@ if song_locator_toggle:
                         pl.col('country').str.contains_any(countries_selectbox, ascii_case_insensitive=True))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
-                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                     'playlist_name', 'track.artists.name', 'owner.display_name', pl.unique('country'),
                      'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
