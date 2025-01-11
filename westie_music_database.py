@@ -160,7 +160,7 @@ if song_locator_toggle:
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
                 .sort([pl.col('hit_terms').list.len(), 
                        'matching_playlist_count'], descending=True)
-                .head(1000).collect(), 
+                .head(1000).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
@@ -533,7 +533,7 @@ if songs_together_toggle:
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
-                .head(100).collect(), 
+                .head(100).collect(streaming=True), 
                  column_config={"playlist_url": st.column_config.LinkColumn()}
                 )
     
@@ -691,6 +691,6 @@ st.link_button('Add your info!',
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 st.link_button('Find a WCS class near you!',
                url='https://www.affinityswing.com/classes')
-st.link_button('Leave feedback/suggestions!', 
+st.link_button('Leave feedback/suggestions!/Report issues/bugs', 
                    url='https://forms.gle/19mALUpmM9Z5XCA28')
 
