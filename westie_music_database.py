@@ -118,13 +118,14 @@ st.text("Close unused tabs for fastest performance")
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
+        num_records = st.slider("How many?", 1, 1000, 50)
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         countries_selectbox = st.multiselect("Country:", countries)
         year_input = st.text_input("Year added (yyyy-mm-dd):")
-        num_records = st.slider("How many records?", 1, 1000, 50)
+        
         st.dataframe(df
                  .join(df_notes,
                         how='full',
