@@ -123,8 +123,8 @@ if song_locator_toggle:
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         countries_selectbox = st.multiselect("Country:", countries)
-        year_input = st.text_input("Year:")
-        
+        year_input = st.text_input("Year added (yyyy-mm-dd):")
+        num_records = st.slider("How many records?", 1, 1000, 50)
         st.dataframe(df
                  .join(df_notes,
                         how='full',
@@ -161,7 +161,7 @@ if song_locator_toggle:
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
                 .sort([pl.col('hit_terms').list.len(), 
                        'matching_playlist_count'], descending=True)
-                .head(1000).collect(streaming=True), 
+                .head(num_records).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
