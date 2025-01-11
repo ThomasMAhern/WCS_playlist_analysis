@@ -113,6 +113,7 @@ if data_view_toggle:
 
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
+st.text("Close unused tabs for fastest performance")
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
