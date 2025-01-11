@@ -178,7 +178,7 @@ if playlist_locator_toggle:
                 .group_by('playlist_name', 'playlist_url')
                 .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                 .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                .head(200).collect(), 
+                .head(200).collect(streaming=True), 
                  column_config={"playlist_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
@@ -580,7 +580,7 @@ if songs_together_toggle:
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
-                .head(100).collect(), 
+                .head(100).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
     
@@ -622,7 +622,7 @@ if songs_together_toggle:
                 .sort('times_played_together',
                         pl.col('owner.display_name').list.len(), 
                         descending=True)
-                .head(100).collect(), 
+                .head(100).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
