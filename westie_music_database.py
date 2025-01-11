@@ -121,7 +121,7 @@ if song_locator_toggle:
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
-        countries_selectbox = st.multiselect("Compare these countries' music:", countries)
+        countries_selectbox = st.multiselect("Country:", countries)
         
         st.dataframe(df
                  .join(df_notes,
@@ -131,7 +131,8 @@ if song_locator_toggle:
                         pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                         pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                        pl.col('country').str.contains_any(countries_selectbox, ascii_case_insensitive=True))
+                        pl.col('country').str.contains_any(countries_selectbox, ascii_case_insensitive=True) #courtesy of Franzi M.
+                        )
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
