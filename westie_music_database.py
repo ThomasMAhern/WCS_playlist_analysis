@@ -113,7 +113,7 @@ if data_view_toggle:
 
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
-st.text("Close unused tabs for fastest performance")
+st.text("Close unused tabs for best performance")
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
@@ -124,7 +124,7 @@ if song_locator_toggle:
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         countries_selectbox = st.multiselect("Country:", countries)
-        year_input = st.text_input("Year added (yyyy-mm-dd):")
+        year_input = st.text_input("Year (yyyy-mm-dd):")
         
         st.dataframe(df
                  .join(df_notes,
