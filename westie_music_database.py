@@ -21,7 +21,7 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|soirée|west coast|westcoast|routine|practice|practise|westie|party|beginner|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-@st.cache_data
+@st.cache_resource
 def load_playlist_data():
         return (pl.scan_parquet('data_playlists_*.parquet')
       .rename({'name':'playlist_name'})
