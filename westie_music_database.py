@@ -73,10 +73,23 @@ def load_notes():
 def load_countries():
         return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
 
+@st.cache_data
+def load_stats():
+        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
+        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
+        playlist_count = df.select('playlist_name').unique().collect(streaming=True).shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]
+        dj_count = df.select('owner.display_name').unique().collect(streaming=True).shape[0]
+        
+        return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
+
 
 df = load_playlist_data()
 df_notes = load_notes()
 countries = load_countries()
+stats = load_stats()
 
 
 
@@ -92,10 +105,10 @@ st.markdown("## Westie Music Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
 stats_view_toggle = st.toggle("Stats")
 if stats_view_toggle:
-        st.write(f"{df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} Songs ({df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]:,} wcs specific)")
-        st.write(f"{df.select('track.artists.name').unique().collect(streaming=True).shape[0]:,} Artists ({df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]:,} wcs specific)")
-        st.write(f"{df.select('playlist_name').unique().collect(streaming=True).shape[0]:,} Playlists ({df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]:,} wcs specific)")
-        st.write(f"{df.select('owner.display_name').unique().collect(streaming=True).shape[0]:,} DJ's/Westies\n\n")
+        st.write(f"{stats[0]:,} Songs ({stats[1]:,} wcs specific)")
+        st.write(f"{stats[2]:,} Artists ({stats[3]:,} wcs specific)")
+        st.write(f"{stats[4]:,} Playlists ({stats[5]:,} wcs specific)")
+        st.write(f"{dj_count:,} DJ's/Westies\n\n")
         
         st.markdown(f"#### ")
 
