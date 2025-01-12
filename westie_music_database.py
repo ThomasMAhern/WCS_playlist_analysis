@@ -21,7 +21,9 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|soirée|west coast|westcoast|routine|practice|practise|westie|party|beginner|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-df = (pl.scan_parquet('data_playlists_*.parquet')
+@st.cache_data
+def load_playlist_data():
+        return (pl.scan_parquet('data_playlists_*.parquet')
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
@@ -62,9 +64,19 @@ df = (pl.scan_parquet('data_playlists_*.parquet')
                                                 .otherwise(0))
       )
 
-df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
-df_notes = pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
-countries = sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
+
+@st.cache_data
+def load_notes():
+        return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
+
+@st.cache_data
+def load_countries():
+        return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
+
+
+df = load_playlist_data()
+df_notes = load_notes()
+countries = load_countries()
 
 
 
@@ -644,6 +656,7 @@ if songs_together_toggle:
 
 lyrics_toggle = st.toggle("📋 Search lyrics")
 if lyrics_toggle:
+        df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         song_input = st.text_input("Song:")
