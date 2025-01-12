@@ -21,7 +21,7 @@ def wcs_specific(df_):
                   |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|soirée|west coast|westcoast|routine|practice|practise|westie|party|beginner|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
       )
 
-@st.cache_resource
+@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_playlist_data():
         return (pl.scan_parquet('data_playlists_*.parquet')
       .rename({'name':'playlist_name'})
@@ -65,7 +65,11 @@ def load_playlist_data():
       )
 
 
-@st.cache_data
+@st.cache_resource
+def load_lyrics():
+        return pl.scan_parquet('song_lyrics_*.parquet')
+
+@st.cache_data #makes it so streamlit doesn't have to reload for every sesson.
 def load_notes():
         return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
@@ -75,6 +79,8 @@ def load_countries():
 
 @st.cache_data
 def load_stats():
+        '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
+        should make it much more responsive'''
         song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
         wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
         artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
@@ -86,7 +92,9 @@ def load_stats():
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
 
+
 df = load_playlist_data()
+df_lyrics = load_lyrics()
 df_notes = load_notes()
 countries = load_countries()
 stats = load_stats()
@@ -668,7 +676,6 @@ if songs_together_toggle:
 
 lyrics_toggle = st.toggle("📋 Search lyrics")
 if lyrics_toggle:
-        df_lyrics = pl.scan_parquet('song_lyrics_*.parquet')
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
         song_input = st.text_input("Song:")
