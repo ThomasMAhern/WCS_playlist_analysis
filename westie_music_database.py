@@ -451,17 +451,6 @@ if geo_region_toggle:
 
 
     st.markdown(f"#### Comparing Countries' music:")
-    st.dataframe(df
-                 .group_by('country')
-                 .agg(song_count = pl.n_unique('track.name'), 
-                      playlist_count = pl.n_unique('playlist_name'), 
-                      dj_count = pl.n_unique('owner.display_name'),
-                      djs = pl.col('owner.display_name'),
-                      )
-                 .with_columns(pl.col('djs').list.unique().list.head(50))
-                 .sort('country')
-                 .collect(streaming=True)
-        )
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
     if len(countries_selectbox) >= 2:
