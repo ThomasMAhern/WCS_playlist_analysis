@@ -91,8 +91,6 @@ def load_stats():
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
-
-
 df = load_playlist_data()
 df_lyrics = load_lyrics()
 df_notes = load_notes()
@@ -390,11 +388,33 @@ if search_dj_toggle:
 
 
 
+@st.cache_data
+def region_data():
+    return (df
+                 .group_by('region')
+                 .agg(song_count = pl.n_unique('track.name'), 
+                      playlist_count = pl.n_unique('playlist_name'), 
+                      dj_count = pl.n_unique('owner.display_name'),
+                      djs = pl.col('owner.display_name'),
+                      )
+                 .with_columns(pl.col('djs').list.unique().list.head(50))
+                 .sort('region')
+                 .collect(streaming=True)
+                 )
 
-
-
-
-
+@st.cache_data
+def country_data():
+        return (df
+                 .group_by('country')
+                 .agg(song_count = pl.n_unique('track.name'), 
+                      playlist_count = pl.n_unique('playlist_name'), 
+                      dj_count = pl.n_unique('owner.display_name'),
+                      djs = pl.col('owner.display_name'),
+                      )
+                 .with_columns(pl.col('djs').list.unique().list.head(50))
+                 .sort('country')
+                 .collect(streaming=True)
+                 )
 
 
 
@@ -406,17 +426,8 @@ if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
     
-    st.dataframe(df
-                 .group_by('region')
-                 .agg(song_count = pl.n_unique('track.name'), 
-                      playlist_count = pl.n_unique('playlist_name'), 
-                      dj_count = pl.n_unique('owner.display_name'),
-                      djs = pl.col('owner.display_name'),
-                      )
-                 .with_columns(pl.col('djs').list.unique().list.head(50))
-                 .sort('region')
-                 .collect(streaming=True)
-    )
+    st.dataframe(region_data())
+    st.dataframe(country_data())
     regions = ['Select One', 'Europe', 'North America', 'MENA', 'Oceania', 'Asia']
     region_selectbox = st.selectbox("Which Geographic Region would you like to see?",
                                     regions)
@@ -454,18 +465,7 @@ if geo_region_toggle:
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
     if len(countries_selectbox) >= 2:
-        st.dataframe(df
-                 .filter(pl.col('country').str.contains_any(countries_selectbox))
-                 .group_by('country')
-                 .agg(song_count = pl.n_unique('track.name'), 
-                      playlist_count = pl.n_unique('playlist_name'), 
-                      dj_count = pl.n_unique('owner.display_name'),
-                      djs = pl.col('owner.display_name'),
-                      )
-                 .with_columns(pl.col('djs').list.unique().list.head(50))
-                 .sort('country')
-                 .collect(streaming=True)
-        )
+        
         countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
                                 pl.col('dj_count').gt(3), 
                                 pl.col('playlist_count').gt(3))
