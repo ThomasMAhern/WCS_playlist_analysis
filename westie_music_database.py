@@ -113,7 +113,7 @@ st.text("Note: this database lacks most of the non-spotify playlists - but if yo
 st.write(f"{stats[0]:,} Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,} Artists ({stats[3]:,} wcs specific)")
 st.write(f"{stats[4]:,} Playlists ({stats[5]:,} wcs specific)")
-st.write(f"{stats[5]:,} DJ's/Westies\n\n")
+st.write(f"{stats[6]:,} DJ's/Westies\n\n")
 
 st.markdown(f"#### ")
 
