@@ -69,7 +69,7 @@ def load_playlist_data():
 def load_lyrics():
         return pl.scan_parquet('song_lyrics_*.parquet')
 
-@st.cache_data #makes it so streamlit doesn't have to reload for every sesson.
+@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_notes():
         return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
 
@@ -77,7 +77,7 @@ def load_notes():
 def load_countries():
         return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
 
-@st.cache_data
+@st.cache_resource
 def load_stats():
         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
         should make it much more responsive'''
@@ -256,7 +256,7 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_count'), descending=True)
-                .head(1000)
+                .head(100)
                 .collect(streaming=True), 
                  column_config={"owner_url": st.column_config.LinkColumn()}
                 )
@@ -303,7 +303,7 @@ if search_dj_toggle:
                         .agg('playlist_name')
                         .sort('playlist_count', descending=True)
                         .filter(pl.col('dj_count').eq(1))
-                        .head(200)
+                        .head(100)
                         .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -388,7 +388,7 @@ if search_dj_toggle:
 
 
 
-@st.cache_data
+@st.cache_resource
 def region_data():
     return (df
                  .group_by('region')
@@ -402,7 +402,7 @@ def region_data():
                  .collect(streaming=True)
                  )
 
-@st.cache_data
+@st.cache_resource
 def country_data():
         return (df
                  .group_by('country')
