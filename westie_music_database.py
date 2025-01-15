@@ -154,7 +154,9 @@ if song_locator_toggle:
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         dj_input = st.text_input("Input the dj name:").lower()
         countries_selectbox = st.multiselect("Country:", countries)
-        year_input = st.text_input("Year (yyyy-mm-dd):")
+        date_added_2_playlist = st.text_input("Year added to playlist (yyyy-mm-dd):")
+        track_release_date = st.text_input("Year track released '198' for 1980's music:")
+        
         
         st.dataframe(df
                  .join(df_notes,
@@ -165,7 +167,8 @@ if song_locator_toggle:
                         pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                         pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
                         pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
-                        pl.col('added_at').dt.to_string().str.contains(year_input), #courtesy of Franzi M.
+                        pl.col('added_at').dt.to_string().str.contains(date_added_2_playlist), #courtesy of Franzi M.
+                        pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
                         )
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
@@ -388,7 +391,7 @@ if search_dj_toggle:
 
 
 
-@st.cache_resource
+@st.cache_resource()
 def region_data():
     return (df
                  .group_by('region')
