@@ -149,7 +149,7 @@ st.text("Close unused tabs for best performance")
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
-        num_records = st.slider("Display __ songs", 1, 1000, 50)
+        # num_records = st.slider("Display __ songs", 1, 1000, 50)
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
@@ -196,7 +196,7 @@ if song_locator_toggle:
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
                 .sort([pl.col('hit_terms').list.len(), 
                        'matching_playlist_count'], descending=True)
-                .head(num_records).collect(streaming=True), 
+                .head(1000).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
         st.markdown(f"#### ")
