@@ -2,8 +2,6 @@ import streamlit as st
 import polars as pl
 import psutil
 
-st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
-
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 
 regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
@@ -109,7 +107,7 @@ stats = load_stats()
 
 
 
-
+st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
 st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
 
