@@ -268,13 +268,13 @@ if search_dj_toggle:
                 others_music = (df
                                 .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
                                         | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                                .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
+                                .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                                 )
 
                 djs_music = (df
                         .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
                                 | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
-                        .select('track.name', 'track.artists.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
+                        .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
                         .unique()
                         )
                 
