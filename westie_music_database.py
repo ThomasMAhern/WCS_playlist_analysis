@@ -1,5 +1,8 @@
 import streamlit as st
 import polars as pl
+import psutil
+
+st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 
@@ -77,7 +80,7 @@ def load_notes():
 def load_countries():
         return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
 
-@st.cache_resource
+@st.cache_data
 def load_stats():
         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
         should make it much more responsive'''
@@ -148,7 +151,7 @@ st.text("Close unused tabs for best performance")
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
-        num_records = st.slider("How many?", 1, 1000, 50)
+        num_records = st.slider("Display __ songs", 1, 1000, 50)
         song_input = st.text_input("Song name:").lower()
         artist_name = st.text_input("Artist name:").lower()
         playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
@@ -391,7 +394,7 @@ if search_dj_toggle:
 
 
 
-@st.cache_resource()
+@st.cache_data
 def region_data():
     return (df
                  .group_by('region')
@@ -405,7 +408,7 @@ def region_data():
                  .collect(streaming=True)
                  )
 
-@st.cache_resource
+@st.cache_data
 def country_data():
         return (df
                  .group_by('country')
