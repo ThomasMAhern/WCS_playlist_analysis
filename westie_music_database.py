@@ -279,7 +279,7 @@ if search_dj_toggle:
                         )
                 
                 st.dataframe(others_music.join(djs_music, how='anti', 
-                                on=['track.name', 'track.artists.name', 'dj_count', 
+                                on=['track.name', 'dj_count', 
                                 'playlist_count', 'song_url'])
                         .group_by(pl.all().exclude('owner.display_name'))
                         .agg('owner.display_name')
@@ -297,7 +297,7 @@ if search_dj_toggle:
                 st.markdown(f"#### Music unique to _{id_input}_")
                 st.dataframe(djs_music.join(others_music, 
                                         how='anti', 
-                                        on=['track.name', 'track.artists.name', 'owner.display_name', 
+                                        on=['track.name', 'owner.display_name', 
                                                 'dj_count', 'playlist_count', 'song_url'])
                         .group_by(pl.all().exclude('playlist_name'))
                         .agg('playlist_name')
