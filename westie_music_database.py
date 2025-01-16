@@ -191,13 +191,13 @@ if song_locator_toggle:
         if ''.join(anti_playlist_input).strip() == '':
                 anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
-        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+        while (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '':
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
-        elif (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+        else (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() != '':
                 
                 st.dataframe(df
