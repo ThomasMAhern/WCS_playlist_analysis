@@ -2,7 +2,7 @@ import streamlit as st
 import polars as pl
 import psutil
 
-pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
+pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100).set_streaming_chunk_size(1)
 
 regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
@@ -199,7 +199,7 @@ if song_locator_toggle:
 
         elif (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() != '':
-                # st.text('something selected')
+                
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
