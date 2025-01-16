@@ -197,8 +197,7 @@ if song_locator_toggle:
                                  column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
-        elif (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() != 'this_is_a_bogus_value_to_hopefully_not_break_things':
+        else:
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
@@ -267,27 +266,9 @@ if playlist_locator_toggle:
 
 
 
-
-
-
-
-
-#courtesy of Lino V
-search_dj_toggle = st.toggle("🎧 DJ insights")
-
-if search_dj_toggle:
-
-        st.markdown("#### Enter a Spotify display_name/user_id:")
-        id_input = st.text_input("ex. Kasia Stepek or 1185428002")
-        dj_id = id_input.lower().strip()
-        dj_playlist_input = st.text_input("With a playlist name:").lower()
-
-        st.text("DJ stats")
-        st.dataframe(df
-                .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
-                        |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
-                        &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
-                        )
+@st.cache_data
+def djs_data():
+        return (df
                 .group_by('owner.display_name', 'owner_url')
                 .agg(pl.n_unique('track.name').alias('song_count'),
                      pl.n_unique('track.artists.name').alias('artist_count'),
@@ -303,13 +284,54 @@ if search_dj_toggle:
                               .list.head(50)
                               )
                 .sort(pl.col('playlist_count'), descending=True)
-                .head(100)
-                .collect(streaming=True), 
-                 column_config={"owner_url": st.column_config.LinkColumn()}
+                .head(1000)
+                .collect(streaming=True)
                 )
+
+djs_data = djs_data()
+
+
+#courtesy of Lino V
+search_dj_toggle = st.toggle("🎧 DJ insights")
+
+if search_dj_toggle:
+
+        id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
+        dj_id = id_input.lower().strip()
+        dj_playlist_input = st.text_input("Playlist name:").lower()
+        
+        if (dj_id + dj_playlist_input).strip() == '':
+                st.dataframe(djs_data, 
+                 column_config={"owner_url": st.column_config.LinkColumn()})
+        
+        else:
+                st.dataframe(df
+                        .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                                |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
+                                &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
+                                )
+                        .group_by('owner.display_name', 'owner_url')
+                        .agg(pl.n_unique('track.name').alias('song_count'),
+                        pl.n_unique('track.artists.name').alias('artist_count'),
+                        pl.n_unique('playlist_name').alias('playlist_count'),
+                        'playlist_name', 
+                        )
+                        .with_columns(pl.col('playlist_name')
+                                .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
+                                                .then(pl.element()))
+                                .list.unique()
+                                .list.drop_nulls()
+                                .list.sort()
+                                .list.head(50)
+                                )
+                        .sort(pl.col('playlist_count'), descending=True)
+                        .head(1000)
+                        .collect(streaming=True), 
+                        column_config={"owner_url": st.column_config.LinkColumn()}
+                        )
         
         
-        if dj_id:
+        # if dj_id:
                 st.markdown(f"#### Popular music _{id_input}_ doesn't play")
                 ##too much data now that we have more music, that list is blowing up the streamlit
                 others_music = (df
