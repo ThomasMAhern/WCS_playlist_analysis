@@ -186,7 +186,7 @@ if song_locator_toggle:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
-                anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
+                anti_playlist_input = st.text_input("Not in playlist:", value='this_is_a_bogus_value_to_hopefully_not_break_things').lower().split(',')
 
         if ''.join(anti_playlist_input).strip() == '':
                 anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
@@ -361,7 +361,7 @@ if search_dj_toggle:
         
         
         
-                st.text(f"#### Music unique to _{id_input}_")
+                st.text(f"Music unique to _{id_input}_")
                 st.dataframe(djs_music.join(others_music, 
                                         how='anti', 
                                         on=['track.name', 'owner.display_name', 
