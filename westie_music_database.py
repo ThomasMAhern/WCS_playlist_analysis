@@ -194,13 +194,12 @@ if song_locator_toggle:
 
         if st.button("Search songs", type="primary"):
                 
-                if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-                ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+                if (song_input + artist_name + dj_input + ''.join(playlist_input) 
+                    + ''.join(anti_playlist_input) + ''.join(countries_selectbox) 
+                    + added_2_playlist_date + track_release_date).strip() != 'this_is_a_bogus_value_to_hopefully_not_break_things':
                         st.dataframe(top_songs, 
                                         column_config={"song_url": st.column_config.LinkColumn()}
                                 )
-
-                else:
                         st.dataframe(df
                                 .join(df_notes,
                                         how='full',
@@ -241,6 +240,12 @@ if song_locator_toggle:
                                 'matching_playlist_count'], descending=True)
                                 .head(1000).collect(streaming=True), 
                                 column_config={"song_url": st.column_config.LinkColumn()}
+                                )
+                else:        
+                        # (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+                        # ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+                        st.dataframe(top_songs, 
+                                        column_config={"song_url": st.column_config.LinkColumn()}
                                 )
         st.markdown(f"#### ")
 
