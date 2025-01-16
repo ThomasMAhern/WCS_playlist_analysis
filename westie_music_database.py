@@ -147,6 +147,7 @@ st.markdown("#### Choose your own adventure!")
 
 @st.cache_data
 def top_songs():
+        '''creates the standard top songs until user '''
         return (df
                  .join(df_notes,
                         how='full',
@@ -164,18 +165,10 @@ def top_songs():
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                hit_terms = pl.col('playlist_name')
-                                                .list.join(', ')
-                                                .str.to_lowercase()
-                                                .str.extract_all('|'.join(playlist_input))
-                                                .list.drop_nulls()
-                                                .list.unique()
-                                                .list.sort(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
-                .sort([pl.col('hit_terms').list.len(), 
-                       'matching_playlist_count'], descending=True)
+                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
+                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count',))
+                .sort('matching_playlist_count', descending=True)
                 .head(1000).collect(streaming=True), 
                  column_config={"song_url": st.column_config.LinkColumn()}
                 )
@@ -189,8 +182,7 @@ if song_locator_toggle:
                 artist_name = st.text_input("Artist name:").lower()
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
-                
-    
+
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
@@ -205,9 +197,10 @@ if song_locator_toggle:
         # added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
         # track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
         
-        iall(not var for var in [song_input, artist_name, dj_input, playlist_input
+        if all(not var for var in [song_input, artist_name, dj_input, playlist_input
                                  countries_selectbox, added_2_playlist_date, track_release_date]):
                 st.dataframe(top_songs())
+
         else:
                 st.dataframe(df
                         .join(df_notes,
