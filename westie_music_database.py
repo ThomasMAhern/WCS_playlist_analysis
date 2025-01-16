@@ -276,8 +276,8 @@ def djs_data():
                      'playlist_name', 
                      )
                 .with_columns(pl.col('playlist_name')
-                              .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
-                                           .then(pl.element()))
+                        #       .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
+                        #                    .then(pl.element()))
                               .list.unique()
                               .list.drop_nulls()
                               .list.sort()
