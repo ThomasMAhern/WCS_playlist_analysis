@@ -189,10 +189,9 @@ if song_locator_toggle:
                 # anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
 
         # if ''.join(anti_playlist_input).strip() == '':
-        #         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
+        anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
-        if (song_input + artist_name + dj_input + ''.join(playlist_input) + 
-        #     ''.join(anti_playlist_input) +
+        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
@@ -206,7 +205,7 @@ if song_locator_toggle:
                         .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
-                                # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
+                                ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
