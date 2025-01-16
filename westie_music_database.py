@@ -169,8 +169,7 @@ def top_songs():
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count',))
                 .sort('matching_playlist_count', descending=True)
-                .head(1000).collect(streaming=True), 
-                 column_config={"song_url": st.column_config.LinkColumn()}
+                .head(1000).collect(streaming=True)
                 )
 
 #courtesy of Vishal S
@@ -199,7 +198,8 @@ if song_locator_toggle:
         
         if all(not var for var in [song_input, artist_name, dj_input, playlist_input
                                  countries_selectbox, added_2_playlist_date, track_release_date]):
-                st.dataframe(top_songs())
+                st.dataframe(top_songs(), 
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
         else:
                 st.dataframe(df
