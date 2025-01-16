@@ -197,8 +197,7 @@ if song_locator_toggle:
                                  column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
-        else (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() != '':
+        else:
                 
                 st.dataframe(df
                         .join(df_notes,
