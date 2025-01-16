@@ -588,7 +588,7 @@ if songs_together_toggle:
         song_combo_col1, song_combo_col2 = st.columns(2)
         with song_combo_col1:
                 song_input = st.text_input("Song Name/ID:")
-        with song_combo_col1:
+        with song_combo_col2:
                 artist_name_input = st.text_input("Song artist name:").lower()
                 
         song_input_prepped = song_input.lower()
