@@ -585,10 +585,10 @@ if songs_together_toggle:
         song_combo_col1, song_combo_col2 = st.columns(2)
         with song_combo_col1:
                 song_input = st.text_input("Song Name/ID:")
-                song_input_prepped = song_input.lower()
         with song_combo_col1:
                 artist_name_input = st.text_input("Song artist name:").lower()
-
+                
+        song_input_prepped = song_input.lower()
 
         # st.dataframe(df
         #         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'playlist_url', 'owner.display_name', 'track.artists.id'
