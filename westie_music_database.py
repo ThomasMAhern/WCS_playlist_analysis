@@ -187,66 +187,58 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
                 # anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
-                
-        # st.button("Search", type="primary")
+        
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
-        if st.button("Search songs", type="primary"):
-                
-                if (song_input + artist_name + dj_input + ''.join(playlist_input) 
-                    + ''.join(anti_playlist_input) + ''.join(countries_selectbox) 
-                    + added_2_playlist_date + track_release_date).strip() != 'this_is_a_bogus_value_to_hopefully_not_break_things':
-                        st.dataframe(top_songs, 
-                                        column_config={"song_url": st.column_config.LinkColumn()}
+        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+                st.dataframe(top_songs, 
+                                 column_config={"song_url": st.column_config.LinkColumn()}
+                            )
+
+        else:
+                st.dataframe(df
+                        .join(df_notes,
+                                how='full',
+                                on=['track.artists.name', 'track.name'])
+                        .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
+                                pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
+                                pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
+                                # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
+                                pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
+                                pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
+                                pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
                                 )
-                        st.dataframe(df
-                                .join(df_notes,
-                                        how='full',
-                                        on=['track.artists.name', 'track.name'])
-                                .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
-                                        pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                                        pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
-                                        # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
-                                        pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                                        pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
-                                        pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
-                                        pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
+                        'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                        'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
+                                #connies notes
+                                'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
+                        .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
+                                        'apprx_song_position_in_playlist', 'track.artists.name', 'country',
+                                                #connies notes
+                                                'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                                'Familiarity', 'Transition type'
+                                                ).list.unique().list.drop_nulls().list.sort().list.head(50),
+                                        pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
+                                        hit_terms = pl.col('playlist_name')
+                                                        .list.join(', ')
+                                                        .str.to_lowercase()
+                                                        .str.extract_all('|'.join(playlist_input))
+                                                        .list.drop_nulls()
+                                                        .list.unique()
+                                                        .list.sort(),
                                         )
-                                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
-                                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
-                                'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                                'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
-                                        #connies notes
-                                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-                                .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
-                                                'apprx_song_position_in_playlist', 'track.artists.name', 'country',
-                                                        #connies notes
-                                                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
-                                                        'Familiarity', 'Transition type'
-                                                        ).list.unique().list.drop_nulls().list.sort().list.head(50),
-                                                pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                                hit_terms = pl.col('playlist_name')
-                                                                .list.join(', ')
-                                                                .str.to_lowercase()
-                                                                .str.extract_all('|'.join(playlist_input))
-                                                                .list.drop_nulls()
-                                                                .list.unique()
-                                                                .list.sort(),
-                                                )
-                                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
-                                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
-                                .sort([pl.col('hit_terms').list.len(), 
-                                'matching_playlist_count'], descending=True)
-                                .head(1000).collect(streaming=True), 
-                                column_config={"song_url": st.column_config.LinkColumn()}
-                                )
-                elif (song_input + artist_name + dj_input + ''.join(playlist_input) 
-                      + ''.join(anti_playlist_input) + ''.join(countries_selectbox) 
-                      + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
-                                st.dataframe(top_songs, 
-                                                column_config={"song_url": st.column_config.LinkColumn()}
-                                        )
+                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
+                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
+                        .sort([pl.col('hit_terms').list.len(), 
+                        'matching_playlist_count'], descending=True)
+                        .head(1000).collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()}
+                        )
         st.markdown(f"#### ")
 
 #courtesy of Vishal S
