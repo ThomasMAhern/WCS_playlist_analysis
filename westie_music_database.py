@@ -296,7 +296,7 @@ if search_dj_toggle:
 
         id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
         dj_id = id_input.lower().strip()
-        dj_playlist_input = st.text_input("Playlist name:").lower()
+        dj_playlist_input = st.text_input("DJ playlist name:").lower()
         
         if (dj_id + dj_playlist_input).strip() == '':
                 st.dataframe(djs_data, 
