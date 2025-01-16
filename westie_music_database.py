@@ -582,7 +582,7 @@ if songs_together_toggle:
     
         song_input = st.text_input("Song Name/ID:")
         song_input_prepped = song_input.lower()
-        artist_name_input = st.text_input("Artist name:").lower()
+        artist_name_input = st.text_input("Song artist name:").lower()
 
 
         # st.dataframe(df
