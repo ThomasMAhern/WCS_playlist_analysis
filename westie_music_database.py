@@ -2,7 +2,7 @@ import streamlit as st
 import polars as pl
 import psutil
 
-pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)#.set_streaming_chunk_size(100)
+pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 
 regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
@@ -191,14 +191,14 @@ if song_locator_toggle:
         if ''.join(anti_playlist_input).strip() == '':
                 anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
-        while (((song_input + artist_name + dj_input + ''.join(playlist_input) +
-            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '')
-                & (anti_playlist_input[0] == 'this_is_a_bogus_value_to_hopefully_not_break_things')):
+        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
-        else:
+        elif (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() != 'this_is_a_bogus_value_to_hopefully_not_break_things':
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
