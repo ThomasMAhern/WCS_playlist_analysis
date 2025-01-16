@@ -248,16 +248,18 @@ if playlist_locator_toggle:
         playlist_input = st.text_input("Playlist name:").lower()
         song_input = st.text_input("Contains the song:").lower()
         dj_input = st.text_input("DJ name:").lower()
-        st.dataframe(df
-                .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
-                        pl.col('track.name').str.to_lowercase().str.contains(song_input),
-                        pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
-                .group_by('playlist_name', 'playlist_url')
-                .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
-                .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                .head(200).collect(streaming=True), 
-                 column_config={"playlist_url": st.column_config.LinkColumn()}
-                )
+        
+        if any(val for val in [playlist_input, song_input, dj_input]):
+                st.dataframe(df
+                        .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
+                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
+                                pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
+                        .group_by('playlist_name', 'playlist_url')
+                        .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
+                        .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
+                        .head(200).collect(streaming=True), 
+                        column_config={"playlist_url": st.column_config.LinkColumn()}
+                        )
         st.markdown(f"#### ")
 
 
