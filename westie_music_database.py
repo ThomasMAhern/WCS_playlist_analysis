@@ -206,7 +206,7 @@ if song_locator_toggle:
         # track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
         
         iall(not var for var in [song_input, artist_name, dj_input, playlist_input
-                                 countries_selectbox, added_2_playlist_date, track_release_date])::
+                                 countries_selectbox, added_2_playlist_date, track_release_date]):
                 st.dataframe(top_songs())
         else:
                 st.dataframe(df
