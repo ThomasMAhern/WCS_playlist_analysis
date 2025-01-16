@@ -171,6 +171,7 @@ def top_songs():
                 .sort('matching_playlist_count', descending=True)
                 .head(1000).collect(streaming=True)
                 )
+top_songs = top_songs()
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
@@ -192,7 +193,7 @@ if song_locator_toggle:
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '':
-                st.dataframe(top_songs(), 
+                st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
@@ -206,7 +207,7 @@ if song_locator_toggle:
                         .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
-                                # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
+                                ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
