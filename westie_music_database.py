@@ -304,7 +304,7 @@ if search_dj_toggle:
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
-        elif:
+        else:
                 st.dataframe(df
                         .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                                 |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
@@ -331,7 +331,7 @@ if search_dj_toggle:
                         )
         
         
-        elif dj_id:
+        # elif dj_id:
                 st.text(f"Popular music _{id_input}_ doesn't play")
                 ##too much data now that we have more music, that list is blowing up the streamlit
                 others_music = (df
