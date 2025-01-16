@@ -187,7 +187,7 @@ if song_locator_toggle:
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
                 anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
 
-        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input),
+        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '':
                 st.dataframe(top_songs(), 
                                  column_config={"song_url": st.column_config.LinkColumn()}
