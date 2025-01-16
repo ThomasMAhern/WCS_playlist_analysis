@@ -153,8 +153,9 @@ if song_locator_toggle:
         with song_col1:
                 song_input = st.text_input("Song name:").lower()
                 artist_name = st.text_input("Artist name:").lower()
+                dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
-                dj_input = st.text_input("Input the dj name:").lower()
+                
     
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
