@@ -294,10 +294,12 @@ djs_data = djs_data()
 search_dj_toggle = st.toggle("🎧 DJ insights")
 
 if search_dj_toggle:
-
-        id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
-        dj_id = id_input.lower().strip()
-        dj_playlist_input = st.text_input("DJ playlist name:").lower()
+        dj_col1, dj_col2 = st.columns(2)
+        with dj_col1:
+                id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
+                dj_id = id_input.lower().strip()
+        with dj_col2:
+                dj_playlist_input = st.text_input("DJ playlist name:").lower()
         
         if (dj_id + dj_playlist_input).strip() == '':
                 st.dataframe(djs_data, 
@@ -580,10 +582,12 @@ if geo_region_toggle:
 songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
-    
-        song_input = st.text_input("Song Name/ID:")
-        song_input_prepped = song_input.lower()
-        artist_name_input = st.text_input("Song artist name:").lower()
+        song_combo_col1, song_combo_col2 = st.columns(2)
+        with song_combo_col1:
+                song_input = st.text_input("Song Name/ID:")
+                song_input_prepped = song_input.lower()
+        with song_combo_col1:
+                artist_name_input = st.text_input("Song artist name:").lower()
 
 
         # st.dataframe(df
@@ -732,11 +736,16 @@ if songs_together_toggle:
 
 lyrics_toggle = st.toggle("📋 Search lyrics")
 if lyrics_toggle:
+                
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
-        lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
-        song_input = st.text_input("Song:")
-        artist_input = st.text_input("Artist:")
-        
+        lyrics_col1, lyrics_col2 = st.columns(2)
+        with lyrics_col1:
+                song_input = st.text_input("Song:")
+                lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
+                
+        with lyrics_col2:
+                artist_input = st.text_input("Artist:")
+
         st.dataframe(df_lyrics
         .join(df.select('song_url', 
                         song = pl.col('track.name'), 
