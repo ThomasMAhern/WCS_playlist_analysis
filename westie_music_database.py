@@ -181,22 +181,13 @@ if song_locator_toggle:
                 artist_name = st.text_input("Artist name:").lower()
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
-
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
-        
-        # # num_records = st.slider("Display __ songs", 1, 1000, 50)
-        # song_input = st.text_input("Song name:").lower()
-        # artist_name = st.text_input("Artist name:").lower()
-        # playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
-        # dj_input = st.text_input("Input the dj name:").lower()
-        # countries_selectbox = st.multiselect("Country:", countries)
-        # added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
-        # track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
-        
-        if (song_input + artist_name + dj_input + ''.join(playlist_input) +
+                anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
+
+        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input),
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '':
                 st.dataframe(top_songs(), 
                                  column_config={"song_url": st.column_config.LinkColumn()}
@@ -212,6 +203,7 @@ if song_locator_toggle:
                         .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
+                                ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
