@@ -197,7 +197,7 @@ if song_locator_toggle:
         # track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
         
         if (song_input + artist_name + dj_input + playlist_input +
-            countries_selectbox + added_2_playlist_date + track_release_date).strip() = '':
+            countries_selectbox + added_2_playlist_date + track_release_date).strip() == '':
                 st.text('Nothing selected')
                 st.dataframe(top_songs(), 
                                 #  column_config={"song_url": st.column_config.LinkColumn()}
