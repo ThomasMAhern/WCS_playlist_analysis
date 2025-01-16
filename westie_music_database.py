@@ -149,14 +149,26 @@ st.text("Close unused tabs for best performance")
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
-        # num_records = st.slider("Display __ songs", 1, 1000, 50)
-        song_input = st.text_input("Song name:").lower()
-        artist_name = st.text_input("Artist name:").lower()
-        playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
-        dj_input = st.text_input("Input the dj name:").lower()
-        countries_selectbox = st.multiselect("Country:", countries)
-        added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
-        track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
+        col1, col2 = st.columns(2)
+        with col1:
+                song_input = st.text_input("Song name:").lower()
+                artist_name = st.text_input("Artist name:").lower()
+                playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
+                dj_input = st.text_input("Input the dj name:").lower()
+    
+        with col2:
+                countries_selectbox = st.multiselect("Country:", countries)
+                added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
+                track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
+        
+        # # num_records = st.slider("Display __ songs", 1, 1000, 50)
+        # song_input = st.text_input("Song name:").lower()
+        # artist_name = st.text_input("Artist name:").lower()
+        # playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
+        # dj_input = st.text_input("Input the dj name:").lower()
+        # countries_selectbox = st.multiselect("Country:", countries)
+        # added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
+        # track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
         
         
         st.dataframe(df
