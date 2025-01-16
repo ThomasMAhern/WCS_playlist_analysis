@@ -245,9 +245,12 @@ if song_locator_toggle:
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("💿 Find a Playlist")
 if playlist_locator_toggle:
-        playlist_input = st.text_input("Playlist name:").lower()
-        song_input = st.text_input("Contains the song:").lower()
-        dj_input = st.text_input("DJ name:").lower()
+        playlist_col1, playlist_col2 = st.columns(2)
+        with playlist_col1:
+                playlist_input = st.text_input("Playlist name:").lower()
+                song_input = st.text_input("Contains the song:").lower()
+        with playlist_col2:
+                dj_input = st.text_input("DJ name:").lower()
         
         if any(val for val in [playlist_input, song_input, dj_input]):
                 st.dataframe(df
