@@ -629,7 +629,7 @@ if songs_together_toggle:
     
     
     
-        if song_input or artist_name_input:
+        if (song_input_prepped + artist_name_input).strip() != '':
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
                 st.dataframe(df
