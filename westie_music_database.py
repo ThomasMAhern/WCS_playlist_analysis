@@ -198,9 +198,8 @@ if song_locator_toggle:
         
         if (song_input + artist_name + dj_input + ''.join(playlist_input) +
             ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == '':
-                st.text('Nothing selected')
                 st.dataframe(top_songs(), 
-                                #  column_config={"song_url": st.column_config.LinkColumn()}
+                                 column_config={"song_url": st.column_config.LinkColumn()}
                             )
 
         elif any(var for var in [song_input, artist_name, dj_input, playlist_input,
