@@ -784,59 +784,58 @@ if lyrics_toggle:
 
 faq_toggle = st.toggle("FAQ")
 if faq_toggle:
-st.markdown("""
-### Westie Music Database FAQ
+        st.markdown("""### Westie Music Database FAQ
 
-#### How can I help?
-* Make lots of playlists with descriptive names! The more the better!
-* Add "WCS" to your playlist name
-* Add "yyyy-mm-dd" date (or variation) when you played the DJ set for a social
-* Let me know the country of a user - helps our geographic insights!
-* DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
+        #### How can I help?
+        * Make lots of playlists with descriptive names! The more the better!
+        * Add "WCS" to your playlist name
+        * Add "yyyy-mm-dd" date (or variation) when you played the DJ set for a social
+        * Let me know the country of a user - helps our geographic insights!
+        * DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
-#### What can the Westie Music Database tell me?
-* Top 1000 songs
-* Event sets
-* Most popular songs and playlists for:
-	* Late-night
-	* Competitions
-	* Beginners
-	* BPM-specific
-	* Era's (80's, 90's, etc)
-	* Holidays
-	* Particular country (Germany)
-* Comparing 2 DJ's music
-* Songs unique to a particular DJ
-* Comparing Country's music
-* Songs unique to a country
-* Top Songs per geographic region/country
-* Songs only played in a
-* Finding songs by lyrics
-* Most popular songs played together
+        #### What can the Westie Music Database tell me?
+        * Top 1000 songs
+        * Event sets
+        * Most popular songs and playlists for:
+                * Late-night
+                * Competitions
+                * Beginners
+                * BPM-specific
+                * Era's (80's, 90's, etc)
+                * Holidays
+                * Particular country (Germany)
+        * Comparing 2 DJ's music
+        * Songs unique to a particular DJ
+        * Comparing Country's music
+        * Songs unique to a country
+        * Top Songs per geographic region/country
+        * Songs only played in a
+        * Finding songs by lyrics
+        * Most popular songs played together
 
-#### Where does the data come from?
-- I find westies on Spotify, and use Spotify's API to grab all their public playlists.
-- Currently trying to incorporate DJ data from VirtualDJ
+        #### Where does the data come from?
+        - I find westies on Spotify, and use Spotify's API to grab all their public playlists.
+        - Currently trying to incorporate DJ data from VirtualDJ
 
-#### Doesn't that mean there's some non-WCS music?
-* Correct, not all music is WCS specific, but I filter out the bulk of it (Tango/Salsa/Etc.), and the music that's left rises to the top due to the amount of westies adding it to their playlists. Eg. If we all listen to non-westible show tunes, those songs might rise to the top, but we also have the # of playlists to sort by - Chunks, might appear in multiple playlists per spotify profile, but Defying Gravity would be in fewer.
+        #### Doesn't that mean there's some non-WCS music?
+        * Correct, not all music is WCS specific, but I filter out the bulk of it (Tango/Salsa/Etc.), and the music that's left rises to the top due to the amount of westies adding it to their playlists. Eg. If we all listen to non-westible show tunes, those songs might rise to the top, but we also have the # of playlists to sort by - Chunks, might appear in multiple playlists per spotify profile, but Defying Gravity would be in fewer.
 
-#### I'm not a DJ and don't have a lot of playlists, can I be included?/why am I included?
-* Please click the feedback form link and comment your profile link and location so I can include you! 
-* The wonderful thing about aggregation on this scale is that even your 1 or 2 wcs playlists will still contribute to 
+        #### I'm not a DJ and don't have a lot of playlists, can I be included?/why am I included?
+        * Please click the feedback form link and comment your profile link and location so I can include you! 
+        * The wonderful thing about aggregation on this scale is that even your 1 or 2 wcs playlists will still contribute to 
 
-#### Artists are kinda messed up
-* Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
+        #### Artists are kinda messed up
+        * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
 
-#### It broke ☹️
-* Yes, there's a lot of processing involved (on 500MB+ with a 1GB machine 😬), and it occasionally blows up, I'm trying to alleviate it. It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
+        #### It broke ☹️
+        * Yes, there's a lot of processing involved (on 500MB+ with a 1GB machine 😬), and it occasionally blows up, I'm trying to alleviate it. It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
-#### Errors:
-* Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
+        #### Errors:
+        * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
 
-#### Things to consider:
-* Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJ's not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
-            """)
+        #### Things to consider:
+        * Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJ's not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
+                """)
 
 
 
