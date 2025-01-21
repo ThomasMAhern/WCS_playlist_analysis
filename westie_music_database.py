@@ -827,10 +827,10 @@ st.markdown("""####
         * Particular country (Germany)
 * Comparing 2 DJ's music
 * Songs unique to a particular DJ
-* Comparing Country's music
+* Comparing a country's music
 * Songs unique to a country
 * Top Songs per geographic region/country
-* Songs only played in a
+* Songs only played in a country
 * Finding songs by lyrics
 * Most popular songs played together
 
