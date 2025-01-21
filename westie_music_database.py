@@ -805,7 +805,8 @@ st.link_button('Leave feedback/suggestions!/Report issues/bugs',
 
 
 
-st.markdown("""### Westie Music Database FAQ
+st.markdown("""#### 
+### Westie Music Database FAQ
 #### How can I help?
 * Make lots of playlists with descriptive names! The more the better!
 * Add "WCS" to your playlist name
