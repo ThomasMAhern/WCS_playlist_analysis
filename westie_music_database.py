@@ -158,10 +158,10 @@ def top_songs():
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                     'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
+                     'apprx_song_position_in_playlist', 'notes', 'note_source', 
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-                .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
+                .with_columns(pl.col('playlist_name', 'owner.display_name', 
                                      'apprx_song_position_in_playlist', 'track.artists.name', 'country',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
@@ -652,8 +652,7 @@ if songs_together_toggle:
     
                 st.dataframe(df
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
-                                'owner.display_name', 'track.artists.name', 'track.artists.id',
-                                )
+                                'owner.display_name', 'track.artists.name',                                 )
                         .unique()
                         .sort('playlist_name', 'song_number')
                         
