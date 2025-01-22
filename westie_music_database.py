@@ -203,12 +203,13 @@ if song_locator_toggle:
                             )
 
         else:
-                pl.Config.set_streaming_chunk_size(10)
+                # pl.Config.set_streaming_chunk_size(10)
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
+                        .filter(pl.col(),
+                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                                 # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
@@ -221,13 +222,13 @@ if song_locator_toggle:
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
-                                #connies notes
-                                'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
+                                #connie's notes
+                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                         .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
                                         'apprx_song_position_in_playlist', 'track.artists.name', 'country',
-                                                #connies notes
-                                                'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
-                                                'Familiarity', 'Transition type'
+                                                #connie's notes
+                                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                                # 'Familiarity', 'Transition type'
                                                 ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                         pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                         hit_terms = pl.col('playlist_name')
@@ -245,7 +246,7 @@ if song_locator_toggle:
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
-                pl.Config.set_streaming_chunk_size(1000)
+                # pl.Config.set_streaming_chunk_size(1000)
         st.markdown(f"#### ")
         
 
