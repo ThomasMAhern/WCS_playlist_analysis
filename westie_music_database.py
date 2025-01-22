@@ -187,7 +187,7 @@ if song_locator_toggle:
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         with song_col2:
-                countries_selectbox = st.multiselect("Country:", countries)
+                countries_selectbox = st.text_input("Country: ").lower().split(',')
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
                 # anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
@@ -213,7 +213,7 @@ if song_locator_toggle:
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                                 # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                                # pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('country').str.to_lowercase().str.contains_any(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
                                 )
