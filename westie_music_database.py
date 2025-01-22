@@ -4,7 +4,7 @@ import psutil
 
 avail_threads = pl.threadpool_size()
 
-pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100).set_streaming_chunk_size(1000)
+pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100).set_streaming_chunk_size(100)
 st.text(f"{avail_threads}")
 
 regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
