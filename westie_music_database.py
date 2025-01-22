@@ -208,8 +208,7 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        .filter(pl.col(),
-                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
+                        .filter(pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                                 # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
@@ -223,7 +222,8 @@ if song_locator_toggle:
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
                                 #connie's notes
-                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
+                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
+                                )
                         .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
                                         'apprx_song_position_in_playlist', 'track.artists.name', 'country',
                                                 #connie's notes
