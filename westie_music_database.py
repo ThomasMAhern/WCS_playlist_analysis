@@ -260,7 +260,8 @@ if playlist_locator_toggle:
         with playlist_col2:
                 dj_input = st.text_input("DJ name:").lower()
         
-        if any(val for val in [playlist_input, song_input, dj_input]):
+        # if any(val for val in [playlist_input, song_input, dj_input]):
+        if st.button("Search playlists", type="primary"):
                 st.dataframe(df
                         .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
@@ -316,7 +317,8 @@ if search_dj_toggle:
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
-        else:
+        # else:
+        if st.button("Search djs", type="primary"):
                 st.dataframe(df
                         .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
                                 |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
