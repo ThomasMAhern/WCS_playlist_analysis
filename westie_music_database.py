@@ -203,7 +203,7 @@ if song_locator_toggle:
                             )
 
         # else:
-        if st.button("Search", type="primary"):
+        if st.button("Search songs", type="primary"):
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
@@ -757,7 +757,7 @@ if lyrics_toggle:
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
                 
-        if st.button("Search", type="primary"):
+        if st.button("Search lyrics", type="primary"):
                 st.dataframe(df_lyrics
                 .join(df.select('song_url', 
                                 song = pl.col('track.name'), 
