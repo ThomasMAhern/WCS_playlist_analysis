@@ -245,7 +245,9 @@ if song_locator_toggle:
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
+                pl.Config.set_streaming_chunk_size(1000)
         st.markdown(f"#### ")
+        
 
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("💿 Find a Playlist")
