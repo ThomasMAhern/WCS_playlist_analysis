@@ -220,17 +220,18 @@ if song_locator_toggle:
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                        'apprx_song_position_in_playlist', 'track.artists.id', 'notes', 'note_source', 
+                        'apprx_song_position_in_playlist', 
+                        # 'track.artists.id', 'notes', 'note_source', 
                                 #connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
-                        .with_columns(pl.col('playlist_name', 'track.artists.id', 'owner.display_name', 
+                        .with_columns(pl.col('playlist_name', 'owner.display_name', 
                                         'apprx_song_position_in_playlist', 'track.artists.name', 'country',
                                                 #connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                                 # 'Familiarity', 'Transition type'
                                                 ).list.unique().list.drop_nulls().list.sort().list.head(50),
-                                        pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
+                                        # pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                         hit_terms = pl.col('playlist_name')
                                                         .list.join(', ')
                                                         .str.to_lowercase()
