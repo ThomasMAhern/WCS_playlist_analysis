@@ -27,7 +27,7 @@ def wcs_specific(df_):
 
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_playlist_data():
-        return (pl.scan_parquet('data_playlists_*.parquet')
+        return (pl.scan_parquet('data_playlists_*.parquet', low_memory=True)
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
       .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
