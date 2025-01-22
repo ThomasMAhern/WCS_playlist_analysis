@@ -213,7 +213,7 @@ if song_locator_toggle:
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                                 # ~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                                pl.col('country').str.to_lowercase().str.contains_any(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('country').str.to_lowercase().str.contains_any(countries_selectbox), #courtesy of Franzi M.
                                 pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
                                 )
