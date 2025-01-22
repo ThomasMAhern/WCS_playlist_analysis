@@ -221,7 +221,7 @@ if song_locator_toggle:
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
-                        # 'track.artists.id', 'notes', 'note_source', 
+                        # 'notes', 'note_source', 
                                 #connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
@@ -620,13 +620,13 @@ if songs_together_toggle:
         #                         )
         #         .with_columns(pair = pl.concat_list('pair1', 'pair2'))
         #         .explode('pair')
-        #         .select('pair', 'playlist_name', 'owner.display_name', 'track.artists.id',
+        #         .select('pair', 'playlist_name', 'owner.display_name', 
         #                 )
         #         .drop_nulls()
         #         .unique()
         #         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
         #         .group_by('pair')
-        #         .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 'track.artists.id',
+        #         .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 
         #                 )
         #         .with_columns(pl.col('playlist_name').list.unique(),
         #                         pl.col('owner.display_name').list.unique())
@@ -652,7 +652,8 @@ if songs_together_toggle:
     
                 st.dataframe(df
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
-                                'owner.display_name', 'track.artists.name',                                 )
+                                'owner.display_name', 'track.artists.name', 
+                                )
                         .unique()
                         .sort('playlist_name', 'song_number')
                         
