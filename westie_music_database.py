@@ -2,10 +2,10 @@ import streamlit as st
 import polars as pl
 import psutil
 
-avail_threads = pl.threadpool_size()
+# avail_threads = pl.threadpool_size()
 
-pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100).set_streaming_chunk_size(100)
-st.text(f"{avail_threads}")
+pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
+# st.text(f"{avail_threads}")
 
 regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
@@ -179,6 +179,7 @@ top_songs = top_songs()
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("🎵 Find a Song")
 if song_locator_toggle:
+        
         song_col1, song_col2 = st.columns(2)
         with song_col1:
                 song_input = st.text_input("Song name:").lower()
@@ -202,6 +203,7 @@ if song_locator_toggle:
                             )
 
         else:
+                pl.Config.set_streaming_chunk_size(10)
                 st.dataframe(df
                         .join(df_notes,
                                 how='full',
