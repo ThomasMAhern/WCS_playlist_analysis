@@ -190,7 +190,7 @@ if song_locator_toggle:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
-                anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
+                anti_playlist_input = st.text_input("And not song/artist/dj/playlist/country").lower().split(',')
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
@@ -208,7 +208,7 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        .filter(~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
+                        .filter(~pl.concat_str(pl.all(), separator=' ').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
