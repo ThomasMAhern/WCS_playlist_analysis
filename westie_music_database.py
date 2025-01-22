@@ -195,14 +195,14 @@ if song_locator_toggle:
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
-        if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
-                # st.text('preloaded')
-                st.dataframe(top_songs, 
-                                 column_config={"song_url": st.column_config.LinkColumn()}
-                            )
-
-        else:
+        # if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
+        #     ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+        #         # st.text('preloaded')
+        #         st.dataframe(top_songs, 
+        #                          column_config={"song_url": st.column_config.LinkColumn()}
+        #                     )
+        if st.button("Search", type="primary"):
+        # else:
                 # pl.Config.set_streaming_chunk_size(10)
                 st.dataframe(df
                         .join(df_notes,
