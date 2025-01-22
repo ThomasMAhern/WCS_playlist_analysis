@@ -255,17 +255,17 @@ playlist_locator_toggle = st.toggle("💿 Find a Playlist")
 if playlist_locator_toggle:
         playlist_col1, playlist_col2 = st.columns(2)
         with playlist_col1:
-                playlist_input = st.text_input("Playlist name:").lower()
-                song_input = st.text_input("Contains the song:").lower()
+                playlist_input = st.text_input("Playlist name:").lower().split(',')
+                song_input = st.text_input("Contains the song:").lower().split(',')
         with playlist_col2:
-                dj_input = st.text_input("DJ name:").lower()
+                dj_input = st.text_input("DJ name:").lower().split(',')
         
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
                 st.dataframe(df
-                        .filter(pl.col('playlist_name').str.to_lowercase().str.contains(playlist_input),
-                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
-                                pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input))
+                        .filter(pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
+                                pl.col('track.name').str.to_lowercase().str.contains_any(song_input),
+                                pl.col('owner.display_name').str.to_lowercase().str.contains_any(dj_input))
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
