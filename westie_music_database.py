@@ -774,10 +774,11 @@ if lyrics_toggle:
                                                 .list.eval(pl.element().str.to_lowercase())
                                                 .list.unique(),
                         )
-                .sort(pl.col('matched_lyrics').list.len(), descending=True)
+                
                 .group_by(pl.all().exclude('song_url')) #otherwise there will be multiple rows for each song variation
                 .agg('song_url')
                 .with_columns(pl.col('song_url').list.get(0)) #otherwise multiple urls will be smashed together
+                .sort(pl.col('matched_lyrics').list.len(), 'playlist_count', 'dj_count', descending=True)
                 .head(100)
                 .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
