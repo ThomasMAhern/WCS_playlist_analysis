@@ -761,7 +761,7 @@ if lyrics_toggle:
                 
         if st.button("Search lyrics", type="primary"):
                 st.dataframe(df_lyrics
-                .join(df.select('song_url', 'playlist_count', 'dj_count'
+                .join(df.select('song_url', 'playlist_count', 'dj_count',
                                 song = pl.col('track.name'), 
                                 artist = pl.col('track.artists.name')).unique(), 
                         how='left', on=['song', 'artist'])
