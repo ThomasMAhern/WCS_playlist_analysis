@@ -188,15 +188,15 @@ if song_locator_toggle:
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
-                added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):")
-                track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):")
+                added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
+                track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-            ''.join(countries_selectbox) + added_2_playlist_date + track_release_date).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+            ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
@@ -214,8 +214,8 @@ if song_locator_toggle:
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                                pl.col('added_at').dt.to_string().str.contains(added_2_playlist_date), #courtesy of Franzi M.
-                                pl.col('track.album.release_date').dt.to_string().str.contains(track_release_date), #courtesy of James B.
+                                pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date), #courtesy of Franzi M.
+                                pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date), #courtesy of James B.
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
