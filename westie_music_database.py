@@ -778,8 +778,8 @@ if lyrics_toggle:
                 .group_by(pl.all().exclude('song_url')) #otherwise there will be multiple rows for each song variation
                 .agg('song_url', 'playlist_count', 'dj_count',)
                 .with_columns(pl.col('song_url').list.get(0), #otherwise multiple urls will be smashed together
-                              pl.col('playlist_count').list.sort(descending=True).list.get(0),
-                              pl.col('dj_count').list.sort(descending=True).list.get(0),
+                              playlist_count = pl.col('playlist_count').list.sort(descending=True).list.get(0),
+                              dj_count = pl.col('dj_count').list.sort(descending=True).list.get(0),
                 )
                 .sort(pl.col('matched_lyrics').list.len(), 'playlist_count', 'dj_count', descending=True)
                 .head(100)
