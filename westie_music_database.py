@@ -801,8 +801,8 @@ if lyrics_toggle:
 st.markdown("#### ")
 st.link_button('Add your info!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
-st.link_button('Follow me so I can add you to the database!',
-               'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
+# st.link_button('Follow me so I can add you to the database!',
+#                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
 st.link_button('Find a WCS class near you!',
                url='https://www.affinityswing.com/classes')
 st.link_button('Westie App Events Calendar',
