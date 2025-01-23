@@ -22,7 +22,10 @@ def wcs_specific(df_):
           .filter(~(pl.col('playlist_name').str.contains(regex_year_first)
                   |pl.col('playlist_name').str.contains(regex_year_last)
                   |pl.col('playlist_name').str.contains(regex_year_abbreviated)
-                  |pl.col('playlist_name').str.to_lowercase().str.contains('wcs|social|party|soirée|west coast|westcoast|routine|practice|practise|westie|party|beginner|bpm|swing|novice|intermediate|comp|musicality|timing|pro show')))
+                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
+                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
+                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
+                                                            'musicality', 'timing', 'pro show'], ascii_case_insensitive=True)))
       )
 
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
@@ -208,14 +211,14 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        .filter(~pl.col('playlist_name').str.to_lowercase().str.contains_any(anti_playlist_input), #courtesy of Tobias N.
+                        .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                                pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
+                                pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
-                                pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date), #courtesy of Franzi M.
-                                pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date), #courtesy of James B.
+                                pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
@@ -263,9 +266,9 @@ if playlist_locator_toggle:
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
                 st.dataframe(df
-                        .filter(pl.col('playlist_name').str.to_lowercase().str.contains_any(playlist_input),
-                                pl.col('track.name').str.to_lowercase().str.contains_any(song_input),
-                                pl.col('owner.display_name').str.to_lowercase().str.contains_any(dj_input))
+                        .filter(pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
+                                pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
+                                pl.col('owner.display_name').str.contains_any(dj_input, ascii_case_insensitive=True))
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
