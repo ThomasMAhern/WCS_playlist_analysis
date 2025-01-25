@@ -275,14 +275,16 @@ if song_locator_toggle:
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
         
-        if st.checkbox("🏳️‍🌈"):
+        queer_toggle = st.checkbox("🏳️‍🌈")
+        if queer_toggle:
                 only_fabulous_people = queer_artists
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
-            ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things':
+            ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
+            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and not queer_toggle:
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
