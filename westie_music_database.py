@@ -11,6 +11,84 @@ regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
 regex_year_abbreviated = r"'\d{2}"
 
+#based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
+# and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
+queer_artists =[
+"Ben Abraham", "Jennifer Knapp", "Will Young", "Sam Smith",
+"Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist",
+"TJ Osborne", "Angel Olson", "Joy Oladokun", "Sufjan Stevens",
+"Evil", "KD Lang", "Izzy Heltai", "Trixie Mattel",
+"Steve Grand", "Adrianne Lenker", "Taylor Bennett", "Snow Tha Product",
+"Zebra Katz", "Shygirl", "Rob.B", "Tiger Goods",
+"Naeem", "Mykki Blanco", "Princess Nokia", "Mahawam",
+"Heems", "Saul Williams", "Kalifa", "Omar Apollo",
+"Keanan", "Drebae", "Cuee", "Junglepussy",
+"Angel Haze", "Mista Strange", "The Last Artful, Dodgr", "Dizzy Fae",
+"Kelechi", "ILoveMakonnen", "Kamaiyah", "Kidd Kenn",
+"Leikeli47", "Isaiah Rashad", "Dai Burger", "Azealia Banks",
+"Chika", "Jaboukie", "Dapper Dan Midas", "Baby Tate",
+"Kevin Abstract", "Cakes Da Killa", "IamJakeHill", "Cazwell",
+"Lil Lotus", "Lil Aaron", "Purple Crush", "Aurora",
+"St. Vincent", "Black Dresses", "Anohni", "Maggie Lindemann",
+"Scott Matthew", "Oscar and the Wolf", "Steve Lacy", "Dreamer Isioma",
+"Vaultboy", "Coco & Clair Clair", "Shamir", "Empress Of",
+"Cat Burns", "Kučka", "King Mala", "Lava La Rue",
+"Devonté Hynes", "Jessica 6", "Adore Delano", "Orion Sun",
+"PVRIS", "Japanese Breakfast", "Dorian Electra", "Yeule",
+"Christine & The Queens", "Davy Boi", "Declan McKenna", "Yungblud",
+"Jazmin Bean", "Durand Bernarr", "Keiynan Lonsdale", "Frank Ocean",
+"Noah Davis", "Serpentwithfeet", "Isaac Dunbar", "Kwaye",
+"Kyle Dion", "Janelle Monáe", "Kelela", "Jeremy Pope",
+"Syd", "Jamila Woods", "Kehlani", "070 Shake",
+"Destin Conrad", "Michelle", "Coco & Breezy", "Arlo Parks",
+"Bartees Strange", "Brayton Bowman", "Bronze Avery", "Cain Culto",
+"Olivia O'Brien", "The Muslims", "Hamed Sinno", "Wafia",
+"Remi Wolf", "Rostam", "Freddie Mercury", "Leo Kalyan",
+"Lil Darkie", "Dounia", "Dua Saleh", "Raveena",
+"Mavi Phoenix", "Ray Laurel", "Kevin Terry", "Mo Heart",
+"Resistance Revival Chorus", "James Cleveland", "Sister Rosetta Tharpe", "Tonex",
+"Donnie McClurkin", "Billy Wright", "Bessie Smith", "Frankie Jaxon",
+"Big Mama Thornton", "Johnny Mathis", "Ethel Waters", "Billie Holiday",
+"Little Richard", "Ma Rainey", "Billy Strayhorn", "Langston Hughes",
+"IAMJakeHill", "Qaadir Howard", "Whitney Houston", "Monifah",
+"Iman Jordan", "William Matthews", "Semler", "Ethel Cain",
+"Julien Baker", "Ray Boltz", "Dan Haseltine", "Vicky Beeching",
+"Kaytranada", "Amorphous", "Sophie", "MNEK",
+"Mike Q", "Woodkid", "Robert Alfons", "Bright Light Bright Lights",
+"K Flay", "Beth Ditto", "Midnight Pool Party", "Sylvester",
+"Eartheater", "Yves Tumor", "Passion Pit", "Peaches",
+"Fever Ray", "Jessica 6", "Hercules & Love Affair", "Kele Okereke",
+"Madison Rose", "Michael Medrano", "TT The Artist", "Dorian Electra",
+"Mickey Darling", "Cub Sport", "Moses Sumney", "Minute Taker",
+"Morgxn", "MUNA", "Tawnted", "The Aces",
+"Angel Olsen", "Mothica", "Peter Thomas", "Japanese Breakfast",
+"Royal & The Serpent", "Boyish", "Courtney Barnett", "Joe Talbot",
+"Le Tigre", "John Grant", "Lucy Dacus", "Big Thief",
+"Black Belt Eagle Scout", "Trixie Mattel", "Mrshll", "Holland",
+"Lionesses", "Jiae", "Wonho", "Arca",
+"Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai",
+"Snow Tha Product", "070 Shake", "Anitta", "Kali Uchis",
+"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland",
+"Princess Nokia", "Omar Apollo", "Bentley Robles", "Lauren Jauregui",
+"Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai",
+"Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black",
+"Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine",
+"Lil Nas X", "George Michael", "Freddie Mercury", "Frank Ocean",
+"David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko",
+"Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep",
+"Cardi B", "Saucy Santana", "Doechii", "Tyler, The Creator",
+"Six: The Musical", "Leave It On The Floor", "Boy George", "Village People",
+"Erasure", "Pet Shop Boys", "Skin", "Big Joanie",
+"Tyler Glenn", "Lil Lotus", "PWR BTTM", "The Muslims",
+"Special Interest", "Le Tigre", "Limp Wrist", "Mannequin Pussy",
+"Meet Me @ The Altar", "She/Her/Hers", "James Nielsen", "Max Bemis",
+"Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser",
+"Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine",
+]
+
+
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
     for _ in iterable:
@@ -69,6 +147,8 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
+#       .with_columns(queer_artist = pl.col('track.artists.name').str.contains_any(queer_artists, ascii_case_insensitive=True),
+#                     )
       )
 
 
@@ -194,6 +274,10 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
+                queer_artists = st.checkbox("🏳️‍🌈")
+        
+        if queer_artists:
+                only_fabulous_people = queer_artists
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
@@ -213,6 +297,7 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
@@ -220,7 +305,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count',)
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
