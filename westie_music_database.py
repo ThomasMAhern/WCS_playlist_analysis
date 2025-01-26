@@ -270,7 +270,7 @@ if song_locator_toggle:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
-                anti_playlist_input = st.text_input("Not in playlist:").lower().split(',')
+                anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
         
         queer_toggle = st.checkbox("🏳️‍🌈")
         if queer_toggle:
