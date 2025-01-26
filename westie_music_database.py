@@ -275,7 +275,7 @@ if song_locator_toggle:
         if queer_toggle:
                 only_fabulous_people = queer_artists
         if not queer_toggle:
-                only_fabulous_people = []
+                only_fabulous_people = ['']
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
