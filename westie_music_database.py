@@ -11,6 +11,100 @@ regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
 regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
 regex_year_abbreviated = r"'\d{2}"
 
+
+def gen(iterable):
+    '''converts iterable item to generator to save on memory'''
+    for _ in iterable:
+        yield _
+
+def wcs_specific(df_):
+  '''given a df, filter to the records most likely to be west coast swing related'''
+  return (df_.lazy()
+          .filter(~(pl.col('playlist_name').str.contains(regex_year_first)
+                  |pl.col('playlist_name').str.contains(regex_year_last)
+                  |pl.col('playlist_name').str.contains(regex_year_abbreviated)
+                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
+                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
+                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
+                                                            'musicality', 'timing', 'pro show'], ascii_case_insensitive=True)))
+      )
+
+@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
+def load_playlist_data():
+        return (pl.scan_parquet('data_playlists_*.parquet', low_memory=True)
+      .rename({'name':'playlist_name'})
+      #makes a new column filled with a date - this is good indicator if there was a set played
+      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
+                                                    pl.col('playlist_name').str.extract_all(regex_year_last),
+                                                    pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
+                                       .list.unique().list.sort(),
+                    song_url = pl.when(pl.col('track.id').is_not_null())
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
+                    playlist_url = pl.when(pl.col('playlist_id').is_not_null())
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/playlist/'), 'playlist_id')),
+                    owner_url = pl.when(pl.col('owner.id').is_not_null())
+                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner.id')),
+                    region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),
+                    country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
+      
+      #gets the counts of djs, playlists, and geographic regions a song is found in
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']),
+                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']),
+                    regions = pl.col('region').over('track.name', mapping_strategy='join')
+                                  .list.unique()
+                                  .list.sort()
+                                  .list.join(', '),
+                    countries = pl.col('country').over('track.name', mapping_strategy='join')
+                                  .list.unique()
+                                  .list.sort()
+                                  .list.join(', '),
+                    song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
+                    apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
+                                                        .then(pl.lit('beginning'))
+                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
+                                                                (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
+                                                        .then(pl.lit('middle'))
+                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
+                                                        .then(pl.lit('end')),
+                                                        )
+      .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
+                                                .then(pl.col('regions').str.split(', ').list.len())
+                                                .otherwise(0))
+      )
+
+
+@st.cache_resource
+def load_lyrics():
+        return pl.scan_parquet('song_lyrics_*.parquet')
+
+@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
+def load_notes():
+        return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
+
+@st.cache_data
+def load_countries():
+        return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
+
+@st.cache_data
+def load_stats():
+        '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
+        should make it much more responsive'''
+        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
+        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
+        playlist_count = df.select('playlist_name').unique().collect(streaming=True).shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]
+        dj_count = df.select('owner.display_name').unique().collect(streaming=True).shape[0]
+        
+        return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
+
+df = load_playlist_data()
+df_lyrics = load_lyrics()
+df_notes = load_notes()
+countries = load_countries()
+stats = load_stats()
+
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
 queer_artists =[
@@ -87,104 +181,6 @@ queer_artists =[
 "Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
 "Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine",
 ]
-
-
-def gen(iterable):
-    '''converts iterable item to generator to save on memory'''
-    for _ in iterable:
-        yield _
-
-def wcs_specific(df_):
-  '''given a df, filter to the records most likely to be west coast swing related'''
-  return (df_.lazy()
-          .filter(~(pl.col('playlist_name').str.contains(regex_year_first)
-                  |pl.col('playlist_name').str.contains(regex_year_last)
-                  |pl.col('playlist_name').str.contains(regex_year_abbreviated)
-                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
-                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
-                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
-                                                            'musicality', 'timing', 'pro show'], ascii_case_insensitive=True)))
-      )
-
-@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
-def load_playlist_data():
-        return (pl.scan_parquet('data_playlists_*.parquet', low_memory=True)
-      .rename({'name':'playlist_name'})
-      #makes a new column filled with a date - this is good indicator if there was a set played
-      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
-                                                    pl.col('playlist_name').str.extract_all(regex_year_last),
-                                                    pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
-                                       .list.unique().list.sort(),
-                    song_url = pl.when(pl.col('track.id').is_not_null())
-                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
-                    playlist_url = pl.when(pl.col('playlist_id').is_not_null())
-                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/playlist/'), 'playlist_id')),
-                    owner_url = pl.when(pl.col('owner.id').is_not_null())
-                                 .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner.id')),
-                    region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),
-                    country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
-      
-      #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']),
-                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']),
-                    regions = pl.col('region').over('track.name', mapping_strategy='join')
-                                  .list.unique()
-                                  .list.sort()
-                                  .list.join(', '),
-                    countries = pl.col('country').over('track.name', mapping_strategy='join')
-                                  .list.unique()
-                                  .list.sort()
-                                  .list.join(', '),
-                    song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
-                    apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
-                                                        .then(pl.lit('beginning'))
-                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
-                                                                (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
-                                                        .then(pl.lit('middle'))
-                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
-                                                        .then(pl.lit('end')),
-                                                        )
-      .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
-                                                .then(pl.col('regions').str.split(', ').list.len())
-                                                .otherwise(0))
-#       .with_columns(queer_artist = pl.col('track.artists.name').str.contains_any(queer_artists, ascii_case_insensitive=True),
-#                     )
-      )
-
-
-@st.cache_resource
-def load_lyrics():
-        return pl.scan_parquet('song_lyrics_*.parquet')
-
-@st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
-def load_notes():
-        return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
-
-@st.cache_data
-def load_countries():
-        return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
-
-@st.cache_data
-def load_stats():
-        '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
-        should make it much more responsive'''
-        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
-        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-        playlist_count = df.select('playlist_name').unique().collect(streaming=True).shape[0]
-        wcs_playlist_count = df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]
-        dj_count = df.select('owner.display_name').unique().collect(streaming=True).shape[0]
-        
-        return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
-
-df = load_playlist_data()
-df_lyrics = load_lyrics()
-df_notes = load_notes()
-countries = load_countries()
-stats = load_stats()
-
-
 
 
 
@@ -278,6 +274,8 @@ if song_locator_toggle:
         queer_toggle = st.checkbox("🏳️‍🌈")
         if queer_toggle:
                 only_fabulous_people = queer_artists
+        if not queer_toggle:
+                only_fabulous_people = []
         
         # if ''.join(anti_playlist_input).strip() == '':
         anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
