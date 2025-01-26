@@ -179,7 +179,8 @@ queer_artists =[
 "Meet Me @ The Altar", "She/Her/Hers", "James Nielsen", "Max Bemis",
 "Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser",
 "Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
-"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", 'Sasami', 
+'Lambrini Girls', 'Victoria Monét', 'Teddy Swims', 'Benson Boone', 'Raye', 'Chappell Roan',
 ]
 
 
@@ -356,7 +357,7 @@ if playlist_locator_toggle:
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                        .head(200).collect(streaming=True), 
+                        .head(500).collect(streaming=True), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
@@ -892,14 +893,16 @@ if lyrics_toggle:
 
 
 st.markdown("#### ")
-st.link_button('Add your info!', 
+st.link_button('Add your local DJs!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
-st.link_button('Find a WCS class near you!',
+st.link_button('📍 Find a WCS class near you!',
                url='https://www.affinityswing.com/classes')
-st.link_button('Westie App Events Calendar',
+st.link_button('📆 Westie App Events Calendar',
                'https://westie-app.dance/calendar')
+st.link_button('💃⏱️ Dance Metronome',
+               url='https://loewclan.de/metronome/')
 st.link_button('Weekenders Events Calendar',
                'https://weekenders.dance/')
 st.link_button('Leave feedback/suggestions!/Report issues/bugs', 
