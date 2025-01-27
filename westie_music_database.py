@@ -848,7 +848,8 @@ if lyrics_toggle:
                 artist_input = st.text_input("Artist:")
                 
         if st.button("Search lyrics", type="primary"):
-                st.dataframe(df_lyrics
+                st.dataframe(
+                df_lyrics
                 .join(df.select('song_url', 'playlist_count', 'dj_count',
                                 song = pl.col('track.name'), 
                                 artist = pl.col('track.artists.name')).unique(), 
