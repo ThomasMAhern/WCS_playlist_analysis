@@ -873,7 +873,7 @@ if lyrics_toggle:
                               )
                 .drop('playlist_count', 'dj_count',)
                 .unique()
-                .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True)
+                .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True, nulls_last=True)
                 .head(100)
                 .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
