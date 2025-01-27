@@ -842,7 +842,7 @@ if lyrics_toggle:
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
-                lyrics_input = st.text_input("Lyrics (comma-separated):").split(',')
+                lyrics_input = st.text_input("Lyrics (comma-separated):").lower().split(',')
                 
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
@@ -859,7 +859,8 @@ if lyrics_toggle:
                         pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
                         )
                 .with_columns(matched_lyrics = pl.col('lyrics')
-                                                .str.extract_many(lyrics_input, ascii_case_insensitive=True)
+                                                .str.to_lowercase()
+                                                .str.extract_all('|'.join(lyrics_input))
                                                 .list.eval(pl.element().str.to_lowercase())
                                                 .list.unique(),
                         )
