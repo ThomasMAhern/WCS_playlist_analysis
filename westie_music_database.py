@@ -257,7 +257,7 @@ def top_songs():
 top_songs = top_songs()
 
 #courtesy of Vishal S
-song_locator_toggle = st.toggle("🎵 Find a Song")
+song_locator_toggle = st.toggle("Find a Song 🎵")
 if song_locator_toggle:
         
         song_col1, song_col2 = st.columns(2)
@@ -339,7 +339,7 @@ if song_locator_toggle:
         
 
 #courtesy of Vishal S
-playlist_locator_toggle = st.toggle("💿 Find a Playlist")
+playlist_locator_toggle = st.toggle("Find a Playlist 💿")
 if playlist_locator_toggle:
         playlist_col1, playlist_col2 = st.columns(2)
         with playlist_col1:
@@ -391,7 +391,7 @@ djs_data = djs_data()
 
 
 #courtesy of Lino V
-search_dj_toggle = st.toggle("🎧 DJ insights")
+search_dj_toggle = st.toggle("DJ insights 🎧")
 
 if search_dj_toggle:
         dj_col1, dj_col2 = st.columns(2)
@@ -592,7 +592,7 @@ def country_data():
 
 
 #courtesy of Lino V
-geo_region_toggle = st.toggle("🌎 Geographic Insights")
+geo_region_toggle = st.toggle("Geographic Insights 🌎")
 if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
@@ -835,7 +835,7 @@ if songs_together_toggle:
 
 
 
-lyrics_toggle = st.toggle("📋 Search lyrics")
+lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
                 
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
