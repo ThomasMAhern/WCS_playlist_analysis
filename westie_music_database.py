@@ -842,7 +842,7 @@ if lyrics_toggle:
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
-                lyrics_input = [i.strip() for i in st.text_input("Lyrics (comma-separated):").split(',')]
+                lyrics_input = st.text_input("Lyrics (comma-separated):").split(',')
                 
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
