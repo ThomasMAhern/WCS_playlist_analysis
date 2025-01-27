@@ -894,7 +894,7 @@ if lyrics_toggle:
 
 
 st.markdown("#### ")
-st.link_button('Are you a DJ? Add/update your info!', 
+st.link_button('You a DJ? Add/update your info!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
