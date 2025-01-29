@@ -272,7 +272,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
-                age = st.slider("Exclude the top __ results", 0, 100000, 1000)
+                age = st.slider("Exclude the top __ results", 0, 100000, step=1000)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
