@@ -266,13 +266,14 @@ if song_locator_toggle:
                 artist_name = st.text_input("Artist name:").lower()
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
+                queer_toggle = st.checkbox("🏳️‍🌈")
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
+                age = st.slider("Exclude the top __ results", 0, 100000, 1000)
         
-        queer_toggle = st.checkbox("🏳️‍🌈")
         if queer_toggle:
                 only_fabulous_people = queer_artists
         if not queer_toggle:
@@ -933,6 +934,7 @@ st.markdown("""####
 * DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
 #### What can the Westie Music Database tell me?
+* What music was played at Budafest, but NOT at Westie Spring Thing
 * Top 1000 songs
 * Event sets
 * Most popular songs and playlists for:
