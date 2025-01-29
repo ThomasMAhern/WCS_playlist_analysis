@@ -350,8 +350,8 @@ if playlist_locator_toggle:
                 dj_input = st.text_input("DJ name:").lower().split(',')
                 anti_playlist_input2 = st.text_input("Not in playlist name: ").lower().split(',')
         
-        # if not anti_playlist_input2:
-        #         anti_playlist_input2 = ['this_is_a_bogus_value_to_hopefully_not_break_things']
+        if anti_playlist_input2 == ['']:
+                anti_playlist_input2 = ['this_is_a_bogus_value_to_hopefully_not_break_things']
                 
                 
         # if any(val for val in [playlist_input, song_input, dj_input]):
