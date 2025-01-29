@@ -279,7 +279,7 @@ if song_locator_toggle:
                 only_fabulous_people = ['']
         
         # if ''.join(anti_playlist_input).strip() == '':
-        if not anti_playlist_input:
+        if anti_playlist_input == ['']:
                 anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
