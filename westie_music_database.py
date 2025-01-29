@@ -344,8 +344,8 @@ playlist_locator_toggle = st.toggle("Find a Playlist 💿")
 if playlist_locator_toggle:
         playlist_col1, playlist_col2 = st.columns(2)
         with playlist_col1:
-                playlist_input = st.text_input("Playlist name:").lower().split(',')
                 song_input = st.text_input("Contains the song:").lower().split(',')
+                playlist_input = st.text_input("Playlist name:").lower().split(',')
         with playlist_col2:
                 dj_input = st.text_input("DJ name:").lower().split(',')
                 anti_playlist_input2 = st.text_input("Not in playlist name: ").lower().split(',')
