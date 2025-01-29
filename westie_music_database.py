@@ -347,11 +347,13 @@ if playlist_locator_toggle:
                 song_input = st.text_input("Contains the song:").lower().split(',')
         with playlist_col2:
                 dj_input = st.text_input("DJ name:").lower().split(',')
+                anti_playlist_input2 = st.text_input("Not in playlist name: ").lower().split(',')
         
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
                 st.dataframe(df
-                        .filter(pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
+                        .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
+                                pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('owner.display_name').str.contains_any(dj_input, ascii_case_insensitive=True))
                         .group_by('playlist_name', 'playlist_url')
