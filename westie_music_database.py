@@ -272,7 +272,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
-                age = st.slider("Exclude the top __ results", 0, 100000, step=1000)
+                num_results = st.slider("Exclude the top __ results", 0, 50000, step=1000)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -334,6 +334,7 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
+                        .slice(num_results)
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
