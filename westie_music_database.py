@@ -272,7 +272,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
-                num_results = st.slider("Exclude the top __ results", 0, 50000, step=1000)
+                num_results = st.slider("Exclude the top __ results", 0, 500000, step=1000)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -285,7 +285,7 @@ if song_locator_toggle:
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
-            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and not queer_toggle:
+            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle:
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
