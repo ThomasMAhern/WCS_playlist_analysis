@@ -59,28 +59,9 @@ def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
-      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name')
-                                                     .str.extract_many([pattern_yyyy_mm_dd, 
-                                                                        pattern_yyyy_dd_mm, 
-                                                                        pattern_dd_mm_yyyy, 
-                                                                        pattern_mm_dd_yyyy, 
-                                                                        pattern_yy_mm_dd, 
-                                                                        pattern_yy_dd_mm, 
-                                                                        pattern_dd_mm_yy, 
-                                                                        pattern_mm_dd_yy, 
-                                                                        pattern_dd_MMM_yyyy, 
-                                                                        pattern_MMM_dd_yyyy, 
-                                                                        pattern_yyyy_MMM_dd, 
-                                                                        pattern_yyyy_dd_MMM, 
-                                                                        pattern_dd_MMM_yy, 
-                                                                        pattern_MMM_dd_yy, 
-                                                                        pattern_yy_MMM_dd, 
-                                                                        pattern_yy_dd_MMM, 
-                                                                        pattern_mm_yy, 
-                                                                        pattern_dd_mm, 
-                                                                        pattern_yy_mm, 
-                                                                        pattern_mm_dd,])
-                                                     )
+      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
+                                                    pl.col('playlist_name').str.extract_all(regex_year_last),
+                                                    pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
                                        .list.unique().list.sort(),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
