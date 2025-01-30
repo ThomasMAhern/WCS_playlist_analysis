@@ -57,30 +57,30 @@ def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
-      .with_columns(extracted_date = pl.concat_list(pl.col('name').str.extract_all(pattern_yyyy_mm_dd),
-                                                pl.col('name').str.extract_all(pattern_yyyy_dd_mm),
-                                                pl.col('name').str.extract_all(pattern_dd_mm_yyyy),
-                                                pl.col('name').str.extract_all(pattern_mm_dd_yyyy),
+      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(pattern_yyyy_mm_dd),
+                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_dd_mm),
+                                                pl.col('playlist_name').str.extract_all(pattern_dd_mm_yyyy),
+                                                pl.col('playlist_name').str.extract_all(pattern_mm_dd_yyyy),
 
-                                                pl.col('name').str.extract_all(pattern_yy_mm_dd),
-                                                pl.col('name').str.extract_all(pattern_yy_dd_mm),
-                                                pl.col('name').str.extract_all(pattern_dd_mm_yy),
-                                                pl.col('name').str.extract_all(pattern_mm_dd_yy),
+                                                pl.col('playlist_name').str.extract_all(pattern_yy_mm_dd),
+                                                pl.col('playlist_name').str.extract_all(pattern_yy_dd_mm),
+                                                pl.col('playlist_name').str.extract_all(pattern_dd_mm_yy),
+                                                pl.col('playlist_name').str.extract_all(pattern_mm_dd_yy),
 
-                                                pl.col('name').str.extract_all(pattern_dd_MMM_yyyy),
-                                                pl.col('name').str.extract_all(pattern_MMM_dd_yyyy),
-                                                pl.col('name').str.extract_all(pattern_yyyy_MMM_dd),
-                                                pl.col('name').str.extract_all(pattern_yyyy_dd_MMM),
+                                                pl.col('playlist_name').str.extract_all(pattern_dd_MMM_yyyy),
+                                                pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yyyy),
+                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_MMM_dd),
+                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_dd_MMM),
 
-                                                pl.col('name').str.extract_all(pattern_dd_MMM_yy),
-                                                pl.col('name').str.extract_all(pattern_yy_MMM_dd),
-                                                # pl.col('name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date
-                                                # pl.col('name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date
+                                                pl.col('playlist_name').str.extract_all(pattern_dd_MMM_yy),
+                                                pl.col('playlist_name').str.extract_all(pattern_yy_MMM_dd),
+                                                # pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date
+                                                # pl.col('playlist_name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date
 
-                                                # pl.col('name').str.extract_all(pattern_mm_yy),
-                                                # pl.col('name').str.extract_all(pattern_dd_mm),
-                                                # pl.col('name').str.extract_all(pattern_yy_mm),
-                                                # pl.col('name').str.extract_all(pattern_mm_dd),
+                                                # pl.col('playlist_name').str.extract_all(pattern_mm_yy),
+                                                # pl.col('playlist_name').str.extract_all(pattern_dd_mm),
+                                                # pl.col('playlist_name').str.extract_all(pattern_yy_mm),
+                                                # pl.col('playlist_name').str.extract_all(pattern_mm_dd),
                                                 )
                            .list.unique(),
                     song_url = pl.when(pl.col('track.id').is_not_null())
