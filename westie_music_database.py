@@ -265,13 +265,13 @@ if song_locator_toggle:
                 song_input = st.text_input("Song name:").lower()
                 artist_name = st.text_input("Artist name:").lower()
                 dj_input = st.text_input("DJ/user name:").lower()
-                playlist_input = st.text_input("Playlist name (try 'late night', '80', or 'beginner'):").lower().split(',')
+                playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
-                anti_playlist_input = st.text_input("Not in playlist name:").lower().split(',')
+                anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
                 num_results = st.slider("Exclude the top __ results", 0, 111000, step=1000)
         
         if queer_toggle:
