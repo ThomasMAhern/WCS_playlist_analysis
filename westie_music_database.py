@@ -7,19 +7,15 @@ import psutil
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 # st.text(f"{avail_threads}")
 
-regex_year_first = r'\d{2,4}[.\-/ ]?\d{1,2}[.\-/ ]?\d{1,2}'
-regex_year_last = r'\d{1,2}[.\-/ ]?\d{1,2}[.\-/ ]?\d{2,4}'
-regex_year_abbreviated = r"'\d{2}"
+pattern_yyyy_mm_dd = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
+pattern_yyyy_dd_mm = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])\b'
+pattern_dd_mm_yyyy = r'\b(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])[-/.](?:19|20)\d{2}\b'
+pattern_mm_dd_yyyy = r'\b(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:19|20)\d{2}\b'
 
-pattern_yyyy_mm_dd = r'\b(?:19|20)\d{2}[-/.](?:(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])|(?:0[13-9]|1[0-2])-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8]))\b'
-pattern_yyyy_dd_mm = r'\b(?:19|20)\d{2}[-/.](?:(?:0[1-9]|[12]\d|3[01])-(?:0[1-9]|1[0-2])|(?:0[1-9]|[12]\d|30)-(?:0[13-9]|1[0-2])|(?:0[1-9]|1\d|2[0-8])-(?:02))\b'
-pattern_dd_mm_yyyy = r'\b(?:(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])|(?:0[1-9]|[12]\d|30)[-/.](?:0[13-9]|1[0-2])|(?:0[1-9]|1\d|2[0-8])[-/.](?:02))[-/.](?:19|20)\d{2}\b'
-pattern_mm_dd_yyyy = r'\b(?:(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])|(?:0[13-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|30)|(?:02)[-/.](?:0[1-9]|1\d|2[0-8]))[-/.](?:19|20)\d{2}\b'
-
-pattern_yy_mm_dd = r'\b\d{2}[-/.](?:(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])|(?:0[13-9]|1[0-2])-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8]))\b'
-pattern_yy_dd_mm = r'\b\d{2}[-/.](?:(?:0[1-9]|[12]\d|3[01])-(?:0[1-9]|1[0-2])|(?:0[1-9]|[12]\d|30)-(?:0[13-9]|1[0-2])|(?:0[1-9]|1\d|2[0-8])-(?:02))\b'
-pattern_dd_mm_yy = r'\b(?:(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])|(?:0[1-9]|[12]\d|30)[-/.](?:0[13-9]|1[0-2])|(?:0[1-9]|1\d|2[0-8])[-/.](?:02))[-/.]\d{2}\b'
-pattern_mm_dd_yy = r'\b(?:(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])|(?:0[13-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|30)|(?:02)[-/.](?:0[1-9]|1\d|2[0-8]))[-/.]\d{2}\b'
+pattern_yy_mm_dd = r'\b\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
+pattern_yy_dd_mm = r'\b\d{2}[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])\b'
+pattern_dd_mm_yy = r'\b(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])[-/.]\d{2}\b'
+pattern_mm_dd_yy = r'\b(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])[-/.]\d{2}\b'
 
 pattern_dd_MMM_yyyy = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:19|20)\d{2}\b'
 pattern_MMM_dd_yyyy = r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:19|20)\d{2}\b'
@@ -35,6 +31,8 @@ pattern_mm_yy = r'\b(?:0[1-9]|1[0-2])[-/. ]\d{2}\b'
 pattern_dd_mm = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ](?:0[1-9]|1[0-2])\b'
 pattern_yy_mm = r'\b\d{2}[-/. ](?:0[1-9]|1[0-2])\b'
 pattern_mm_dd = r'\b(?:0[1-9]|1[0-2])[-/. ](?:0[1-9]|[12]\d|3[01])\b'
+
+pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
 
 def gen(iterable):
@@ -59,10 +57,32 @@ def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
-      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(regex_year_last),
-                                                    pl.col('playlist_name').str.extract_all(regex_year_last),
-                                                    pl.col('playlist_name').str.extract_all(regex_year_abbreviated),)
-                                       .list.unique().list.sort(),
+      .with_columns(extracted_date = pl.concat_list(pl.col('name').str.extract_all(pattern_yyyy_mm_dd),
+                                                pl.col('name').str.extract_all(pattern_yyyy_dd_mm),
+                                                pl.col('name').str.extract_all(pattern_dd_mm_yyyy),
+                                                pl.col('name').str.extract_all(pattern_mm_dd_yyyy),
+
+                                                pl.col('name').str.extract_all(pattern_yy_mm_dd),
+                                                pl.col('name').str.extract_all(pattern_yy_dd_mm),
+                                                pl.col('name').str.extract_all(pattern_dd_mm_yy),
+                                                pl.col('name').str.extract_all(pattern_mm_dd_yy),
+
+                                                pl.col('name').str.extract_all(pattern_dd_MMM_yyyy),
+                                                pl.col('name').str.extract_all(pattern_MMM_dd_yyyy),
+                                                pl.col('name').str.extract_all(pattern_yyyy_MMM_dd),
+                                                pl.col('name').str.extract_all(pattern_yyyy_dd_MMM),
+
+                                                pl.col('name').str.extract_all(pattern_dd_MMM_yy),
+                                                pl.col('name').str.extract_all(pattern_yy_MMM_dd),
+                                                # pl.col('name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date
+                                                # pl.col('name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date
+
+                                                # pl.col('name').str.extract_all(pattern_mm_yy),
+                                                # pl.col('name').str.extract_all(pattern_dd_mm),
+                                                # pl.col('name').str.extract_all(pattern_yy_mm),
+                                                # pl.col('name').str.extract_all(pattern_mm_dd),
+                                                )
+                           .list.unique(),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
@@ -960,7 +980,7 @@ st.markdown("""####
 * DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
 #### What can the Westie Music Database tell me?
-* What music was played at Budafest, but NOT at Westie Spring Thing
+* What music was played at Budafest, but NOT at Westie Spring Thing (Courtesy of Nicole!)
 * Top 1000 songs
 * Event sets
 * Most popular songs and playlists for:
