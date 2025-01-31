@@ -34,6 +34,17 @@ pattern_mm_dd = r'\b(?:0[1-9]|1[0-2])[-/. ](?:0[1-9]|[12]\d|3[01])\b'
 
 pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
+actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', 'chrisbloecker', '7r53jcujuc31b9bmur1kdk6j8', '11124055499', 
+'1154418581', 'lanyc13', 'idcmp2', 'james93uk', 'jacinthe.r', '1214584555', '216rwad76ay2yufv6wdksnbvi', 'lutynka', 
+'1185428002', 'ichikoo', '1181723092', '1229065119', '11164785980', 'rafalzonk', '11170824661', '1114726702', 'sepgod', 
+'blitzemp', '1195256212', 'vincentmoi54', 'saf2ousfteo2zwin3ysb71uc4', 'gj39mpctu2splzc3yjov5ph80', 'stoune', '1136143824', 
+'225x7krl3utkpzg34gw3lhycy', 'timo-2000-de', 'aennabanaenas', '21nse7ljtz2chhqdqi7onh4zi', 'armand1989', '1167150164', 
+'1121756047', 'tourflo', 'drjessdc', 'califf_wcs', 'kthiran', '1136143824', '11156835879', 'ahammar', 'foo7pbdux9qf50en3fnl1hnqk', 
+'vgvttofujh6h2qhz1dllwipgw', 'rhoades.elaine', '11149778648', '11168063242', '1262866465', '1227130632', 
+'31ww73dlraaawzixnk5xic7zn5d4', '1112522347', 'kfal92', 'hasskt', '21n5wwkfegd4ssz2xjaunjcja', '1160072156', 'siverin', 
+'31crk5spdq5bwf2niasjvmazkcee', '31cadxxcjjyxtogwamke25v5ljaq', '31px4eoamsjrpiptxvptk2mc3yx4', '1112824750', '12134184020', 
+'21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng', 
+'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', ]
 
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
@@ -111,11 +122,17 @@ def load_playlist_data():
                                                         .then(pl.lit('middle'))
                                                         .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
                                                         .then(pl.lit('end')),
-                    social_dance_set = pl.when(pl.col('extracted_date').list.len().gt(0)
+                    actual_social_set = pl.when(pl.col('extracted_date').list.len().gt(0)
                                                | pl.col('playlist_name').str.contains_any(['social', 'party', 'soir'], 
                                                                                  ascii_case_insensitive=True))
                                          .then(True)
                                          .otherwise(False),
+                    actual_wcs_dj = pl.when(pl.col('owner.id').str.contains_any(actual_wcs_djs, ascii_case_insensitive=True)
+                                            | pl.col('owner.display_name').eq('Connie Wang') 
+                                            | pl.col('owner.display_name').eq('Koichi Tsunoda') 
+                                            )
+                                      .then(True)
+                                      .otherwise(False)
                                                         )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
@@ -798,7 +815,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
                 st.dataframe(df
-                             .filter(pl.col('social_dance_set')==True)
+                             .filter(pl.col('actual_social_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                                 'owner.display_name', 'track.artists.name', 
                                 )
