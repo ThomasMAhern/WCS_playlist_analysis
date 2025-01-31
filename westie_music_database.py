@@ -45,7 +45,7 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 '31ww73dlraaawzixnk5xic7zn5d4', '1112522347', 'kfal92', 'hasskt', '21n5wwkfegd4ssz2xjaunjcja', '1160072156', 'siverin', 
 '31crk5spdq5bwf2niasjvmazkcee', '31cadxxcjjyxtogwamke25v5ljaq', '31px4eoamsjrpiptxvptk2mc3yx4', '1112824750', '12134184020', 
 '21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng', 
-'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', ]
+'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', '11149862781']
 
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
@@ -340,7 +340,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
-                num_results = st.slider("Exclude the top __ results", 0, 111000, step=1000)
+                num_results = st.slider("Skip the top __ results", 0, 111000, step=1000)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -508,8 +508,23 @@ if search_dj_toggle:
                         .collect(streaming=True), 
                         column_config={"owner_url": st.column_config.LinkColumn()}
                         )
-        
-        
+                
+                
+                
+                st.text(f"Music unique to _{id_input}_")
+                st.dataframe(djs_music.join(others_music, 
+                                        how='anti', 
+                                        on=['track.name', 'owner.display_name', 
+                                                'dj_count', 'playlist_count', 'song_url'])
+                        .group_by(pl.all().exclude('playlist_name'))
+                        .agg('playlist_name')
+                        .sort('playlist_count', descending=True)
+                        .filter(pl.col('dj_count').eq(1))
+                        .head(100)
+                        .collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
+                
         # elif dj_id:
                 st.text(f"Popular music _{id_input}_ doesn't play")
                 ##too much data now that we have more music, that list is blowing up the streamlit
@@ -534,24 +549,6 @@ if search_dj_toggle:
                         .with_columns(pl.col('owner.display_name').list.head(50))
                         .sort('dj_count', 'playlist_count', descending=True)
                         .head(200)
-                        .collect(streaming=True), 
-                        column_config={"song_url": st.column_config.LinkColumn()})
-        
-        
-        
-        
-        
-        
-                st.text(f"Music unique to _{id_input}_")
-                st.dataframe(djs_music.join(others_music, 
-                                        how='anti', 
-                                        on=['track.name', 'owner.display_name', 
-                                                'dj_count', 'playlist_count', 'song_url'])
-                        .group_by(pl.all().exclude('playlist_name'))
-                        .agg('playlist_name')
-                        .sort('playlist_count', descending=True)
-                        .filter(pl.col('dj_count').eq(1))
-                        .head(100)
                         .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
