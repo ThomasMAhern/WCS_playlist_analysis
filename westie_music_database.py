@@ -56,7 +56,6 @@ def wcs_specific(df_):
   return (df_.lazy()
           .filter(~(pl.col('actual_social_set').eq(True)
                   |pl.col('actual_wcs_dj').eq(True)
-                  |pl.col('playlist_name').str.contains(regex_year_abbreviated)
                   |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
                                                             'practice', 'practise', 'westie', 'party', 'beginner', 
                                                             'bpm', 'swing', 'novice', 'intermediate', 'comp', 
