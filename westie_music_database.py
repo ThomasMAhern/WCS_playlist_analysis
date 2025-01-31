@@ -54,8 +54,8 @@ def gen(iterable):
 def wcs_specific(df_):
   '''given a df, filter to the records most likely to be west coast swing related'''
   return (df_.lazy()
-          .filter(~(pl.col('playlist_name').str.contains(regex_year_first)
-                  |pl.col('playlist_name').str.contains(regex_year_last)
+          .filter(~(pl.col('actual_social_set').eq(True)
+                  |pl.col('actual_wcs_dj').eq(True)
                   |pl.col('playlist_name').str.contains(regex_year_abbreviated)
                   |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
                                                             'practice', 'practise', 'westie', 'party', 'beginner', 
