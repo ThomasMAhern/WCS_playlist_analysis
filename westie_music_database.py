@@ -276,8 +276,8 @@ st.markdown(f"#### ")
 data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
-        num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(df._fetch(num_records), 
+        # num_records = st.slider("How many records?", 1, 1000, step=50)
+        st.dataframe(df.collect(streaming=True).sample(1000), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
