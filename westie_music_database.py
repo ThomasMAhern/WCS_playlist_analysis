@@ -258,7 +258,7 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
+st.text("Please let it finish processing before running subsequent queries, otherwise it may crash :(\n")
 
 st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
