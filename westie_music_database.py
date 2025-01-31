@@ -112,7 +112,7 @@ def load_playlist_data():
                                                         .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
                                                         .then(pl.lit('end')),
                     social_dance_set = pl.when(pl.col('extracted_date').list.len().gt(0)
-                                               | pl.col('name').str.contains_any(['social', 'party', 'soir'], 
+                                               | pl.col('playlist_name').str.contains_any(['social', 'party', 'soir'], 
                                                                                  ascii_case_insensitive=True))
                                          .then(True)
                                          .otherwise(False),
