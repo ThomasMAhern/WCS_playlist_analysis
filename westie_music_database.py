@@ -269,14 +269,16 @@ st.markdown(f"#### ")
 
 
 
-
-
+@st.cache_data
+def sample_of_raw_data():
+        return df._fetch(100000).sample(1000)
+sample_of_raw_data = sample_of_raw_data()
 
 data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         # num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(df._fetch(100000).sample(1000), 
+        st.dataframe(sample_of_raw_data, 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
