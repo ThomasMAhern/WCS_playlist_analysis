@@ -74,15 +74,15 @@ def load_playlist_data():
 
                                                 pl.col('playlist_name').str.extract_all(pattern_dd_MMM_yy),
                                                 pl.col('playlist_name').str.extract_all(pattern_yy_MMM_dd),
-                                                # pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date
-                                                # pl.col('playlist_name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date
+                                                # pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date :(
+                                                # pl.col('playlist_name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date :(
 
                                                 # pl.col('playlist_name').str.extract_all(pattern_mm_yy),
                                                 # pl.col('playlist_name').str.extract_all(pattern_dd_mm),
                                                 # pl.col('playlist_name').str.extract_all(pattern_yy_mm),
                                                 # pl.col('playlist_name').str.extract_all(pattern_mm_dd),
                                                 )
-                           .list.unique(),
+                                        .list.unique(),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
@@ -111,6 +111,11 @@ def load_playlist_data():
                                                         .then(pl.lit('middle'))
                                                         .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
                                                         .then(pl.lit('end')),
+                    social_dance_set = pl.when(pl.col('extracted_date').list.len().gt(0)
+                                               | pl.col('name').str.contains_any(['social', 'party', 'soir'], 
+                                                                                 ascii_case_insensitive=True))
+                                         .then(True)
+                                         .otherwise(False),
                                                         )
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
@@ -793,6 +798,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
                 st.dataframe(df
+                             .filter(pl.col('social_dance_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                                 'owner.display_name', 'track.artists.name', 
                                 )
@@ -838,6 +844,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play before _{song_input}_:")
         
                 st.dataframe(df
+                             .filter(pl.col('social_dance_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 'owner.display_name', 'track.artists.name')
                         .unique()
                         .sort('playlist_name', 'song_number')
