@@ -51,17 +51,6 @@ def gen(iterable):
     for _ in iterable:
         yield _
 
-def wcs_specific(df_):
-  '''given a df, filter to the records most likely to be west coast swing related'''
-  return (df_.lazy()
-          .filter(pl.col('actual_social_set').eq(True)
-                  |pl.col('actual_wcs_dj').eq(True)
-                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
-                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
-                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
-                                                            'musicality', 'timing', 'pro show'], ascii_case_insensitive=True))
-      )
-
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
@@ -138,6 +127,16 @@ def load_playlist_data():
                                                 .otherwise(0))
       )
 
+def wcs_specific(df_):
+  '''given a df, filter to the records most likely to be west coast swing related'''
+  return (df_.lazy()
+          .filter(pl.col('actual_social_set').eq(True)
+                  |pl.col('actual_wcs_dj').eq(True)
+                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
+                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
+                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
+                                                            'musicality', 'timing', 'pro show'], ascii_case_insensitive=True))
+      )
 
 @st.cache_resource
 def load_lyrics():
