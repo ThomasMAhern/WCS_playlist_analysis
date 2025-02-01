@@ -263,8 +263,9 @@ st.text("Please let it finish processing before running subsequent queries, othe
 st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
-st.write(f"{stats[6]:,}   Westies/DJs\n\n") st.link_button('You a DJ? Add your info!', 
-                                                           url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
+st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+st.link_button('You a DJ? Add your info!', 
+                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 
 st.markdown(f"#### ")
 
