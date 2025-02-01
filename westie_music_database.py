@@ -814,7 +814,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
     
                 st.dataframe(df
-                             .filter(pl.col('actual_social_set')==True)
+                        .filter(pl.col('actual_social_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                                 'owner.display_name', 'track.artists.name', 
                                 )
@@ -860,7 +860,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play before _{song_input}_:")
         
                 st.dataframe(df
-                             .filter(pl.col('social_dance_set')==True)
+                             .filter(pl.col('actual_social_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 'owner.display_name', 'track.artists.name')
                         .unique()
                         .sort('playlist_name', 'song_number')
