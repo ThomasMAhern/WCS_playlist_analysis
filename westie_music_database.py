@@ -949,8 +949,9 @@ if lyrics_toggle:
                 artist_input = st.text_input("Artist:")
                 anti_lyrics_input = st.text_input("Not in lyrics:").lower().split(',')
         
-        if anti_lyrics_input == ['']
+        if anti_lyrics_input == ['']:
                 anti_lyrics_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
+        
         if st.button("Search lyrics", type="primary"):
                 st.dataframe(
                 df_lyrics
