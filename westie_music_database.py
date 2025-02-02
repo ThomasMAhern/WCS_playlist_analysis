@@ -375,6 +375,7 @@ if song_locator_toggle:
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                (pl.col('bpm').gt(bpm_slider[0]) & pl.col('bpm').lt(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
