@@ -129,7 +129,10 @@ def load_playlist_data():
       .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
       .with_columns(pl.when(pl.col('bpm').gt(138))
                       .then(pl.col('bpm')/2)
+                      .when(pl.col('bpm').is_null())
+                      .then(pl.lit(0))
                       .otherwise(pl.col('bpm'))
+                      
                    )
 )
 
