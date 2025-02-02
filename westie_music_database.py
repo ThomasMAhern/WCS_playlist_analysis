@@ -947,6 +947,7 @@ if lyrics_toggle:
                 
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
+                anti_lyrics_input = st.text_input("Not in lyrics:").lower().split(',')
                 
         if st.button("Search lyrics", type="primary"):
                 st.dataframe(
@@ -955,7 +956,8 @@ if lyrics_toggle:
                                 song = pl.col('track.name'), 
                                 artist = pl.col('track.artists.name')).unique(), 
                         how='left', on=['song', 'artist'])
-                .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
+                .filter(~pl.col('lyrics').str.contains_any(anti_lyrics_input, ascii_case_insensitive=True),, 
+                        pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
                         pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
                         pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
                         )
