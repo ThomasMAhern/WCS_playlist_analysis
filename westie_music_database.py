@@ -135,10 +135,13 @@ def load_playlist_data():
                       
                    )
       #memory tricks
-      .with_columns(pl.col('tracks.total').cast(pl.UInt16),
+      .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.UInt8),
                     pl.col('bpm').cast(pl.UInt16),
-                    pl.col(['song_url', 'playlist_url']).cast(pl.Categorical())
+                    pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
+                            'countries', 'region', 'country', 'regions', 'countries', 
+                        #     'playlist_name', 
+                            ]).cast(pl.Categorical())
                     )
 )
 
