@@ -306,10 +306,10 @@ def top_songs():
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                     'apprx_song_position_in_playlist', 'notes', 'note_source', 
+                     'apprx_song_position_in_playlist', 'notes', 'note_source'
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 
@@ -320,8 +320,8 @@ def top_songs():
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count',))
+                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
+                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm'))
                 .sort('matching_playlist_count', descending=True)
                 .head(1000).collect(streaming=True)
                 )
@@ -378,7 +378,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count',)
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
@@ -401,8 +401,8 @@ if song_locator_toggle:
                                                         .list.unique()
                                                         .list.sort(),
                                         )
-                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
-                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
+                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
+                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
