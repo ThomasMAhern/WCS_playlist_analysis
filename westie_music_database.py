@@ -93,8 +93,8 @@ def load_playlist_data():
                     country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']).cast(pl.UInt32),
-                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']).cast(pl.UInt32),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']).cast(pl.UInt16),
+                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']).cast(pl.UInt16),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
@@ -289,6 +289,29 @@ st.markdown(f"#### ")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @st.cache_data
 def sample_of_raw_data():
         return df._fetch(100000).sample(1000)
@@ -303,6 +326,34 @@ if data_view_toggle:
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -343,6 +394,7 @@ def top_songs():
                 .head(1000).collect(streaming=True)
                 )
 top_songs = top_songs()
+
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song 🎵")
@@ -432,6 +484,42 @@ if song_locator_toggle:
         st.markdown(f"#### ")
         
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("Find a Playlist 💿")
 if playlist_locator_toggle:
@@ -461,6 +549,30 @@ if playlist_locator_toggle:
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -657,6 +769,19 @@ if search_dj_toggle:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 @st.cache_data
 def region_data():
     return (df
@@ -687,8 +812,6 @@ def country_data():
 
 
 
-
-
 #courtesy of Lino V
 geo_region_toggle = st.toggle("Geographic Insights 🌎")
 if geo_region_toggle:
@@ -715,7 +838,6 @@ if geo_region_toggle:
         
         st.dataframe(europe._fetch(50000), 
                         column_config={"song_url": st.column_config.LinkColumn()})
-
 
 
 
@@ -764,6 +886,33 @@ if geo_region_toggle:
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -936,6 +1085,34 @@ if songs_together_toggle:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
                 
@@ -984,6 +1161,25 @@ if lyrics_toggle:
                 .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
