@@ -342,6 +342,7 @@ if song_locator_toggle:
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
+                bpm_slider = st.slider("BPM:", 0.0, 150.0, (0, 150.0))
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
