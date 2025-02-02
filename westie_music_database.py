@@ -446,6 +446,15 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
+                        #add bpm
+                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                        .with_columns(pl.when(pl.col('bpm').gt(140))
+                                        .then(pl.col('bpm')/2)
+                                        .when(pl.col('bpm').is_null())
+                                        .then(pl.lit(0.0))
+                                        .otherwise(pl.col('bpm'))
+                                        
+                                        )
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
@@ -484,14 +493,6 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
-                        #add bpm
-                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.when(pl.col('bpm').gt(140))
-                                        .then(pl.col('bpm')/2)
-                                        .when(pl.col('bpm').is_null())
-                                        .then(pl.lit(0.0))
-                                        .otherwise(pl.col('bpm'))
-                                        )
                         .slice(num_results)
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
