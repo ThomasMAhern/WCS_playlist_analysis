@@ -126,6 +126,7 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
+      .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
       )
 
 def wcs_specific(df_):
@@ -258,7 +259,7 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("Please let it finish processing before running subsequent queries, otherwise it may crash :(\n")
+st.text("Please be gentle, I crash easily :(\n")
 
 st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
