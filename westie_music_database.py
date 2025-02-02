@@ -127,7 +127,6 @@ def load_playlist_data():
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
       .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-      .with_columns(pl.col('bpm').cast(pl.Int8))
       .with_columns(pl.when(pl.col('bpm').gt(138))
                       .then(pl.col('bpm')/2)
                       .otherwise(pl.col('bpm'))
