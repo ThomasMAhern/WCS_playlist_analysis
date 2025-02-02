@@ -365,7 +365,8 @@ if song_locator_toggle:
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
-            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle:
+            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle and
+            bpm_slider[0]==0 and bpm_slider[1]==150:
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
@@ -825,15 +826,16 @@ if songs_together_toggle:
     
         if (song_input_prepped + artist_name_input).strip() != '':
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
-    
+                st.link_button("Andreas' connected-songs visualization!",
+                                'https://loewclan.de/song-galaxy/')
                 st.dataframe(df
-                        .filter(pl.col('actual_social_set')==True)
+                        .filter(pl.col('actual_social_set')==True,
+                                )
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                                 'owner.display_name', 'track.artists.name', 
                                 )
                         .unique()
                         .sort('playlist_name', 'song_number')
-                        
                         .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
                                                 .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                                                         pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
