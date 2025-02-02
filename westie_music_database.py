@@ -319,8 +319,6 @@ if data_view_toggle:
                                 .when(pl.col('bpm').is_null())
                                 .then(pl.lit(0.0))
                                 .otherwise(pl.col('bpm'))
-                                )
-                                
                                 ), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
