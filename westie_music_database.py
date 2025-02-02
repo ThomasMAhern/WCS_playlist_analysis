@@ -946,8 +946,7 @@ if geo_region_toggle:
 songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
-        st.link_button("Andreas' connected-songs visualization!",
-                                'https://loewclan.de/song-galaxy/')
+        
         song_combo_col1, song_combo_col2 = st.columns(2)
         with song_combo_col1:
                 song_input = st.text_input("Song Name/ID:")
@@ -1086,6 +1085,8 @@ if songs_together_toggle:
                         .head(100).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
+        st.link_button("Andreas' connected-songs visualization!",
+                                'https://loewclan.de/song-galaxy/')
         st.markdown(f"#### ")
 
 
