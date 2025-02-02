@@ -372,6 +372,14 @@ def top_songs():
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
+                 #add bpm
+                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                .with_columns(pl.when(pl.col('bpm').gt(140))
+                                .then(pl.col('bpm')/2)
+                                .when(pl.col('bpm').is_null())
+                                .then(pl.lit(0.0))
+                                .otherwise(pl.col('bpm'))
+                                )
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
@@ -389,15 +397,7 @@ def top_songs():
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
-                #add bpm
-                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                .with_columns(pl.when(pl.col('bpm').gt(140))
-                                .then(pl.col('bpm')/2)
-                                .when(pl.col('bpm').is_null())
-                                .then(pl.lit(0.0))
-                                .otherwise(pl.col('bpm'))
-                                
-                                )
+                
                 .head(1000).collect(streaming=True)
                 )
 top_songs = top_songs()
