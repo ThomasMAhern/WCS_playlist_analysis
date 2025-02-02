@@ -365,8 +365,7 @@ if song_locator_toggle:
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
-            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle and
-            bpm_slider[0]==0 and bpm_slider[1]==150:
+            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle and bpm_slider[0]==0 and bpm_slider[1]==150:
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
