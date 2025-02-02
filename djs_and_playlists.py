@@ -148,6 +148,23 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
+#       .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+#       .with_columns(pl.when(pl.col('bpm').gt(140))
+#                       .then(pl.col('bpm')/2)
+#                       .when(pl.col('bpm').is_null())
+#                       .then(pl.lit(0.0))
+#                       .otherwise(pl.col('bpm'))
+#                    )
+      #memory tricks
+      .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
+                    pl.col('geographic_region_count', 'gain').cast(pl.Int8),
+                    pl.col('bpm').cast(pl.UInt16),
+                #     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
+                #             'location', 'countries', 'regions',
+                # #             'region', 'country', 
+                # #         #     'playlist_name', 
+                #             ]).cast(pl.Categorical())
+                    )
       )
 
 def wcs_specific(df_):
