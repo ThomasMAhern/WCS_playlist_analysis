@@ -148,6 +148,14 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
+      .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+      .with_columns(pl.when(pl.col('bpm').gt(140))
+                      .then(pl.col('bpm')/2)
+                      .when(pl.col('bpm').is_null())
+                      .then(pl.lit(0.0))
+                      .otherwise(pl.col('bpm'))
+                      
+                   )
       )
 
 def wcs_specific(df_):
@@ -315,6 +323,27 @@ if data_view_toggle:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
 
@@ -460,6 +489,30 @@ if playlist_locator_toggle:
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -658,6 +711,28 @@ if search_dj_toggle:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @st.cache_data
 def region_data():
     return (df
@@ -685,8 +760,6 @@ def country_data():
                  .sort('country')
                  .collect(streaming=True)
                  )
-
-
 
 
 
@@ -765,6 +838,29 @@ if geo_region_toggle:
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -922,6 +1018,34 @@ if songs_together_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
