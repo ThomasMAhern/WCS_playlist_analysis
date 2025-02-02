@@ -306,20 +306,24 @@ st.markdown(f"#### ")
 
 @st.cache_data
 def sample_of_raw_data():
-        return df._fetch(100000).sample(1000)
+        return (df
+                .join(pl.scan_parquet('data_song_bpm.parquet'), 
+                      how='left', on=['track.name', 'track.artists.name'])
+                .with_columns(pl.when(pl.col('bpm').gt(140))
+                        .then(pl.col('bpm')/2)
+                        .when(pl.col('bpm').is_null())
+                        .then(pl.lit(0.0))
+                        .otherwise(pl.col('bpm'))
+                        )
+                ._fetch(100000).sample(1000)
+                     )
 sample_of_raw_data = sample_of_raw_data()
 
 data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         # num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(sample_of_raw_data.join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                     .with_columns(pl.when(pl.col('bpm').gt(140))
-                                .then(pl.col('bpm')/2)
-                                .when(pl.col('bpm').is_null())
-                                .then(pl.lit(0.0))
-                                .otherwise(pl.col('bpm'))
-                                ), 
+        st.dataframe(sample_of_raw_data, 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
