@@ -946,6 +946,8 @@ if geo_region_toggle:
 songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
+        st.link_button("Andreas' connected-songs visualization!",
+                                'https://loewclan.de/song-galaxy/')
         song_combo_col1, song_combo_col2 = st.columns(2)
         with song_combo_col1:
                 song_input = st.text_input("Song Name/ID:")
@@ -1000,8 +1002,6 @@ if songs_together_toggle:
     
         if (song_input_prepped + artist_name_input).strip() != '':
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
-                st.link_button("Andreas' connected-songs visualization!",
-                                'https://loewclan.de/song-galaxy/')
                 st.dataframe(df
                         .filter(pl.col('actual_social_set')==True,
                                 )
