@@ -2,28 +2,6 @@ import streamlit as st
 import polars as pl
 import psutil
 
-st.markdown("# You've found an old link")
-st.markdown("#### ")
-st.link_button('New, updated link!', 
-                   url='https://wcs-music-database.streamlit.app/')
-st.link_button('You could also click this one', 
-                   url='https://wcs-music-database.streamlit.app/')
-st.link_button("Definitely don't click this one", 
-                   url='https://wcs-music-database.streamlit.app/')
-st.link_button('This link is fine though.', 
-                   url='https://wcs-music-database.streamlit.app/')
-st.link_button('This one is just spam', 
-                   url='https://wcs-music-database.streamlit.app/')
-st.markdown("#### ")
-st.markdown("#### ")
-st.markdown("#### ")
-st.markdown("## I'll keep this as backup, but you want the one with newer features")
-st.markdown("#### ")
-st.link_button('Newer, sexier features, CLICK ME', 
-                   url='https://wcs-music-database.streamlit.app/')
-st.markdown("#### ")
-st.markdown("#### ")
-st.markdown("#### ")
 # avail_threads = pl.threadpool_size()
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
@@ -67,7 +45,7 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 '31ww73dlraaawzixnk5xic7zn5d4', '1112522347', 'kfal92', 'hasskt', '21n5wwkfegd4ssz2xjaunjcja', '1160072156', 'siverin', 
 '31crk5spdq5bwf2niasjvmazkcee', '31cadxxcjjyxtogwamke25v5ljaq', '31px4eoamsjrpiptxvptk2mc3yx4', '1112824750', '12134184020', 
 '21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng', 
-'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', ]
+'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', '11149862781']
 
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
@@ -115,8 +93,8 @@ def load_playlist_data():
                     country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']),
-                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']).cast(pl.UInt16),
+                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']).cast(pl.UInt16),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
@@ -148,24 +126,17 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
-#       .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-#       .with_columns(pl.when(pl.col('bpm').gt(140))
-#                       .then(pl.col('bpm')/2)
-#                       .when(pl.col('bpm').is_null())
-#                       .then(pl.lit(0.0))
-#                       .otherwise(pl.col('bpm'))
-#                    )
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
-                    pl.col('geographic_region_count', 'gain').cast(pl.Int8),
-                    pl.col('bpm').cast(pl.UInt16),
+                    pl.col('geographic_region_count').cast(pl.Int8),
+                #     pl.col('bpm').cast(pl.UInt16),
                 #     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                 #             'location', 'countries', 'regions',
                 # #             'region', 'country', 
                 # #         #     'playlist_name', 
                 #             ]).cast(pl.Categorical())
                     )
-      )
+)
 
 def wcs_specific(df_):
   '''given a df, filter to the records most likely to be west coast swing related'''
@@ -297,14 +268,39 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("Note: this database lacks most of the non-spotify playlists - but if you know a DJ, pass this to them and tell them they should put their playlists on spotify so we can add them to the collection! (a separate playlist by date is easiest for me ;) )\n")
+st.text("Please be gentle, I crash easily :(\n")
 
 st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
 st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+st.link_button('You a DJ? Add your info!', 
+                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 
 st.markdown(f"#### ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -317,11 +313,24 @@ data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         # num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(sample_of_raw_data, 
+        st.dataframe(sample_of_raw_data.join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                     .with_columns(pl.when(pl.col('bpm').gt(140))
+                                .then(pl.col('bpm')/2)
+                                .when(pl.col('bpm').is_null())
+                                .then(pl.lit(0.0))
+                                .otherwise(pl.col('bpm'))
+                                ), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
+
+
+
+
+
+
+
 
 
 
@@ -363,10 +372,18 @@ def top_songs():
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                 #add bpm
+                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                .with_columns(pl.when(pl.col('bpm').gt(140))
+                                .then(pl.col('bpm')/2)
+                                .when(pl.col('bpm').is_null())
+                                .then(pl.lit(0.0))
+                                .otherwise(pl.col('bpm'))
+                                )
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                     'apprx_song_position_in_playlist', 'notes', 'note_source', 
+                     'apprx_song_position_in_playlist', 'notes', 'note_source',
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 
@@ -377,12 +394,14 @@ def top_songs():
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count',))
+                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
+                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
+                
                 .head(1000).collect(streaming=True)
                 )
 top_songs = top_songs()
+
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song 🎵")
@@ -395,12 +414,14 @@ if song_locator_toggle:
                 dj_input = st.text_input("DJ/user name:").lower()
                 playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
+                
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
-                num_results = st.slider("Exclude the top __ results", 0, 111000, step=1000)
+                num_results = st.slider("Skip the top __ results", 0, 111000, step=1000)
+                bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -413,7 +434,7 @@ if song_locator_toggle:
 
         if (song_input + artist_name + dj_input + ''.join(playlist_input) + ''.join(anti_playlist_input) +
             ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
-            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle:
+            ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle and bpm_slider[0]==0 and bpm_slider[1]==150:
                 # st.text('preloaded')
                 st.dataframe(top_songs, 
                                  column_config={"song_url": st.column_config.LinkColumn()}
@@ -425,7 +446,17 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
+                        #add bpm
+                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                        .with_columns(pl.when(pl.col('bpm').gt(140))
+                                        .then(pl.col('bpm')/2)
+                                        .when(pl.col('bpm').is_null())
+                                        .then(pl.lit(0.0))
+                                        .otherwise(pl.col('bpm'))
+                                        
+                                        )
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
@@ -435,7 +466,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count',)
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
@@ -458,8 +489,8 @@ if song_locator_toggle:
                                                         .list.unique()
                                                         .list.sort(),
                                         )
-                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 
-                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms'))
+                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
+                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
@@ -468,6 +499,42 @@ if song_locator_toggle:
                         )
         st.markdown(f"#### ")
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #courtesy of Vishal S
 playlist_locator_toggle = st.toggle("Find a Playlist 💿")
@@ -595,7 +662,6 @@ if search_dj_toggle:
         
         
         # elif dj_id:
-                st.text(f"Popular music _{id_input}_ doesn't play")
                 ##too much data now that we have more music, that list is blowing up the streamlit
                 others_music = (df
                                 .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
@@ -610,22 +676,7 @@ if search_dj_toggle:
                         .unique()
                         )
                 
-                st.dataframe(others_music.join(djs_music, how='anti', 
-                                on=['track.name', 'dj_count', 
-                                'playlist_count', 'song_url'])
-                        .group_by(pl.all().exclude('owner.display_name'))
-                        .agg('owner.display_name')
-                        .with_columns(pl.col('owner.display_name').list.head(50))
-                        .sort('dj_count', 'playlist_count', descending=True)
-                        .head(200)
-                        .collect(streaming=True), 
-                        column_config={"song_url": st.column_config.LinkColumn()})
-        
-        
-        
-        
-        
-        
+                
                 st.text(f"Music unique to _{id_input}_")
                 st.dataframe(djs_music.join(others_music, 
                                         how='anti', 
@@ -636,6 +687,20 @@ if search_dj_toggle:
                         .sort('playlist_count', descending=True)
                         .filter(pl.col('dj_count').eq(1))
                         .head(100)
+                        .collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
+                
+                
+                st.text(f"Popular music _{id_input}_ doesn't play")
+                st.dataframe(others_music.join(djs_music, how='anti', 
+                                on=['track.name', 'dj_count', 
+                                'playlist_count', 'song_url'])
+                        .group_by(pl.all().exclude('owner.display_name'))
+                        .agg('owner.display_name')
+                        .with_columns(pl.col('owner.display_name').list.head(50))
+                        .sort('dj_count', 'playlist_count', descending=True)
+                        .head(200)
                         .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -733,15 +798,6 @@ if search_dj_toggle:
 
 
 
-
-
-
-
-
-
-
-
-
 @st.cache_data
 def region_data():
     return (df
@@ -801,11 +857,10 @@ if geo_region_toggle:
 
 
 
-
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
-    if len(countries_selectbox) >= 2:
+    if st.button("Compare countries", type="primary") and len(countries_selectbox) >= 2:
         
         countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
                                 pl.col('dj_count').gt(3), 
@@ -847,6 +902,10 @@ if geo_region_toggle:
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
+
+
+
+
 
 
 
@@ -941,15 +1000,16 @@ if songs_together_toggle:
     
         if (song_input_prepped + artist_name_input).strip() != '':
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
-    
+                st.link_button("Andreas' connected-songs visualization!",
+                                'https://loewclan.de/song-galaxy/')
                 st.dataframe(df
-                             .filter(pl.col('actual_social_set')==True)
+                        .filter(pl.col('actual_social_set')==True,
+                                )
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
                                 'owner.display_name', 'track.artists.name', 
                                 )
                         .unique()
                         .sort('playlist_name', 'song_number')
-                        
                         .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
                                                 .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
                                                                         pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
@@ -989,7 +1049,7 @@ if songs_together_toggle:
                 st.markdown(f"#### Most common songs to play before _{song_input}_:")
         
                 st.dataframe(df
-                             .filter(pl.col('social_dance_set')==True)
+                             .filter(pl.col('actual_social_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 'owner.display_name', 'track.artists.name')
                         .unique()
                         .sort('playlist_name', 'song_number')
@@ -1076,11 +1136,15 @@ if lyrics_toggle:
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
-                lyrics_input = st.text_input("Lyrics (comma-separated):").lower().split(',')
+                lyrics_input = st.text_input("In lyrics:").lower().split(',')
                 
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
-                
+                anti_lyrics_input = st.text_input("Not in lyrics:").lower().split(',')
+        
+        if anti_lyrics_input == ['']:
+                anti_lyrics_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
+        
         if st.button("Search lyrics", type="primary"):
                 st.dataframe(
                 df_lyrics
@@ -1088,7 +1152,8 @@ if lyrics_toggle:
                                 song = pl.col('track.name'), 
                                 artist = pl.col('track.artists.name')).unique(), 
                         how='left', on=['song', 'artist'])
-                .filter(pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
+                .filter(~pl.col('lyrics').str.contains_any(anti_lyrics_input, ascii_case_insensitive=True),
+                        pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
                         pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
                         pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
                         )
@@ -1128,9 +1193,27 @@ if lyrics_toggle:
 
 
 
-st.markdown("#### ")
-st.link_button('You a DJ? Add your info!', 
-                   url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+st.markdown("# ")
+st.markdown("# ")
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
 st.link_button('📍 Find a WCS class near you!',
