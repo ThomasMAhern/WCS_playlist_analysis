@@ -139,7 +139,7 @@ def load_playlist_data():
                     pl.col('geographic_region_count').cast(pl.UInt8),
                     pl.col('bpm').cast(pl.UInt16),
                     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
-                            'countries', 'region', 'country', 'regions', 'countries', 
+                            'countries', 'region', 'country', 'regions', 
                         #     'playlist_name', 
                             ]).cast(pl.Categorical())
                     )
