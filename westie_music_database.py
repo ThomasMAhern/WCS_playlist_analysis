@@ -126,18 +126,10 @@ def load_playlist_data():
       .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
-      .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-      .with_columns(pl.when(pl.col('bpm').gt(140))
-                      .then(pl.col('bpm')/2)
-                      .when(pl.col('bpm').is_null())
-                      .then(pl.lit(0.0))
-                      .otherwise(pl.col('bpm'))
-                      
-                   )
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count', 'gain').cast(pl.Int8),
-                    pl.col('bpm').cast(pl.UInt16),
+                #     pl.col('bpm').cast(pl.UInt16),
                 #     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                 #             'location', 'countries', 'regions',
                 # #             'region', 'country', 
@@ -321,7 +313,15 @@ data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         # num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(sample_of_raw_data, 
+        st.dataframe(sample_of_raw_data.join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                     .with_columns(pl.when(pl.col('bpm').gt(140))
+                                .then(pl.col('bpm')/2)
+                                .when(pl.col('bpm').is_null())
+                                .then(pl.lit(0.0))
+                                .otherwise(pl.col('bpm'))
+                                )
+                                
+                                ), 
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
@@ -391,6 +391,15 @@ def top_songs():
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
+                #add bpm
+                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                .with_columns(pl.when(pl.col('bpm').gt(140))
+                                .then(pl.col('bpm')/2)
+                                .when(pl.col('bpm').is_null())
+                                .then(pl.lit(0.0))
+                                .otherwise(pl.col('bpm'))
+                                
+                                )
                 .head(1000).collect(streaming=True)
                 )
 top_songs = top_songs()
@@ -477,6 +486,14 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
+                        #add bpm
+                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                        .with_columns(pl.when(pl.col('bpm').gt(140))
+                                        .then(pl.col('bpm')/2)
+                                        .when(pl.col('bpm').is_null())
+                                        .then(pl.lit(0.0))
+                                        .otherwise(pl.col('bpm'))
+                                        )
                         .slice(num_results)
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
