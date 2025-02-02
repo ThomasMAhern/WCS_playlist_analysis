@@ -130,7 +130,7 @@ def load_playlist_data():
       .with_columns(pl.when(pl.col('bpm').gt(138))
                       .then(pl.col('bpm')/2)
                       .when(pl.col('bpm').is_null())
-                      .then(pl.lit(0))
+                      .then(pl.lit(0.0))
                       .otherwise(pl.col('bpm'))
                       
                    )
