@@ -134,6 +134,7 @@ def load_playlist_data():
                       .otherwise(pl.col('bpm'))
                       
                    )
+      .with_columns(pl.col('bpm').cast(pl.UInt16))
 )
 
 def wcs_specific(df_):
