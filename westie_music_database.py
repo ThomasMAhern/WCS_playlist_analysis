@@ -93,8 +93,8 @@ def load_playlist_data():
                     country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
       
       #gets the counts of djs, playlists, and geographic regions a song is found in
-      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']),
-                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']),
+      .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']).cast(pl.UInt32),
+                    playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']).cast(pl.UInt32),
                     regions = pl.col('region').over('track.name', mapping_strategy='join')
                                   .list.unique()
                                   .list.sort()
@@ -127,14 +127,19 @@ def load_playlist_data():
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0))
       .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-      .with_columns(pl.when(pl.col('bpm').gt(138))
+      .with_columns(pl.when(pl.col('bpm').gt(140))
                       .then(pl.col('bpm')/2)
                       .when(pl.col('bpm').is_null())
                       .then(pl.lit(0.0))
                       .otherwise(pl.col('bpm'))
                       
                    )
-      .with_columns(pl.col('bpm').cast(pl.UInt16))
+      #memory tricks
+      .with_columns(pl.col('tracks.total').cast(pl.UInt16),
+                    pl.col('geographic_region_count').cast(pl.UInt8),
+                    pl.col('bpm').cast(pl.UInt16),
+                    pl.col(['song_url', 'playlist_url']).cast(pl.Categorical())
+                    )
 )
 
 def wcs_specific(df_):
