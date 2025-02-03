@@ -183,7 +183,7 @@ def load_stats():
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
-st.write(f"rest of defs aret good")
+# st.write(f"rest of defs aret good")
 
 df = load_playlist_data()
 # st.write(f"df is good")
