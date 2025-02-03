@@ -144,6 +144,7 @@ def load_playlist_data():
                             ]).cast(pl.Categorical())
                     )
 )
+st.write(f"def is good")
 
 def wcs_specific(df_):
   '''given a df, filter to the records most likely to be west coast swing related'''
@@ -182,11 +183,18 @@ def load_stats():
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
+st.write(f"rest of defs aret good")
+
 df = load_playlist_data()
+st.write(f"df is good")
 df_lyrics = load_lyrics()
+st.write(f"lyrics is good")
 df_notes = load_notes()
+st.write(f"notes is good")
 countries = load_countries()
+st.write(f"countries is good")
 # stats = load_stats()
+# st.write(f"stats is good")
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
