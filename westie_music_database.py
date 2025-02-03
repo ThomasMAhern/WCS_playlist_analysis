@@ -105,13 +105,6 @@ def load_playlist_data():
                                   .list.sort()
                                   .list.join(', '),
                     song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
-                    apprx_song_position_in_playlist = pl.when((pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
-                                                        .then(pl.lit('beginning'))
-                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
-                                                                (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
-                                                        .then(pl.lit('middle'))
-                                                        .when((pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
-                                                        .then(pl.lit('end')),
                     actual_social_set = pl.when(pl.col('extracted_date').list.len().gt(0)
                                                | pl.col('playlist_name').str.contains_any(['social', 'party', 'soir'], 
                                                                                  ascii_case_insensitive=True))
@@ -124,15 +117,26 @@ def load_playlist_data():
                                       .then(True)
                                       .otherwise(False)
                                                         )
-      .with_columns(geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
+      .with_columns(apprx_song_position_in_playlist = pl.when(pl.col('actual_social_set').eq(True),
+                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
+                                                        .then(pl.lit('beginning'))
+                                                        .when(pl.col('actual_social_set').eq(True),
+                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
+                                                                (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
+                                                        .then(pl.lit('middle'))
+                                                        .when(pl.col('actual_social_set').eq(True),
+                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
+                                                        .then(pl.lit('end')),
+                    geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
-                                                .otherwise(0))
+                                                .otherwise(0)),
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
                     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                             'location', 'countries', 'regions',
-                        #     'region', 'country', 
+                        #     'region', 
+                        #     'country', 
                         #     'playlist_name', 
                             ]).cast(pl.Categorical())
                     )
