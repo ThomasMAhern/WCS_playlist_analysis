@@ -322,7 +322,8 @@ st.markdown(f"#### ")
 @st.cache_data
 def sample_of_raw_data():
         return (df
-                .select(pl.col('track.artists.name').cast(pl.String))
+                .select('track.name', 
+                        pl.col('track.artists.name').cast(pl.String))
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                       how='left', on=['track.name', 'track.artists.name'])
                 .select(pl.col('track.artists.name').cast(pl.Categorical))
