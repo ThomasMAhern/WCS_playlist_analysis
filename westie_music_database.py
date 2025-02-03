@@ -138,9 +138,9 @@ def load_playlist_data():
                     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                             'location',
                             'region', 
-                        #     'country', 
-                        #     'playlist_name', 
-                        #     'owner.display_name',
+                            'country', 
+                            'playlist_name', 
+                            'owner.display_name',
                             ]).cast(pl.Categorical())
                     )
 )
@@ -176,9 +176,9 @@ def load_stats():
         wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
         artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
         wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-        playlist_count = df.select('playlist_name').unique().collect(streaming=True).shape[0]
-        wcs_playlist_count = df.pipe(wcs_specific).select('playlist_name').collect(streaming=True).unique().shape[0]
-        dj_count = df.select('owner.display_name').unique().collect(streaming=True).shape[0]
+        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
+        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
