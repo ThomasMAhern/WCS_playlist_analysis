@@ -5,7 +5,7 @@ import psutil
 # avail_threads = pl.threadpool_size()
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
-pl.enable_string_cache()
+pl.enable_string_cache() #for Categoricals
 # st.text(f"{avail_threads}")
 
 pattern_yyyy_mm_dd = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
@@ -137,7 +137,7 @@ def load_playlist_data():
                     pl.col('geographic_region_count').cast(pl.Int8),
                     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                             'location',
-                        #     'region', 
+                            'region', 
                         #     'country', 
                             'playlist_name', 
                             'owner.display_name',
@@ -840,7 +840,7 @@ if geo_region_toggle:
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
         europe = (df
                 #  .pipe(wcs_specific)
-                .filter(pl.col('region') == region_selectbox,
+                .filter(pl.col('region').cast(pl.String) == region_selectbox,
                         pl.col('geographic_region_count').eq(1))
                 .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
                 .agg(pl.col('owner.display_name').unique())
