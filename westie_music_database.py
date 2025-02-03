@@ -117,16 +117,16 @@ def load_playlist_data():
                                       .then(True)
                                       .otherwise(False)
                     )
-      .with_columns(apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) &
-                                                        ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 33)
-                                                        ).then(pl.lit('beginning')).when(
-                                                        (pl.col('actual_social_set').eq(True)) &
-                                                        ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33) &
-                                                        ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 66)
-                                                        ).then(pl.lit('middle')).when(
-                                                        (pl.col('actual_social_set').eq(True)) &
-                                                        ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 66)
-                                                        ).then(pl.lit('end')),
+      .with_columns(apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) 
+                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 33))
+                                                        .then(pl.lit('beginning'))
+                                                        .when((pl.col('actual_social_set').eq(True)) 
+                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33) 
+                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 66))
+                                                        .then(pl.lit('middle'))
+                                                        .when((pl.col('actual_social_set').eq(True)) 
+                                                                & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 66))
+                                                        .then(pl.lit('end')),
                     geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0),
@@ -1022,7 +1022,7 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 'playlist_name', 
                         'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
@@ -1065,7 +1065,7 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 'playlist_name', 
                         'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
