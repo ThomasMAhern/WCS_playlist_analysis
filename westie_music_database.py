@@ -138,7 +138,7 @@ def load_playlist_data():
                     pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
                             'location',
                             'region', 
-                        #     'country', 
+                            'country', 
                             'playlist_name', 
                             'owner.display_name',
                             ]).cast(pl.Categorical())
@@ -450,7 +450,7 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
-                                pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
@@ -858,19 +858,19 @@ if geo_region_toggle:
     
     if st.button("Compare countries", type="primary") and len(countries_selectbox) >= 2:
         
-        countries_df = df.filter(pl.col('country').str.contains_any(countries_selectbox),
+        countries_df = df.filter(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox),
                                 pl.col('dj_count').gt(3), 
                                 pl.col('playlist_count').gt(3))
 
         country_1_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[0],
-                        ~(pl.col('country') == countries_selectbox[1]),)
+                .filter(pl.col('country').cast(pl.String) == countries_selectbox[0],
+                        ~(pl.col('country').cast(pl.String) == countries_selectbox[1]),)
                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                 .unique()
                 )
         country_2_df = (countries_df
-                .filter(pl.col('country') == countries_selectbox[1],
-                        ~(pl.col('country') == countries_selectbox[0]))
+                .filter(pl.col('country').cast(pl.String) == countries_selectbox[1],
+                        ~(pl.col('country').cast(pl.String) == countries_selectbox[0]))
                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                 .unique()
                 )
