@@ -283,7 +283,7 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("Please be gentle and query slowly, I'm a delicate flower and crash easily :(\n")
+st.text("Please be gentle and query slowly, I'm a delicate 🌷 and crash easily :(\n")
 
 st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
