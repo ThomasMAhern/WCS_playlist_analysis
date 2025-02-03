@@ -475,7 +475,7 @@ if song_locator_toggle:
                                                 ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                         # pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                         hit_terms = pl.col('playlist_name')
-                                                        .cast(pl.List(pl.String))
+                                                        .cast(pl.String)
                                                         .list.join(', ')
                                                         .str.to_lowercase()
                                                         .str.extract_all('|'.join(playlist_input))
