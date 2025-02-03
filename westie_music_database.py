@@ -183,7 +183,7 @@ def load_countries():
 #         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
 df = load_playlist_data()
-# df_lyrics = load_lyrics()
+df_lyrics = load_lyrics()
 # df_notes = load_notes()
 # countries = load_countries()
 # stats = load_stats()
@@ -315,7 +315,7 @@ st.markdown(f"#### ")
 def sample_of_raw_data():
         return (df
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
-                      how='left', on=['track.name', 'track.artists.name'])
+                      how='left', on=['track.name', pl.col('track.artists.name').cast(pl.String)])
                 ._fetch(100000).sample(1000)
                 )
 sample_of_raw_data = sample_of_raw_data()
