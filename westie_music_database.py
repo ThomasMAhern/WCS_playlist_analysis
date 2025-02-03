@@ -184,7 +184,7 @@ def load_countries():
 
 df = load_playlist_data()
 df_lyrics = load_lyrics()
-# df_notes = load_notes()
+df_notes = load_notes()
 # countries = load_countries()
 # stats = load_stats()
 
