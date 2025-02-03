@@ -309,16 +309,8 @@ def sample_of_raw_data():
         return (df
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                       how='left', on=['track.name', 'track.artists.name'])
-                .with_columns(pl.when(pl.col('bpm').gt(140))
-                        .then(pl.col('bpm')/2)
-                        .when(pl.col('bpm').is_null())
-                        .then(pl.lit(0.0))
-                        .otherwise(pl.col('bpm'))
-                        )
-                .with_columns(pl.col('bpm').cast(pl.UInt8),
-                              pl.col('gain').cast(pl.Int8))
                 ._fetch(100000).sample(1000)
-                     )
+                )
 sample_of_raw_data = sample_of_raw_data()
 
 data_view_toggle = st.toggle("📊 Raw data")
@@ -380,14 +372,6 @@ def top_songs():
                         on=['track.artists.name', 'track.name'])
                  #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                .with_columns(pl.when(pl.col('bpm').gt(140))
-                                .then(pl.col('bpm')/2)
-                                .when(pl.col('bpm').is_null())
-                                .then(pl.lit(0.0))
-                                .otherwise(pl.col('bpm'))
-                                )
-                .with_columns(pl.col('bpm').cast(pl.UInt8),
-                              pl.col('gain').cast(pl.Int8))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
@@ -456,14 +440,6 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.when(pl.col('bpm').gt(140))
-                                        .then(pl.col('bpm')/2)
-                                        .when(pl.col('bpm').is_null())
-                                        .then(pl.lit(0.0))
-                                        .otherwise(pl.col('bpm'))
-                                        )
-                        .with_columns(pl.col('bpm').cast(pl.UInt8),
-                              pl.col('gain').cast(pl.Int8))
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
