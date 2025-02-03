@@ -4,7 +4,7 @@ import psutil
 
 # avail_threads = pl.threadpool_size()
 
-pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
+pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100).enable_string_cache()
 # st.text(f"{avail_threads}")
 
 pattern_yyyy_mm_dd = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
