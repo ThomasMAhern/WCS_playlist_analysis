@@ -1271,7 +1271,8 @@ st.markdown("""####
 * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
 
 #### It broke ☹️
-* Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️ It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
+* Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️ 
+* It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
 #### Errors:
 * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
