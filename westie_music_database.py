@@ -183,9 +183,9 @@ def load_countries():
 #         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
 df = load_playlist_data()
-df_lyrics = load_lyrics()
-df_notes = load_notes()
-countries = load_countries()
+# df_lyrics = load_lyrics()
+# df_notes = load_notes()
+# countries = load_countries()
 # stats = load_stats()
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
