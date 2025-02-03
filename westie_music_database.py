@@ -439,16 +439,16 @@ if song_locator_toggle:
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
                         #add bpm
-                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', pl.col('track.artists.name').cast(pl.String)])
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
-                                pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
-                                pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
-                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
-                                pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
-                                pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
+                                pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
+                                pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                                pl.col('track.name').cast(pl.String).str.to_lowercase().str.contains(song_input),
+                                pl.col('track.artists.name').cast(pl.String).str.to_lowercase().str.contains(artist_name),
+                                pl.col('playlist_name').cast(pl.String).cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
+                                pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
@@ -622,7 +622,7 @@ if search_dj_toggle:
         # else:
         if st.button("Search djs", type="primary"):
                 st.dataframe(df
-                        .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                        .filter((pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_id)
                                 |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
                                 &pl.col('playlist_name').cast(pl.String).str.to_lowercase().str.contains(dj_playlist_input),
                                 )
@@ -633,7 +633,7 @@ if search_dj_toggle:
                         'playlist_name', 
                         )
                         .with_columns(pl.col('playlist_name')
-                                .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
+                                .list.eval(pl.when(pl.element().cast(pl.String).str.to_lowercase().str.contains(dj_playlist_input))
                                                 .then(pl.element()))
                                 .list.unique()
                                 .list.drop_nulls()
@@ -657,7 +657,7 @@ if search_dj_toggle:
 
                 djs_music = (df
                         .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
-                                | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
+                                | pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_id)))
                         .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
                         .unique()
                         )
