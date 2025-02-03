@@ -699,7 +699,7 @@ if search_dj_toggle:
                 
 
         st.markdown(f"#### Compare DJ's:")
-        dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
