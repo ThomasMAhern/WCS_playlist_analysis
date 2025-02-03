@@ -129,7 +129,8 @@ def load_playlist_data():
                                                         .then(pl.lit('end')),
                     geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
-                                                .otherwise(0)),
+                                                .otherwise(0),
+                   )
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
