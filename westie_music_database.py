@@ -453,7 +453,7 @@ if song_locator_toggle:
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
-                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
+                        .agg(pl.n_unique(pl.col('playlist_name').cast(pl.String)).alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
                         # 'notes', 'note_source', 
