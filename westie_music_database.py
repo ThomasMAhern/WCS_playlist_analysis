@@ -168,25 +168,25 @@ def load_notes():
 def load_countries():
         return sorted(df.select('country').unique().drop_nulls().collect(streaming=True)['country'].to_list())
 
-# @st.cache_data
-# def load_stats():
-#         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
-#         should make it much more responsive'''
-#         song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-#         wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-#         artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
-#         wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-#         playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
-#         wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
-#         dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+@st.cache_data
+def load_stats():
+        '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
+        should make it much more responsive'''
+        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
+        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
+        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
+        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
+        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
         
-#         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
+        return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
 df = load_playlist_data()
 df_lyrics = load_lyrics()
 df_notes = load_notes()
-# countries = load_countries()
-# stats = load_stats()
+countries = load_countries()
+stats = load_stats()
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
