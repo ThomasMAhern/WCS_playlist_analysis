@@ -388,9 +388,7 @@ def top_songs():
                 .sort('matching_playlist_count', descending=True)
                 .head(1000)
                 #add bpm
-                .join(pl.scan_parquet('data_song_bpm.parquet')
-                        .filter(pl.col('bpm').ge(bpm_slider[0]) 
-                                & pl.col('bpm').le(bpm_slider[1])), 
+                .join(pl.scan_parquet('data_song_bpm.parquet'), 
                         how='left', on=['track.name', 'track.artists.name'])
                 .collect(streaming=True)
                 )
