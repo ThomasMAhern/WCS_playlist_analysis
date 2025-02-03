@@ -383,13 +383,14 @@ def top_songs():
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', ))
+                .select('track.name', 'track.artists.name', 'song_url', 'playlist_count', 'dj_count', 
+                        pl.all().exclude('track.name', 'track.artists.name', 'song_url', 'playlist_count', 'dj_count', ))
                 .sort('matching_playlist_count', descending=True)
                 .head(1000)
                 #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                         how='left', on=['track.name', 'track.artists.name'])
+                .drop('track.artists.name')
                 .collect(streaming=True)
                 )
 top_songs = top_songs()
