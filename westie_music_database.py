@@ -617,12 +617,12 @@ search_dj_toggle = st.toggle("DJ insights 🎧")
 if search_dj_toggle:
         dj_col1, dj_col2 = st.columns(2)
         with dj_col1:
-                id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)").lower().split(',')
+                id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
                 dj_id = id_input.lower().split(',')
         with dj_col2:
                 dj_playlist_input = st.text_input("DJ playlist name:").lower().split(',')
         
-        if id_input == [''] and dj_id  == [''] and dj_playlist_input == ['']:
+        if (id_input == ['']) and (dj_id  == ['']) and (dj_playlist_input == ['']):
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
