@@ -139,7 +139,7 @@ def load_playlist_data():
                             'location',
                         #     'region', 
                         #     'country', 
-                            'playlist_name', 
+                        #     'playlist_name', 
                             'owner.display_name',
                             ]).cast(pl.Categorical())
                     )
@@ -150,7 +150,7 @@ def wcs_specific(df_):
   return (df_.lazy()
           .filter(pl.col('actual_social_set').eq(True)
                   |pl.col('actual_wcs_dj').eq(True)
-                  |pl.col('playlist_name').cast(pl.String).str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
+                  |pl.col('playlist_name').str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
                                                             'practice', 'practise', 'westie', 'party', 'beginner', 
                                                             'bpm', 'swing', 'novice', 'intermediate', 'comp', 
                                                             'musicality', 'timing', 'pro show'], ascii_case_insensitive=True))
@@ -448,13 +448,13 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
-                        .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                        .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
+                                pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
@@ -475,7 +475,6 @@ if song_locator_toggle:
                                                 ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                         # pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                         hit_terms = pl.col('playlist_name')
-                                                        # .cast(pl.List(pl.String))
                                                         .list.join(', ')
                                                         .str.to_lowercase()
                                                         .str.extract_all('|'.join(playlist_input))
@@ -548,8 +547,8 @@ if playlist_locator_toggle:
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
                 st.dataframe(df
-                        .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
-                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
+                        .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
+                                pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
                         .group_by('playlist_name', 'playlist_url')
@@ -632,7 +631,7 @@ if search_dj_toggle:
                 st.dataframe(df
                         .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
                                 |pl.col('owner.id').str.contains_any(dj_id, ascii_case_insensitive=True))
-                                &pl.col('playlist_name').cast(pl.String).str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
+                                &pl.col('playlist_name').str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
                                 )
                         .group_by('owner.display_name', 'owner_url')
                         .agg(pl.n_unique('track.name').alias('song_count'),
@@ -641,9 +640,7 @@ if search_dj_toggle:
                         'playlist_name', 
                         )
                         .with_columns(pl.col('playlist_name')
-                                .list.eval(pl.when(pl.element()
-                                                   .cast(pl.String)
-                                                   .str.contains_any(dj_playlist_input, ascii_case_insensitive=True))
+                                .list.eval(pl.when(pl.element().str.contains_any(dj_playlist_input, ascii_case_insensitive=True))
                                                 .then(pl.element()))
                                 .list.unique()
                                 .list.drop_nulls()
@@ -1026,7 +1023,7 @@ if songs_together_toggle:
                         'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
-                        .filter(~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+                        .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
@@ -1069,7 +1066,7 @@ if songs_together_toggle:
                         'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
-                        .filter(~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+                        .filter(~pl.col('playlist_name').list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
