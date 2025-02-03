@@ -116,16 +116,16 @@ def load_playlist_data():
                                             )
                                       .then(True)
                                       .otherwise(False)
-                                                        )
-      .with_columns(apprx_song_position_in_playlist = pl.when(pl.col('actual_social_set').eq(True),
-                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
+                    )
+      .with_columns(apprx_song_position_in_playlist = pl.when(pl.col('actual_social_set').eq(True)
+                                                              & (pl.col('song_number')*100 / pl.col('tracks.total')) <= 33)
                                                         .then(pl.lit('beginning'))
-                                                        .when(pl.col('actual_social_set').eq(True),
-                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
+                                                        .when(pl.col('actual_social_set').eq(True)
+                                                              & (pl.col('song_number')*100 / pl.col('tracks.total')) > 33,
                                                                 (pl.col('song_number')*100 / pl.col('tracks.total')) <= 66)
                                                         .then(pl.lit('middle'))
-                                                        .when(pl.col('actual_social_set').eq(True),
-                                                              (pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
+                                                        .when(pl.col('actual_social_set').eq(True)
+                                                              & (pl.col('song_number')*100 / pl.col('tracks.total')) > 66)
                                                         .then(pl.lit('end')),
                     geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
