@@ -322,11 +322,11 @@ st.link_button('You a DJ? Add your info!',
 @st.cache_data
 def sample_of_raw_data():
         return (df
-                .select('track.name', 
+                .with_columns(
                         pl.col('track.artists.name').cast(pl.String))
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                       how='left', on=['track.name', 'track.artists.name'])
-                .select(pl.col('track.artists.name').cast(pl.Categorical))
+                .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
                 ._fetch(100000).sample(1000)
                 )
 sample_of_raw_data = sample_of_raw_data()
