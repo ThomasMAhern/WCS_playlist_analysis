@@ -186,7 +186,7 @@ df = load_playlist_data()
 df_lyrics = load_lyrics()
 df_notes = load_notes()
 countries = load_countries()
-stats = load_stats()
+# stats = load_stats()
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
