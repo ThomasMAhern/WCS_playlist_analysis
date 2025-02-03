@@ -369,9 +369,7 @@ def top_songs():
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
-                 #add bpm
-                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count',)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                      'apprx_song_position_in_playlist', 'notes', 'note_source',
@@ -385,11 +383,16 @@ def top_songs():
                                         ).list.unique().list.drop_nulls().list.sort().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
-                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
-                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
+                .select('track.name', 'song_url', 'playlist_count', 'dj_count', 
+                        pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', ))
                 .sort('matching_playlist_count', descending=True)
-                
-                .head(1000).collect(streaming=True)
+                .head(1000)
+                #add bpm
+                .join(pl.scan_parquet('data_song_bpm.parquet')
+                        .filter(pl.col('bpm').ge(bpm_slider[0]) 
+                                & pl.col('bpm').le(bpm_slider[1])), 
+                        how='left', on=['track.name', 'track.artists.name'])
+                .collect(streaming=True)
                 )
 top_songs = top_songs()
 
@@ -437,10 +440,7 @@ if song_locator_toggle:
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        #add bpm
-                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
-                                (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
@@ -450,7 +450,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         'apprx_song_position_in_playlist', 
@@ -473,11 +473,16 @@ if song_locator_toggle:
                                                         .list.unique()
                                                         .list.sort(),
                                         )
-                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
-                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
+                        .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms',
+                                pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms',))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
+                        #add bpm
+                        .join(pl.scan_parquet('data_song_bpm.parquet')
+                              .filter(pl.col('bpm').ge(bpm_slider[0]) 
+                                      & pl.col('bpm').le(bpm_slider[1])), 
+                              how='left', on=['track.name', 'track.artists.name'])
                         .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
