@@ -111,8 +111,8 @@ def load_playlist_data():
                                          .then(True)
                                          .otherwise(False),
                     actual_wcs_dj = pl.when(pl.col('owner.id').str.contains_any(actual_wcs_djs, ascii_case_insensitive=True)
-                                            | pl.col('owner.display_name').cast(pl.String).eq('Connie Wang') 
-                                            | pl.col('owner.display_name').cast(pl.String).eq('Koichi Tsunoda') 
+                                            | pl.col('owner.display_name').eq('Connie Wang') 
+                                            | pl.col('owner.display_name').eq('Koichi Tsunoda') 
                                             )
                                       .then(True)
                                       .otherwise(False)
@@ -140,7 +140,7 @@ def load_playlist_data():
                         #     'region', 
                         #     'country', 
                         #     'playlist_name', 
-                            'owner.display_name',
+                            
                             ]).cast(pl.Categorical())
                     )
 )
@@ -455,7 +455,7 @@ if song_locator_toggle:
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
-                                pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input),
+                                pl.col('owner.display_name').str.to_lowercase().str.contains(dj_input),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
@@ -550,7 +550,7 @@ if playlist_locator_toggle:
                         .filter(~pl.col('playlist_name').str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
                                 pl.col('playlist_name').str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
-                                pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                                pl.col('owner.display_name').str.contains_any(dj_input, ascii_case_insensitive=True))
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
@@ -618,20 +618,20 @@ if search_dj_toggle:
         dj_col1, dj_col2 = st.columns(2)
         with dj_col1:
                 id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
-                dj_id = id_input.lower().split(',')
+                dj_id = id_input.lower().strip()
         with dj_col2:
-                dj_playlist_input = st.text_input("DJ playlist name:").lower().split(',')
+                dj_playlist_input = st.text_input("DJ playlist name:").lower()
         
-        if (id_input == ['']) and (dj_id  == ['']) and (dj_playlist_input == ['']):
+        if (dj_id + dj_playlist_input).strip() == '':
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
         # else:
         if st.button("Search djs", type="primary"):
                 st.dataframe(df
-                        .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
-                                |pl.col('owner.id').str.contains_any(dj_id, ascii_case_insensitive=True))
-                                &pl.col('playlist_name').str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
+                        .filter((pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)
+                                |pl.col('owner.id').str.to_lowercase().str.contains(dj_id))
+                                &pl.col('playlist_name').str.to_lowercase().str.contains(dj_playlist_input),
                                 )
                         .group_by('owner.display_name', 'owner_url')
                         .agg(pl.n_unique('track.name').alias('song_count'),
@@ -640,7 +640,7 @@ if search_dj_toggle:
                         'playlist_name', 
                         )
                         .with_columns(pl.col('playlist_name')
-                                .list.eval(pl.when(pl.element().str.contains_any(dj_playlist_input, ascii_case_insensitive=True))
+                                .list.eval(pl.when(pl.element().str.to_lowercase().str.contains(dj_playlist_input))
                                                 .then(pl.element()))
                                 .list.unique()
                                 .list.drop_nulls()
@@ -657,14 +657,14 @@ if search_dj_toggle:
         # elif dj_id:
                 ##too much data now that we have more music, that list is blowing up the streamlit
                 others_music = (df
-                                .filter(~(pl.col('owner.id').str.contains_any(dj_id, ascii_case_insensitive=True)
-                                        | pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)))
+                                .filter(~(pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                        | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
                                 .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                                 )
 
                 djs_music = (df
-                        .filter((pl.col('owner.id').str.to_lowercase().str.contains_any(dj_id, ascii_case_insensitive=True)
-                                | pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)))
+                        .filter((pl.col('owner.id').str.to_lowercase().str.contains(dj_id)
+                                | pl.col('owner.display_name').str.to_lowercase().str.contains(dj_id)))
                         .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
                         .unique()
                         )
@@ -673,7 +673,7 @@ if search_dj_toggle:
                 st.text(f"Music unique to _{id_input}_")
                 st.dataframe(djs_music.join(others_music, 
                                         how='anti', 
-                                        on=['track.name', pl.col('owner.display_name').cast(pl.String), 
+                                        on=['track.name', 'owner.display_name', 
                                                 'dj_count', 'playlist_count', 'song_url'])
                         .group_by(pl.all().exclude('playlist_name'))
                         .agg('playlist_name')
@@ -699,7 +699,7 @@ if search_dj_toggle:
                 
 
         st.markdown(f"#### Compare DJ's:")
-        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        dj_list = sorted(df.select('owner.display_name').unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
@@ -714,7 +714,7 @@ if search_dj_toggle:
 
         if len(djs_selectbox) >= 2:
                 st.dataframe(df
-                        .filter(pl.col('owner.display_name').cast(pl.String).str.contains_any(djs_selectbox, ascii_case_insensitive=True))
+                        .filter(pl.col('owner.display_name').str.contains_any(djs_selectbox))
                         .group_by('owner.display_name')
                         .agg(song_count = pl.n_unique('track.name'), 
                                 playlist_count = pl.n_unique('playlist_name'), 
@@ -725,14 +725,14 @@ if search_dj_toggle:
 
 
                 dj_1_df = (df
-                        .filter(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[0],
-                                ~(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[1]),)
+                        .filter(pl.col('owner.display_name') == djs_selectbox[0],
+                                ~(pl.col('owner.display_name') == djs_selectbox[1]),)
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         .unique()
                         )
                 dj_2_df = (df
-                        .filter(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[1],
-                                ~(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[0]))
+                        .filter(pl.col('owner.display_name') == djs_selectbox[1],
+                                ~(pl.col('owner.display_name') == djs_selectbox[0]))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         .unique()
                         )
