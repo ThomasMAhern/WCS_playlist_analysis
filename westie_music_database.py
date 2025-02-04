@@ -286,13 +286,16 @@ st.markdown("## Westie Music Database:")
 st.text("Please be gentle and query slowly, I'm a delicate 🌷 and crash easily :(\n")
 
 st.text('''413,482 Songs (146,685 wcs specific)
+
 113,964 Artists (50,358 wcs specific)
+
 42,606 Playlists (15,789 wcs specific)
+
 1,277 Westies/DJs''')
 # st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 # st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 # st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
-# st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+st.write(f"{stats[6]:,}   Westies/DJs\n\n")
 st.link_button('You a DJ? Add your info!', 
                    url='https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY/edit?usp=sharing')
 
