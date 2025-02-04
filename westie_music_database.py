@@ -1222,6 +1222,7 @@ if lyrics_toggle:
 
 st.markdown("# ")
 st.markdown("# ")
+st.markdown("#### WCS resourses/apps by others:")
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
 st.link_button('📍 Find a WCS class near you!',
