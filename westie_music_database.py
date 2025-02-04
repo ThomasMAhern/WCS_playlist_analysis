@@ -193,7 +193,7 @@ df_notes = load_notes()
 # st.write(f"notes is good")
 countries = load_countries()
 # st.write(f"countries is good")
-stats = load_stats()
+# stats = load_stats()
 # st.write(f"stats is good")
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
