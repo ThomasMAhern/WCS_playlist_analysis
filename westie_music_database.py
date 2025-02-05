@@ -293,7 +293,7 @@ st.text('''413,482 Songs (146,685 wcs specific)
 # st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 # st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
 # st.write(f"{stats[6]:,}   Westies/DJs\n\n")
-st.link_button("Help by adding country info!", 
+st.link_button("Help by adding a user's country!", 
                    url='https://docs.google.com/spreadsheets/d/1YQaWwtIy9bqSNTXR9GrEy86Ix51cvon9zzHVh7sBi0A/edit?usp=sharing')
 
 # st.markdown(f"#### ")
