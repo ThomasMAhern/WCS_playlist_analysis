@@ -865,7 +865,7 @@ if geo_region_toggle:
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(europe.collect(streaming=True).head(500)), 
+        st.dataframe(europe.collect(streaming=True).head(500), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
