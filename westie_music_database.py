@@ -855,7 +855,7 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-        europe = (df
+        region_df = (df
                 #  .pipe(wcs_specific)
                 .filter(pl.col('region').cast(pl.String) == region_selectbox,
                         pl.col('geographic_region_count').eq(1))
@@ -865,7 +865,7 @@ if geo_region_toggle:
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(europe.collect(streaming=True).head(500), 
+        st.dataframe(region_df.head(500).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
