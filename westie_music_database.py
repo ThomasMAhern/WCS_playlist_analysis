@@ -283,13 +283,13 @@ st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of WCS music and playlists from DJ's, Spotify users, etc.")
 st.text("(Please be gentle and query slowly, I'm a delicate 🌷 and crash easily 🥲 )")
 
-st.text('''413,482 Songs (146,685 wcs specific)
+st.markdown('''**413,482 Songs** (146,685 wcs specific)
 
-113,964 Artists (50,358 wcs specific)
+**113,964 Artists** (50,358 wcs specific)
 
-42,606 Playlists (15,789 wcs specific)
+**42,606 Playlists** (15,789 wcs specific)
 
-1,277 Westies/DJs''')
+**1,277 Westies/DJs**''')
 # st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 # st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 # st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
