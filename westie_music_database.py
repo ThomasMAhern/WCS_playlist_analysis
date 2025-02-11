@@ -280,7 +280,7 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (Please be gentle and query slowly, I'm a delicate 🌷 and crash easily 🥲 )")
+st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (Please be gentle and query slowly, I'm a delicate 🌷 and crash easily on this amount of data 🥲 )")
 
 st.markdown('''413,482 **Songs** *(146,685 wcs specific)*
 
@@ -865,7 +865,7 @@ if geo_region_toggle:
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(europe._fetch(50000), 
+        st.dataframe(europe.collect(streaming=True).head(500)), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
