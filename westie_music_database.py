@@ -280,7 +280,7 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of WCS music and playlists from DJ's, Spotify users, etc.")
+st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc.")
 st.text("(Please be gentle and query slowly, I'm a delicate 🌷 and crash easily 🥲 )")
 
 st.markdown('''**413,482 Songs** (146,685 wcs specific)
@@ -719,7 +719,7 @@ if search_dj_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
 
-        st.markdown(f"#### Compare DJ's:")
+        st.markdown(f"#### Compare DJs:")
         dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
         # st.dataframe(df
@@ -1256,7 +1256,7 @@ st.markdown("""####
 * Add "WCS" to your playlist name
 * Add "yyyy-mm-dd" date (or variation) when you played the DJ set for a social
 * Let me know the country of a user - helps our geographic insights!
-* DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
+* DJs: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
 #### What can the Westie Music Database tell me?
 * What music was played at Budafest, but NOT at Westie Spring Thing (Courtesy of Nicole!)
@@ -1302,5 +1302,5 @@ st.markdown("""####
 * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
 
 #### Things to consider:
-* Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJ's not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
+* Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJs not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
 """)
