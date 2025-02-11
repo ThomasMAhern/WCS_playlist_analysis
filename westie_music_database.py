@@ -861,11 +861,12 @@ if geo_region_toggle:
                         pl.col('geographic_region_count').eq(1))
                 .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
                 .agg(pl.col('owner.display_name').unique())
+                .with_columns(pl.col('owner.display_name').list.head(50))
                 # .unique()
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(region_df.head(500)._fetch(500000),#.collect(streaming=True), 
+        st.dataframe(region_df.head(500).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
