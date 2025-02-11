@@ -281,7 +281,7 @@ queer_artists =[
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of WCS music and playlists from DJ's, Spotify users, etc.")
-st.text("(Please be gentle and query slowly, I'm a delicate 🌷 and crash easily :( )")
+st.text("(Please be gentle and query slowly, I'm a delicate 🌷 and crash easily 🥲 )")
 
 st.text('''413,482 Songs (146,685 wcs specific)
 
