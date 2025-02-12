@@ -845,6 +845,7 @@ def europe_region_data():
                 .filter(pl.col('region').cast(pl.String) == 'Europe',
                         pl.col('geographic_region_count').eq(1)))
 
+europe_region_data = europe_region_data()
 
 #courtesy of Lino V
 geo_region_toggle = st.toggle("Geographic Insights 🌎")
