@@ -864,7 +864,7 @@ if geo_region_toggle:
                 # .agg(pl.col('owner.display_name').unique())
                 # .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
-                .sort('dj_count', descending=True)
+                .sort('playlist_count', 'dj_count', descending=True)
                 )
         
         st.dataframe(region_df.head(1000).collect(streaming=True), 
