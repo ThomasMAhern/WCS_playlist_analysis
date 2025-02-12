@@ -514,7 +514,6 @@ if song_locator_toggle:
                 
                 playlists_text = ' '.join(song_search_df
                                         .select(pl.concat_str(pl.col('playlist_name').cast(pl.List(pl.String)).list.join(' '), separator=' '))
-                                        .explode('playlist_name')
                                         # .unique()
                                         .collect(streaming=True)
                                         ['playlist_name']
