@@ -861,7 +861,7 @@ if geo_region_toggle:
                         pl.col('geographic_region_count').eq(1))
                 .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
                 .agg(pl.col('owner.display_name'))
-                .with_columns(pl.col('owner.display_name').unique())
+                .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
                 .sort('dj_count', descending=True)
                 )
