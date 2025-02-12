@@ -855,29 +855,18 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-        region_df = (df
+        
+        region_df = (pl.scan_parquet('data_unique_per_region.parquet')
                 #  .pipe(wcs_specific)
-                .filter(pl.col('region').is_not_null(), 
-                        pl.col('region').cast(pl.String) == region_selectbox,
-                        pl.col('geographic_region_count').eq(1))
-                .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-                .agg(pl.col('owner.display_name').unique())
+                .filter(pl.col('region').cast(pl.String) == region_selectbox,
+                        # pl.col('geographic_region_count').eq(1)
+                        )
+                # .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+                # .agg(pl.col('owner.display_name').unique())
                 # .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
                 .sort('playlist_count', 'dj_count', descending=True)
                 )
-        
-        # region_df = (pl.scan_parquet('data_unique_per_region.parquet')
-        #         #  .pipe(wcs_specific)
-        #         .filter(pl.col('region').cast(pl.String) == region_selectbox,
-        #                 # pl.col('geographic_region_count').eq(1)
-        #                 )
-        #         # .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-        #         # .agg(pl.col('owner.display_name').unique())
-        #         # .with_columns(pl.col('owner.display_name').list.unique())
-        #         # .unique()
-        #         .sort('playlist_count', 'dj_count', descending=True)
-        #         )
         
         st.dataframe(region_df.head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
