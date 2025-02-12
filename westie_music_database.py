@@ -513,20 +513,21 @@ if song_locator_toggle:
                 
                 
                 playlists_text = ' '.join(song_search_df
-                                        .select(pl.col('playlist_name').cast(pl.List(pl.String)))
+                                        .select(pl.col('playlist_name').cast(pl.List(pl.String).str.to_lowercase()))
                                         .explode('playlist_name')
                                         .with_columns(pl.col('playlist_name').str.split(' '))
                                         .explode('playlist_name')
+                                        .unique()
                                         .collect(streaming=True)
                                         ['playlist_name']
                                         .to_list()
-                                        ).lower()
+                                        )
                 
                 # Generate the WordCloud
                 if playlists_text:
                         st.text('Wordcloud based on all the playlist names')
                         w = wordcloud.WordCloud(width=1800, 
-                                        height=1400, 
+                                        height=1000, 
                                         background_color="white", 
                                         # stopwords=set(STOPWORDS), 
                                         min_font_size=10).generate(playlists_text)
