@@ -512,14 +512,13 @@ if song_locator_toggle:
                         )
                 
                 
-                playlists_text = ' '.join(song_search_df
+                playlists_text = ' '.join(' '.join(song_search_df
                                         .select(pl.col('playlist_name').cast(pl.List(pl.String)))
-                                        .explode('playlist_name')
                                         .explode('playlist_name')
                                         .collect(streaming=True)
                                         ['playlist_name']
                                         .to_list()
-                                        ).lower().split(' ')
+                                        ).lower().split(' '))
                 
                 # Generate the WordCloud
                 if playlists_text:
