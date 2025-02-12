@@ -508,7 +508,6 @@ if song_locator_toggle:
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
-                        
                         )
                 
                 
@@ -527,7 +526,7 @@ if song_locator_toggle:
                 if playlists_text:
                         st.text('Playlist names wordcloud')
                         w = wordcloud.WordCloud(width=1800, 
-                                        height=1000, 
+                                        height=800, 
                                         background_color="white", 
                                         # stopwords=set(STOPWORDS), 
                                         min_font_size=10).generate(playlists_text)
