@@ -1,5 +1,5 @@
 import streamlit as st
-import wordcloud as WordCloud
+import wordcloud
 import matplotlib.pyplot as plt
 import polars as pl
 import psutil
@@ -524,7 +524,7 @@ if song_locator_toggle:
                 # Generate the WordCloud
                 if playlists_text:
                         st.text('Wordcloud based on all the playlist names')
-                        w = WordCloud(width=1800, 
+                        w = wordcloud.WordCloud(width=1800, 
                                         height=1400, 
                                         background_color="white", 
                                         # stopwords=set(STOPWORDS), 
