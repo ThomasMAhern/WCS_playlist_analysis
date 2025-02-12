@@ -511,13 +511,9 @@ if song_locator_toggle:
                         
                         )
                 
-                st.dataframe(song_search_df
-                             .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(streaming=True), 
-                        column_config={"song_url": st.column_config.LinkColumn()})
                 
                 playlists_text = ' '.join(song_search_df
-                                        .select(pl.concat_str(pl.col('playlist_name').cast(pl.List(pl.String)), separator=' '))
+                                        .select(pl.concat_str(pl.col('playlist_name').cast(pl.List(pl.String)).list.join(' '), separator=' '))
                                         .explode('playlist_name')
                                         # .unique()
                                         .collect(streaming=True)
@@ -538,6 +534,12 @@ if song_locator_toggle:
                         plt.imshow(w)
                         plt.axis('off')
                         st.pyplot()
+                        
+                st.dataframe(song_search_df
+                             .with_columns(pl.col('playlist_name').list.head(50))
+                             .head(1000).collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
         
         st.markdown(f"#### ")
         
