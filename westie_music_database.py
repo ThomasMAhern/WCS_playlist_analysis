@@ -280,15 +280,15 @@ queer_artists =[
 
 st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("Please be gentle and query slowly, I'm a delicate 🌷 and crash easily :(\n")
+st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (Please be gentle and query slowly, I'm a delicate 🌷 and crash easily on this amount of data 🥲 )")
 
-st.text('''413,482 Songs (146,685 wcs specific)
+st.markdown('''413,482 **Songs** *(146,685 wcs specific)*
 
-113,964 Artists (50,358 wcs specific)
+113,964 **Artists** *(50,358 wcs specific)*
 
-42,606 Playlists (15,789 wcs specific)
+42,606 **Playlists** *(15,789 wcs specific)*
 
-1,277 Westies/DJs''')
+1,277 **Westies/DJs**''')
 # st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
 # st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
 # st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
@@ -465,10 +465,10 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
-                        .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                        .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                                ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
-                                pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
@@ -718,7 +718,7 @@ if search_dj_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
 
-        st.markdown(f"#### Compare DJ's:")
+        st.markdown(f"#### Compare DJs:")
         dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
         
         # st.dataframe(df
@@ -855,17 +855,18 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-        europe = (df
+        region_df = (df
                 #  .pipe(wcs_specific)
                 .filter(pl.col('region').cast(pl.String) == region_selectbox,
                         pl.col('geographic_region_count').eq(1))
                 .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
                 .agg(pl.col('owner.display_name').unique())
+                # .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(europe._fetch(50000), 
+        st.dataframe(region_df._fetch(500000),#.collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
@@ -1255,7 +1256,7 @@ st.markdown("""####
 * Add "WCS" to your playlist name
 * Add "yyyy-mm-dd" date (or variation) when you played the DJ set for a social
 * Let me know the country of a user - helps our geographic insights!
-* DJ's: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
+* DJs: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
 #### What can the Westie Music Database tell me?
 * What music was played at Budafest, but NOT at Westie Spring Thing (Courtesy of Nicole!)
@@ -1301,5 +1302,5 @@ st.markdown("""####
 * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
 
 #### Things to consider:
-* Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJ's not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
+* Since the majority of data is based on user adding songs to their own playlists, user-generated vs DJ-generated, the playlists may not reflect actual played sets (except when specified). The benefit, while I work on rounding up DJs not on Spotify, is that we get to see the ground truth of what users actually enjoy (such as songs missed by the GSDJ Top 10 lists).
 """)
