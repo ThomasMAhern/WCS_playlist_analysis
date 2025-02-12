@@ -529,9 +529,10 @@ if song_locator_toggle:
                                         background_color="white", 
                                         # stopwords=set(STOPWORDS), 
                                         min_font_size=10).generate(playlists_text)
-                        plt.imshow(w)
-                        plt.axis('off')
-                        st.pyplot()
+                        fig, ax = plt.subplots()
+                        ax.imshow(w)
+                        ax.axis('off')
+                        st.pyplot(fig)
                         
                 st.dataframe(song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
