@@ -839,6 +839,11 @@ def country_data():
                  .collect(streaming=True)
                  )
 
+@st.cache_data
+def europe_region_data():
+        return (df
+                .filter(pl.col('region').cast(pl.String) == 'Europe',
+                        pl.col('geographic_region_count').eq(1)))
 
 
 #courtesy of Lino V
@@ -855,10 +860,11 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-        region_df = (df
-                #  .pipe(wcs_specific)
-                .filter(pl.col('region').cast(pl.String) == region_selectbox,
-                        pl.col('geographic_region_count').eq(1))
+        region_df = (#df
+                # #  .pipe(wcs_specific)
+                # .filter(pl.col('region').cast(pl.String) == region_selectbox,
+                #         pl.col('geographic_region_count').eq(1))
+                europe_region_data
                 .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
                 .agg(pl.col('owner.display_name').unique())
                 # .with_columns(pl.col('owner.display_name').list.unique())
@@ -866,7 +872,7 @@ if geo_region_toggle:
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(region_df._fetch(500000),#.collect(streaming=True), 
+        st.dataframe(region_df.head(500).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
