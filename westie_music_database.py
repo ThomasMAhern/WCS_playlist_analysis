@@ -524,7 +524,6 @@ if song_locator_toggle:
                 # Generate the WordCloud
                 if playlists_text:
                         st.text('Wordcloud based on all the playlist names')
-                        st.set_option('deprecation.showPyplotGlobalUse', False)
                         w = WordCloud(width=1800, 
                                         height=1400, 
                                         background_color="white", 
