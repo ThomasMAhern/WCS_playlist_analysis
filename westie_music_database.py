@@ -517,7 +517,7 @@ if song_locator_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
                 playlists_text = ' '.join(song_search_df
-                                        .select(pl.concat_str(pl.col('playlist_name'), separator=' '))
+                                        .select(pl.concat_str(pl.col('playlist_name').cast(pl.List(pl.String)), separator=' '))
                                         .explode('playlist_name')
                                         # .unique()
                                         .collect(streaming=True)
