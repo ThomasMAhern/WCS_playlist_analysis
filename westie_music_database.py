@@ -1,4 +1,6 @@
 import streamlit as st
+import wordcloud as WordCloud
+import matplotlib.pyplot as plt
 import polars as pl
 import psutil
 
@@ -484,7 +486,8 @@ if song_locator_toggle:
                                 #connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
-                        .with_columns(pl.col('playlist_name', 'owner.display_name', 
+                        .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
+                                      pl.col('owner.display_name', 
                                         'apprx_song_position_in_playlist', 'track.artists.name', 'country',
                                                 #connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
@@ -505,28 +508,36 @@ if song_locator_toggle:
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
-                        .head(1000).collect(streaming=True)
+                        
                         )
                 
-                st.dataframe(song_search_df, 
+                st.dataframe(song_search_df
+                             .with_columns(pl.col('playlist_name').list.head(50))
+                             .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
-                # word_cloud_text = ' '.join(df
-                #                         .select(pl.col('playlist_name').cast(pl.String).str.to_lowercase().str.split(' '))
-                #                         .explode('playlist_name')
-                #                         .unique()
-                #                         .collect()
-                #                         ['playlist_name']
-                #                         .to_list()
-                #                         ).lower()
+                playlists_text = ' '.join(song_search_df
+                                        .select(pl.concat_str(pl.col('playlist_name'), separator=' '))
+                                        .explode('playlist_name')
+                                        # .unique()
+                                        .collect(streaming=True)
+                                        ['playlist_name']
+                                        .to_list()
+                                        ).lower()
                 
-                # # Generate the WordCloud
-                # if word_cloud_text:
-                # w = WordCloud(width=1800, 
-                #                 height=1400, 
-                #                 background_color="white", 
-                #                 # stopwords=set(STOPWORDS), 
-                #                 min_font_size=10).generate(word_cloud_text)
+                st.text('Wordcloud based on all the playlist names')
+                # Generate the WordCloud
+                if playlists_text:
+                        st.text('Wordcloud based on all the playlist names')
+                        st.set_option('deprecation.showPyplotGlobalUse', False)
+                        w = WordCloud(width=1800, 
+                                        height=1400, 
+                                        background_color="white", 
+                                        # stopwords=set(STOPWORDS), 
+                                        min_font_size=10).generate(playlists_text)
+                        plt.imshow(w)
+                        plt.axis('off')
+                        st.pyplot()
         
         st.markdown(f"#### ")
         
