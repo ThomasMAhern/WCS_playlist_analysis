@@ -517,7 +517,7 @@ if song_locator_toggle:
                                         .explode('playlist_name')
                                         .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
                                         .explode('playlist_name')
-                                        .unique()
+                                        # .unique()
                                         .collect(streaming=True)
                                         ['playlist_name']
                                         .to_list()
