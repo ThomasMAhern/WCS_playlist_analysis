@@ -458,7 +458,7 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
-                st.dataframe(df
+                song_search_df = (df
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
@@ -505,9 +505,29 @@ if song_locator_toggle:
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
-                        .head(1000).collect(streaming=True), 
-                        column_config={"song_url": st.column_config.LinkColumn()}
+                        .head(1000).collect(streaming=True)
                         )
+                
+                st.dataframe(song_search_df, 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
+                # word_cloud_text = ' '.join(df
+                #                         .select(pl.col('playlist_name').cast(pl.String).str.to_lowercase().str.split(' '))
+                #                         .explode('playlist_name')
+                #                         .unique()
+                #                         .collect()
+                #                         ['playlist_name']
+                #                         .to_list()
+                #                         ).lower()
+                
+                # # Generate the WordCloud
+                # if word_cloud_text:
+                # w = WordCloud(width=1800, 
+                #                 height=1400, 
+                #                 background_color="white", 
+                #                 # stopwords=set(STOPWORDS), 
+                #                 min_font_size=10).generate(word_cloud_text)
+        
         st.markdown(f"#### ")
         
 
@@ -855,6 +875,7 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
+        
         region_df = (pl.scan_parquet('data_unique_per_region.parquet')
                 #  .pipe(wcs_specific)
                 .filter(pl.col('region').cast(pl.String) == region_selectbox,
@@ -864,7 +885,7 @@ if geo_region_toggle:
                 # .agg(pl.col('owner.display_name').unique())
                 # .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
-                .sort('dj_count', descending=True)
+                .sort('playlist_count', 'dj_count', descending=True)
                 )
         
         st.dataframe(region_df.head(1000).collect(streaming=True), 
