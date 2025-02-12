@@ -860,14 +860,14 @@ if geo_region_toggle:
                 .filter(pl.col('region').cast(pl.String) == region_selectbox,
                         # pl.col('geographic_region_count').eq(1)
                         )
-                .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
-                .agg(pl.col('owner.display_name').unique())
+                # .group_by('track.name', 'song_url', 'dj_count', 'playlist_count', 'region', 'geographic_region_count')
+                # .agg(pl.col('owner.display_name').unique())
                 # .with_columns(pl.col('owner.display_name').list.unique())
                 # .unique()
                 .sort('dj_count', descending=True)
                 )
         
-        st.dataframe(region_df._fetch(500000),#.collect(streaming=True), 
+        st.dataframe(region_df.head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
