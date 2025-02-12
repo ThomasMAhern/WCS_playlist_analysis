@@ -525,7 +525,7 @@ if song_locator_toggle:
                 
                 # Generate the WordCloud
                 if playlists_text:
-                        st.text('Wordcloud based on all the playlist names')
+                        st.text('Playlist names wordcloud')
                         w = wordcloud.WordCloud(width=1800, 
                                         height=1000, 
                                         background_color="white", 
