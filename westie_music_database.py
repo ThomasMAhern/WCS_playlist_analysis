@@ -156,7 +156,7 @@ def wcs_specific(df_):
 
 @st.cache_resource
 def load_lyrics():
-        return pl.scan_parquet('song_lyrics_*.parquet')
+        return pl.scan_parquet('song_lyrics.parquet')
 
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_notes():
