@@ -282,7 +282,7 @@ queer_artists =[
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (Please be gentle and query slowly, the free service is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
+st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
 st.markdown('''413,482 **Songs** *(146,685 wcs specific)*
 
@@ -1332,6 +1332,7 @@ st.markdown("""####
 * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
 
 #### It broke ☹️
+* The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
 * Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️ 
 * It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
