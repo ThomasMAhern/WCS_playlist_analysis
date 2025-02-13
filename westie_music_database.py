@@ -409,7 +409,7 @@ def top_songs():
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
-                                        ).list.unique().list.drop_nulls().list.sort().list.head(50),
+                                        ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
