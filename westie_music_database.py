@@ -510,6 +510,12 @@ if song_locator_toggle:
                         .slice(num_results)
                         )
                 
+                st.dataframe(song_search_df
+                             .with_columns(pl.col('playlist_name').list.head(50))
+                             .head(1000).collect(streaming=True), 
+                        column_config={"song_url": st.column_config.LinkColumn()})
+                
+                
                 
                 playlists_text = ' '.join(song_search_df
                                         .select(pl.col('playlist_name').cast(pl.List(pl.String)))
@@ -524,7 +530,7 @@ if song_locator_toggle:
                 
                 # Generate the WordCloud
                 if playlists_text:
-                        st.text('Playlist names wordcloud')
+                        st.text('Playlist names also included')
                         w = wordcloud.WordCloud(width=1800, 
                                         height=800, 
                                         background_color="white", 
@@ -535,10 +541,6 @@ if song_locator_toggle:
                         ax.axis('off')
                         st.pyplot(fig)
                         
-                st.dataframe(song_search_df
-                             .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(streaming=True), 
-                        column_config={"song_url": st.column_config.LinkColumn()})
                 
         
         st.markdown(f"#### ")
