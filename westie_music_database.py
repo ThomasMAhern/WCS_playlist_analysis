@@ -517,29 +517,29 @@ if song_locator_toggle:
                 
                 
                 
-                playlists_text = ' '.join(song_search_df
-                                        .select(pl.col('playlist_name').cast(pl.List(pl.String)))
-                                        .explode('playlist_name')
-                                        .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
-                                        .explode('playlist_name')
-                                        .unique()
-                                        .collect(streaming=True)
-                                        ['playlist_name']
-                                        .to_list()
-                                        )
+                # playlists_text = ' '.join(song_search_df
+                #                         .select(pl.col('playlist_name').cast(pl.List(pl.String)))
+                #                         .explode('playlist_name')
+                #                         .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
+                #                         .explode('playlist_name')
+                #                         .unique()
+                #                         .collect(streaming=True)
+                #                         ['playlist_name']
+                #                         .to_list()
+                #                         )
                 
-                # Generate the WordCloud
-                if playlists_text:
-                        st.text('Playlist names also included')
-                        w = wordcloud.WordCloud(width=1800, 
-                                        height=800, 
-                                        background_color="white", 
-                                        # stopwords=set(STOPWORDS), 
-                                        min_font_size=10).generate(playlists_text)
-                        fig, ax = plt.subplots()
-                        ax.imshow(w)
-                        ax.axis('off')
-                        st.pyplot(fig)
+                # # Generate the WordCloud
+                # if playlists_text:
+                #         st.text('Playlist names also included')
+                #         w = wordcloud.WordCloud(width=1800, 
+                #                         height=800, 
+                #                         background_color="white", 
+                #                         # stopwords=set(STOPWORDS), 
+                #                         min_font_size=10).generate(playlists_text)
+                #         fig, ax = plt.subplots()
+                #         ax.imshow(w)
+                #         ax.axis('off')
+                #         st.pyplot(fig)
                         
                 
         
