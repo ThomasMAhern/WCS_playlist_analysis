@@ -284,17 +284,17 @@ queer_artists =[
 st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
-st.markdown('''413,482 **Songs** *(146,685 wcs specific)*
+# st.markdown('''414,943 **Songs** *(146,685 wcs specific)*
 
-113,964 **Artists** *(50,358 wcs specific)*
+# 113,964 **Artists** *(50,358 wcs specific)*
 
-42,606 **Playlists** *(15,789 wcs specific)*
+# 42,606 **Playlists** *(15,789 wcs specific)*
 
-1,277 **Westies/DJs**''')
-# st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
-# st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
-# st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
-# st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+# 1,277 **Westies/DJs**''')
+st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
+st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
+st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
+st.write(f"{stats[6]:,}   Westies/DJs\n\n")
 
 
 st.link_button("Help fill in country info!", 
