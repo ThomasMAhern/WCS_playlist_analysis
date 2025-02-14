@@ -1,4 +1,6 @@
 import streamlit as st
+import wordcloud
+import matplotlib.pyplot as plt
 import polars as pl
 import psutil
 
@@ -278,9 +280,9 @@ queer_artists =[
 
 
 
-st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
+# st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (Please be gentle and query slowly, I'm a delicate 🌷 and crash easily on this amount of data 🥲 )")
+st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
 st.markdown('''413,482 **Songs** *(146,685 wcs specific)*
 
@@ -407,7 +409,7 @@ def top_songs():
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
-                                        ).list.unique().list.drop_nulls().list.sort().list.head(50),
+                                        ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
@@ -484,7 +486,8 @@ if song_locator_toggle:
                                 #connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
-                        .with_columns(pl.col('playlist_name', 'owner.display_name', 
+                        .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
+                                      pl.col('owner.display_name', 
                                         'apprx_song_position_in_playlist', 'track.artists.name', 'country',
                                                 #connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
@@ -505,28 +508,40 @@ if song_locator_toggle:
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .slice(num_results)
-                        .head(1000).collect(streaming=True)
                         )
                 
-                st.dataframe(song_search_df, 
+                st.dataframe(song_search_df
+                             .with_columns(pl.col('playlist_name').list.head(50))
+                             .head(1000).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
-                # word_cloud_text = ' '.join(df
-                #                         .select(pl.col('playlist_name').cast(pl.String).str.to_lowercase().str.split(' '))
-                #                         .explode('playlist_name')
-                #                         .unique()
-                #                         .collect()
-                #                         ['playlist_name']
-                #                         .to_list()
-                #                         ).lower()
                 
-                # # Generate the WordCloud
-                # if word_cloud_text:
-                # w = WordCloud(width=1800, 
-                #                 height=1400, 
-                #                 background_color="white", 
-                #                 # stopwords=set(STOPWORDS), 
-                #                 min_font_size=10).generate(word_cloud_text)
+                
+                playlists_text = ' '.join(song_search_df
+                                        .select(pl.col('playlist_name').cast(pl.List(pl.String)))
+                                        .explode('playlist_name')
+                                        .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
+                                        .explode('playlist_name')
+                                        .unique()
+                                        .collect(streaming=True)
+                                        ['playlist_name']
+                                        .to_list()
+                                        )
+                
+                # Generate the WordCloud
+                if playlists_text:
+                        st.text('Playlist names also included')
+                        w = wordcloud.WordCloud(width=1800, 
+                                        height=800, 
+                                        background_color="white", 
+                                        # stopwords=set(STOPWORDS), 
+                                        min_font_size=10).generate(playlists_text)
+                        fig, ax = plt.subplots()
+                        ax.imshow(w)
+                        ax.axis('off')
+                        st.pyplot(fig)
+                        
+                
         
         st.markdown(f"#### ")
         
@@ -1317,6 +1332,7 @@ st.markdown("""####
 * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
 
 #### It broke ☹️
+* The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
 * Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️ 
 * It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
