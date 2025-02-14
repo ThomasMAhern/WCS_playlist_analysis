@@ -192,7 +192,7 @@ df_notes = load_notes()
 # st.write(f"notes is good")
 countries = load_countries()
 # st.write(f"countries is good")
-stats = load_stats()
+# stats = load_stats()
 # st.write(f"stats is good")
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
@@ -284,17 +284,17 @@ queer_artists =[
 st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of WCS music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
-# st.markdown('''414,943 **Songs** *(146,685 wcs specific)*
+st.markdown('''414,943 **Songs** *(147,851 wcs specific)*
 
-# 113,964 **Artists** *(50,358 wcs specific)*
+114,332 **Artists** *(50,710 wcs specific)*
 
-# 42,606 **Playlists** *(15,789 wcs specific)*
+42,964 **Playlists** *(15,968 wcs specific)*
 
-# 1,277 **Westies/DJs**''')
-st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
-st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
-st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
-st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+1,279 **Westies/DJs**''')
+# st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
+# st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
+# st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
+# st.write(f"{stats[6]:,}   Westies/DJs\n\n")
 
 
 st.link_button("Help fill in country info!", 
