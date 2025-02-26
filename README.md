@@ -4,7 +4,7 @@ Here is where I want to make data analysis available to DJs.
 Many of these notebooks are on google Colab so you can run the notebooks on your own data. You'll have to click through some agreements if it's your first time. 
 
 Start with the app!
-[![Playlists and DJs](https://github.com/ThomasMAhern/WCS_playlist_analysis/blob/main/graphs/DJ%20playlist%20app.jpg)](https://west-coast-swing-dj-playlist-analysis.streamlit.app/)
+[![Playlists and DJs](https://github.com/ThomasMAhern/WCS_playlist_analysis/blob/main/graphs/DJ%20playlist%20app.jpg)](https://wcs-music-database.streamlit.app/)
 
 You can also view the [Jupyter Notebook](https://github.com/ThomasMAhern/WCS_playlist_analysis/blob/main/notebooks/WCS_playlist_analysis.ipynb) of BPM graphs of assorted playlists - you can't interact with this one unless you download the .ipynb file and run it yourself.
 
