@@ -284,7 +284,7 @@ queer_artists =[
 st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
-# st.markdown('''468,348 **Songs** (160,661 wcs specific)
+st.markdown('''468,348 **Songs** (160,661 wcs specific)
 
 124,957 **Artists** (53,789 wcs specific)
 
