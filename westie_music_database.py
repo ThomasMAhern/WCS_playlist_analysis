@@ -166,19 +166,19 @@ def load_notes():
 
 @st.cache_data
 def load_countries():
-        return sorted(df.select(pl.col('country').cast(pl.String)).unique().drop_nulls().collect(streaming=True)['country'].to_list())
+        return sorted(df.select(pl.col('country').cast(pl.String)).unique().drop_nulls().collect(engine='streaming')['country'].to_list())
 
 @st.cache_data
 def load_stats():
         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
         should make it much more responsive'''
-        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
-        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
-        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
-        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(engine='streaming').shape[0]
+        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(engine='streaming').shape[0]
+        artist_count = df.select('track.artists.name').unique().collect(engine='streaming').shape[0]
+        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(engine='streaming').shape[0]
+        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(engine='streaming').shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(engine='streaming').unique().shape[0]
+        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(engine='streaming').shape[0]
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
@@ -417,7 +417,7 @@ def top_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(1000).collect(streaming=True)
+                .head(1000).collect(engine='streaming')
                 )
 top_songs = top_songs()
 
@@ -514,7 +514,7 @@ if song_locator_toggle:
                 
                 st.dataframe(song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(streaming=True), 
+                             .head(1000).collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
                 
@@ -525,7 +525,7 @@ if song_locator_toggle:
                 #                         .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
                 #                         .explode('playlist_name')
                 #                         .unique()
-                #                         .collect(streaming=True)
+                #                         .collect(engine='streaming')
                 #                         ['playlist_name']
                 #                         .to_list()
                 #                         )
@@ -609,7 +609,7 @@ if playlist_locator_toggle:
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                        .head(500).collect(streaming=True), 
+                        .head(500).collect(engine='streaming'), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
@@ -660,7 +660,7 @@ def djs_data():
                               )
                 .sort(pl.col('playlist_count'), descending=True)
                 .head(1000)
-                .collect(streaming=True)
+                .collect(engine='streaming')
                 )
 
 djs_data = djs_data()
@@ -706,7 +706,7 @@ if search_dj_toggle:
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
                         .head(1000)
-                        .collect(streaming=True), 
+                        .collect(engine='streaming'), 
                         column_config={"owner_url": st.column_config.LinkColumn()}
                         )
         
@@ -737,7 +737,7 @@ if search_dj_toggle:
                         .sort('playlist_count', descending=True)
                         .filter(pl.col('dj_count').eq(1))
                         .head(100)
-                        .collect(streaming=True), 
+                        .collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
                 
@@ -751,12 +751,12 @@ if search_dj_toggle:
                         .with_columns(pl.col('owner.display_name').list.head(50))
                         .sort('dj_count', 'playlist_count', descending=True)
                         .head(200)
-                        .collect(streaming=True), 
+                        .collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
 
         st.markdown(f"#### Compare DJs:")
-        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(engine='streaming')['owner.display_name'].to_list())
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
@@ -765,7 +765,7 @@ if search_dj_toggle:
         #                         dj_count = pl.n_unique('owner.display_name'),
         #                         )
         #                 .sort('owner.display_name')
-        #                 .collect(streaming=True)
+        #                 .collect(engine='streaming')
         #         )
         djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
 
@@ -777,7 +777,7 @@ if search_dj_toggle:
                                 playlist_count = pl.n_unique('playlist_name'), 
                                 )
                         .sort('owner.display_name')
-                        .collect(streaming=True)
+                        .collect(engine='streaming')
                 )
 
 
@@ -801,7 +801,7 @@ if search_dj_toggle:
                                                 )
                                 .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
+                                .head(300).collect(engine='streaming') ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
@@ -812,7 +812,7 @@ if search_dj_toggle:
                                                 )
                                 .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
+                                .head(300).collect(engine='streaming') ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
@@ -859,7 +859,7 @@ def region_data():
                       )
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .sort('region')
-                 .collect(streaming=True)
+                 .collect(engine='streaming')
                  )
 
 @st.cache_data
@@ -873,7 +873,7 @@ def country_data():
                       )
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .sort('country')
-                 .collect(streaming=True)
+                 .collect(engine='streaming')
                  )
 
 
@@ -905,7 +905,7 @@ if geo_region_toggle:
                 .sort('playlist_count', 'dj_count', descending=True)
                 )
         
-        st.dataframe(region_df.head(1000).collect(streaming=True), 
+        st.dataframe(region_df.head(1000).collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
@@ -940,7 +940,7 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
+                        .head(300).collect(engine='streaming') ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
@@ -951,7 +951,7 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
+                        .head(300).collect(engine='streaming') ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
@@ -1045,7 +1045,7 @@ if songs_together_toggle:
         #         .sort('times_played_together',
         #                 pl.col('owner.display_name').list.len(), 
         #                 descending=True)
-        #         .head(100).collect(streaming=True), 
+        #         .head(100).collect(engine='streaming'), 
         #          column_config={"playlist_url": st.column_config.LinkColumn()}
         #         )
     
@@ -1092,7 +1092,7 @@ if songs_together_toggle:
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
     
@@ -1135,7 +1135,7 @@ if songs_together_toggle:
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
         st.link_button("Andreas' connected-songs visualization!",
@@ -1186,7 +1186,7 @@ if songs_together_toggle:
 lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
                 
-        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
+        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(engine='streaming').shape[0]:,} songs")
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
@@ -1228,7 +1228,7 @@ if lyrics_toggle:
                 .unique()
                 .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True, nulls_last=True)
                 .head(100)
-                .collect(streaming=True), 
+                .collect(engine='streaming'), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
