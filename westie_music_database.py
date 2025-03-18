@@ -416,7 +416,7 @@ def top_songs():
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
-                
+                .with_row_index()
                 .head(1000).collect(streaming=True)
                 )
 top_songs = top_songs()
@@ -508,6 +508,7 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                         'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
+                        .with_row_index()
                         .slice(num_results)
                         )
                 
