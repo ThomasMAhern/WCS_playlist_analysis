@@ -715,7 +715,7 @@ if search_dj_toggle:
                 st.dataframe(dj_search_df, 
                              column_config={"owner_url": st.column_config.LinkColumn()})
         
-                total_djs_from_search = dj_search_df.select('owner.display_name').unique().collect(engine='streaming')['owner.display_name'].to_list().shape[0]
+                total_djs_from_search = dj_search_df.select('owner.display_name').unique()['owner.display_name'].to_list().shape[0]
         # elif dj_id:
                 if 0 >= total_djs_from_search <= 10: #so it doesn't have to process 
                         ##too much data now that we have more music, that list is blowing up the streamlit
