@@ -710,10 +710,10 @@ if search_dj_toggle:
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
                         .head(1000)
-                        .collect(streaming=True), 
-                        column_config={"owner_url": st.column_config.LinkColumn()}
+                        .collect(streaming=True)
                         )
-                st.dataframe(dj_search_df)
+                st.dataframe(dj_search_df, 
+                             column_config={"owner_url": st.column_config.LinkColumn()})
         
                 total_djs_from_search = dj_search_df.select('owner.display_name').unique().collect(engine='streaming')['owner.display_name'].to_list().shape[0]
         # elif dj_id:
