@@ -717,7 +717,7 @@ if search_dj_toggle:
         
                 total_djs_from_search = dj_search_df.select('owner.display_name').unique()['owner.display_name'].shape[0]
         # elif dj_id:
-                if 0 >= total_djs_from_search <= 10: #so it doesn't have to process 
+                if 0 > total_djs_from_search <= 10: #so it doesn't have to process 
                         ##too much data now that we have more music, that list is blowing up the streamlit
                         others_music = (df
                                         .filter(~(pl.col('owner.id').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
