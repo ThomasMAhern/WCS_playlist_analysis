@@ -1,4 +1,4 @@
 streamlit
 wordcloud
-polars==1.23.0
+polars==1.27.0
 psutil
