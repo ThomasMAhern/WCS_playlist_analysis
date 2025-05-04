@@ -166,19 +166,19 @@ def load_notes():
 
 @st.cache_data
 def load_countries():
-        return sorted(df.select(pl.col('country').cast(pl.String)).unique().drop_nulls().collect(streaming=True)['country'].to_list())
+        return sorted(df.select(pl.col('country').cast(pl.String)).unique().drop_nulls().collect(engine="streaming")['country'].to_list())
 
 @st.cache_data
 def load_stats():
         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
         should make it much more responsive'''
-        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
-        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
-        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
-        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(engine="streaming").shape[0]
+        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(engine="streaming").shape[0]
+        artist_count = df.select('track.artists.name').unique().collect(engine="streaming").shape[0]
+        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(engine="streaming").shape[0]
+        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(engine="streaming").shape[0]
+        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(engine="streaming").unique().shape[0]
+        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(engine="streaming").shape[0]
         
         return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
 
@@ -199,7 +199,7 @@ countries = load_countries()
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
 queer_artists =[
 "Ben Abraham", "Jennifer Knapp", "Will Young", "Sam Smith",
-"Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist",
+"Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist", "Hope Tala",
 "TJ Osborne", "Angel Olson", "Joy Oladokun", "Sufjan Stevens",
 "Evil", "KD Lang", "Izzy Heltai", "Trixie Mattel",
 "Steve Grand", "Adrianne Lenker", "Taylor Bennett", "Snow Tha Product",
@@ -209,25 +209,25 @@ queer_artists =[
 "Keanan", "Drebae", "Cuee", "Junglepussy",
 "Angel Haze", "Mista Strange", "The Last Artful, Dodgr", "Dizzy Fae",
 "Kelechi", "ILoveMakonnen", "Kamaiyah", "Kidd Kenn",
-"Leikeli47", "Isaiah Rashad", "Dai Burger", "Azealia Banks",
+"Leikeli47", "Isaiah Rashad", "Dai Burger", "Azealia Banks", "Benjamin Britten", 
 "Chika", "Jaboukie", "Dapper Dan Midas", "Baby Tate",
 "Kevin Abstract", "Cakes Da Killa", "IamJakeHill", "Cazwell",
-"Lil Lotus", "Lil Aaron", "Purple Crush", "Aurora",
-"St. Vincent", "Black Dresses", "Anohni", "Maggie Lindemann",
+"Lil Lotus", "Lil Aaron", "Purple Crush", "Aurora", "Kim Petras",
+"St. Vincent", "Black Dresses", "Anohni", "Maggie Lindemann", "Halsey", "Ashley Frangipane",
 "Scott Matthew", "Oscar and the Wolf", "Steve Lacy", "Dreamer Isioma",
-"Vaultboy", "Coco & Clair Clair", "Shamir", "Empress Of",
+"Vaultboy", "Coco & Clair Clair", "Shamir", "Empress Of", "Ms.Boogie",
 "Cat Burns", "Kučka", "King Mala", "Lava La Rue",
-"Devonté Hynes", "Jessica 6", "Adore Delano", "Orion Sun",
+"Devonté Hynes", "Jessica 6", "Adore Delano", "Orion Sun", "Thorgy Thor",
 "PVRIS", "Japanese Breakfast", "Dorian Electra", "Yeule",
 "Christine & The Queens", "Davy Boi", "Declan McKenna", "Yungblud",
-"Jazmin Bean", "Durand Bernarr", "Keiynan Lonsdale", "Frank Ocean",
+"Jazmin Bean", "Durand Bernarr", "Keiynan Lonsdale", "Frank Ocean", "Towa Bird",
 "Noah Davis", "Serpentwithfeet", "Isaac Dunbar", "Kwaye",
 "Kyle Dion", "Janelle Monáe", "Kelela", "Jeremy Pope",
-"Syd", "Jamila Woods", "Kehlani", "070 Shake",
+"Syd", "Jamila Woods", "Kehlani", "070 Shake", "Leonard Bernstein",
 "Destin Conrad", "Michelle", "Coco & Breezy", "Arlo Parks",
 "Bartees Strange", "Brayton Bowman", "Bronze Avery", "Cain Culto",
-"Olivia O'Brien", "The Muslims", "Hamed Sinno", "Wafia",
-"Remi Wolf", "Rostam", "Freddie Mercury", "Leo Kalyan",
+"Olivia O'Brien", "The Muslims", "Hamed Sinno", "Wafia", "Jamie Barton", 
+"Remi Wolf", "Rostam", "Freddie Mercury", "Leo Kalyan", "Ambré",
 "Lil Darkie", "Dounia", "Dua Saleh", "Raveena",
 "Mavi Phoenix", "Ray Laurel", "Kevin Terry", "Mo Heart",
 "Resistance Revival Chorus", "James Cleveland", "Sister Rosetta Tharpe", "Tonex",
@@ -243,31 +243,31 @@ queer_artists =[
 "Eartheater", "Yves Tumor", "Passion Pit", "Peaches",
 "Fever Ray", "Jessica 6", "Hercules & Love Affair", "Kele Okereke",
 "Madison Rose", "Michael Medrano", "TT The Artist", "Dorian Electra",
-"Mickey Darling", "Cub Sport", "Moses Sumney", "Minute Taker",
-"Morgxn", "MUNA", "Tawnted", "The Aces",
-"Angel Olsen", "Mothica", "Peter Thomas", "Japanese Breakfast",
-"Royal & The Serpent", "Boyish", "Courtney Barnett", "Joe Talbot",
-"Le Tigre", "John Grant", "Lucy Dacus", "Big Thief",
-"Black Belt Eagle Scout", "Trixie Mattel", "Mrshll", "Holland",
-"Lionesses", "Jiae", "Wonho", "Arca",
-"Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai",
-"Snow Tha Product", "070 Shake", "Anitta", "Kali Uchis",
-"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland",
-"Princess Nokia", "Omar Apollo", "Bentley Robles", "Lauren Jauregui",
-"Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai",
-"Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black",
-"Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan",
-"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine",
+"Mickey Darling", "Cub Sport", "Moses Sumney", "Minute Taker", "Michael Tippett",
+"Morgxn", "MUNA", "Tawnted", "The Aces", "Noahfinnce", "Bambie Thug",
+"Angel Olsen", "Mothica", "Peter Thomas", "Japanese Breakfast", "Rob Halford",
+"Royal & The Serpent", "Boyish", "Courtney Barnett", "Joe Talbot", "Evann Mcintosh", 
+"Le Tigre", "John Grant", "Lucy Dacus", "Big Thief", "Rodney Chrome",
+"Black Belt Eagle Scout", "Trixie Mattel", "Mrshll", "Holland", "Rina Sawayama",
+"Lionesses", "Jiae", "Wonho", "Arca", "Demi Lovato", "Mia Wray", "Emily Jeffri",
+"Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai", "Against Me!", "Laura Jane Grace",
+"Snow Tha Product", "070 Shake", "Anitta", "Kali Uchis", "girl in red",
+"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland", "Geo Jordan", "Girli",
+"Princess Nokia", "Omar Apollo", "Bentley Robles", "Lauren Jauregui", "Lagoona Bloo",
+"Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai", "Tsatsamis", "Jade LeMac", 
+"Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black", "Karin Ann", "Anthony Lexa",
+"Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan", "Hey, Baby",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", "Chappell Roan",
 "Lil Nas X", "George Michael", "Freddie Mercury", "Frank Ocean",
-"David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko",
-"Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep",
+"David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko", "Baby Queen",
+"Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep", "The Last Dinner Party",
 "Cardi B", "Saucy Santana", "Doechii", "Tyler, The Creator",
 "Six: The Musical", "Leave It On The Floor", "Boy George", "Village People",
-"Erasure", "Pet Shop Boys", "Skin", "Big Joanie",
-"Tyler Glenn", "Lil Lotus", "PWR BTTM", "The Muslims",
+"Erasure", "Pet Shop Boys", "Skin", "Big Joanie", "Mel4Ever", "HEIDI",
+"Tyler Glenn", "Lil Lotus", "PWR BTTM", "The Muslims", "Cooza", "montykeates",
 "Special Interest", "Le Tigre", "Limp Wrist", "Mannequin Pussy",
 "Meet Me @ The Altar", "She/Her/Hers", "James Nielsen", "Max Bemis",
-"Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser",
+"Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser", "MINOE",
 "Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
 "Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", 'Sasami', 
 'Lambrini Girls', 'Victoria Monét', 'Teddy Swims', 'Benson Boone', 'Raye', 'Chappell Roan',
@@ -417,7 +417,7 @@ def top_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(1000).collect(streaming=True)
+                .head(1000).collect(engine="streaming")
                 )
 top_songs = top_songs()
 
@@ -514,7 +514,7 @@ if song_locator_toggle:
                 
                 st.dataframe(song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(streaming=True), 
+                             .head(1000).collect(engine="streaming"), 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
                 
@@ -525,7 +525,7 @@ if song_locator_toggle:
                 #                         .with_columns(pl.col('playlist_name').str.to_lowercase().str.split(' '))
                 #                         .explode('playlist_name')
                 #                         .unique()
-                #                         .collect(streaming=True)
+                #                         .collect(engine="streaming")
                 #                         ['playlist_name']
                 #                         .to_list()
                 #                         )
@@ -609,7 +609,7 @@ if playlist_locator_toggle:
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                        .head(500).collect(streaming=True), 
+                        .head(500).collect(engine="streaming"), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
@@ -663,7 +663,7 @@ def djs_data():
                               )
                 .sort(pl.col('playlist_count'), descending=True)
                 .head(2000)
-                .collect(streaming=True)
+                .collect(engine="streaming")
                 )
 
 djs_data = djs_data()
@@ -710,7 +710,7 @@ if search_dj_toggle:
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
                         .head(2000)
-                        .collect(streaming=True)
+                        .collect(engine="streaming")
                         )
                 st.dataframe(dj_search_df, 
                              column_config={"owner_url": st.column_config.LinkColumn()})
@@ -743,7 +743,7 @@ if search_dj_toggle:
                                 .sort('playlist_count', descending=True)
                                 .filter(pl.col('dj_count').eq(1))
                                 .head(100)
-                                .collect(streaming=True), 
+                                .collect(engine="streaming"), 
                                 column_config={"song_url": st.column_config.LinkColumn()})
                         
                         
@@ -757,12 +757,12 @@ if search_dj_toggle:
                                 .with_columns(pl.col('owner.display_name').list.head(50))
                                 .sort('dj_count', 'playlist_count', descending=True)
                                 .head(200)
-                                .collect(streaming=True), 
+                                .collect(engine="streaming"), 
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 
 
         st.markdown(f"#### Compare DJs:")
-        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(engine="streaming")['owner.display_name'].to_list())
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
@@ -771,7 +771,7 @@ if search_dj_toggle:
         #                         dj_count = pl.n_unique('owner.display_name'),
         #                         )
         #                 .sort('owner.display_name')
-        #                 .collect(streaming=True)
+        #                 .collect(engine="streaming")
         #         )
         djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
 
@@ -783,7 +783,7 @@ if search_dj_toggle:
                                 playlist_count = pl.n_unique('playlist_name'), 
                                 )
                         .sort('owner.display_name')
-                        .collect(streaming=True)
+                        .collect(engine="streaming")
                 )
 
 
@@ -807,7 +807,7 @@ if search_dj_toggle:
                                                 )
                                 .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
+                                .head(300).collect(engine="streaming") ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
@@ -818,7 +818,7 @@ if search_dj_toggle:
                                                 )
                                 .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
+                                .head(300).collect(engine="streaming") ,
                                 # ._fetch(10000),
                                 column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
@@ -865,7 +865,7 @@ def region_data():
                       )
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .sort('region')
-                 .collect(streaming=True)
+                 .collect(engine="streaming")
                  )
 
 @st.cache_data
@@ -879,7 +879,7 @@ def country_data():
                       )
                  .with_columns(pl.col('djs').list.unique().list.head(50))
                  .sort('country')
-                 .collect(streaming=True)
+                 .collect(engine="streaming")
                  )
 
 
@@ -911,7 +911,7 @@ if geo_region_toggle:
                 .sort('playlist_count', 'dj_count', descending=True)
                 )
         
-        st.dataframe(region_df.head(1000).collect(streaming=True), 
+        st.dataframe(region_df.head(1000).collect(engine="streaming"), 
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
@@ -946,7 +946,7 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
+                        .head(300).collect(engine="streaming") ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.text(f"{countries_selectbox[1]} music not in {countries_selectbox[0]}")
@@ -957,7 +957,7 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .head(300).collect(streaming=True) ,
+                        .head(300).collect(engine="streaming") ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
@@ -1051,7 +1051,7 @@ if songs_together_toggle:
         #         .sort('times_played_together',
         #                 pl.col('owner.display_name').list.len(), 
         #                 descending=True)
-        #         .head(100).collect(streaming=True), 
+        #         .head(100).collect(engine="streaming"), 
         #          column_config={"playlist_url": st.column_config.LinkColumn()}
         #         )
     
@@ -1098,7 +1098,7 @@ if songs_together_toggle:
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(engine="streaming"), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
     
@@ -1141,7 +1141,7 @@ if songs_together_toggle:
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(engine="streaming"), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
         st.link_button("Andreas' connected-songs visualization!",
@@ -1192,7 +1192,7 @@ if songs_together_toggle:
 lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
                 
-        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
+        st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(engine="streaming").shape[0]:,} songs")
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
@@ -1234,7 +1234,7 @@ if lyrics_toggle:
                 .unique()
                 .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True, nulls_last=True)
                 .head(100)
-                .collect(streaming=True), 
+                .collect(engine="streaming"), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
