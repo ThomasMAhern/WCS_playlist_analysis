@@ -557,12 +557,8 @@ if song_locator_toggle:
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(102))
                         .sort('bpm', descending=True)
-                        
-                        .with_row_count(name="row_idx")
-                        .with_columns([(pl.col("value") 
-                                        + pl.lit(4) 
-                                        * pl.col("row_idx")).alias("value")])
-                        .drop("row_idx")
+                        .with_columns(order = pl.lit(4))
+                        .with_columns((pl.col('order') + 4).cum_sum())
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
