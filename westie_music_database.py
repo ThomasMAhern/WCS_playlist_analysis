@@ -558,7 +558,7 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(102))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        ._fetch(50)
+                        .sample(50, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -568,7 +568,7 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(95))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        ._fetch(50)
+                        .sample(50, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -577,7 +577,7 @@ if song_locator_toggle:
                         .filter(pl.col('bpm').le(88))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        ._fetch(50)
+                        .sample(50, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
