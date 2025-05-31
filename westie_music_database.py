@@ -552,6 +552,7 @@ if song_locator_toggle:
                         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
                         
                         st.dataframe((song_search_df
+                                .lazy()
                                 .filter(pl.col('bpm').gt(bpm_med[0])
                                         & pl.col('bpm').le(bpm_high[0]))
                                 .sort('bpm', descending=True)
@@ -560,6 +561,7 @@ if song_locator_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                         
                         st.dataframe((song_search_df
+                                .lazy()
                                 .filter(pl.col('bpm').gt(bpm_low[0]) 
                                         & pl.col('bpm').le(bpm_med[0]))
                                 .sort('bpm', descending=True)
@@ -568,6 +570,7 @@ if song_locator_toggle:
                         column_config={"song_url": st.column_config.LinkColumn()})
                         
                         st.dataframe((song_search_df
+                                .lazy()
                                 .filter(pl.col('bpm').le(bpm_low[0]))
                                 .sort('bpm', descending=True)
                                 ._fetch(50)
