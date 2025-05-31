@@ -512,9 +512,10 @@ if song_locator_toggle:
                         .slice(num_results)
                         )
                 
-                st.dataframe(song_search_df
+                results_df = (song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(engine="streaming"), 
+                             .head(1000).collect(engine="streaming"))
+                st.dataframe(results_df, 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
                 
@@ -551,7 +552,7 @@ if song_locator_toggle:
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
                 #         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
                         
-                st.dataframe((song_search_df
+                st.dataframe((results_df
                         .lazy()
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(102))
@@ -561,7 +562,7 @@ if song_locator_toggle:
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
-                st.dataframe((song_search_df
+                st.dataframe((results_df
                         .lazy()
                         .filter(pl.col('bpm').gt(88) 
                                 & pl.col('bpm').le(95))
@@ -571,7 +572,7 @@ if song_locator_toggle:
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
-                st.dataframe((song_search_df
+                st.dataframe((results_df
                         .lazy()
                         .filter(pl.col('bpm').le(88))
                         .sort('bpm', descending=True)
