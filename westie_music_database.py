@@ -559,8 +559,8 @@ if song_locator_toggle:
                         .sort('bpm', descending=True)
                         # .with_columns(order = pl.lit(1))
                         # .with_columns((pl.col('order')+4).cum_sum())
-                        .with_row_count(name="count")
-                        .with_columns(pl.col('count')*4)
+                        .with_row_index(offset=1)
+                        # .with_columns(pl.col('count')*4)
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
