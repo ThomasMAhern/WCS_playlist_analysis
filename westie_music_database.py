@@ -558,7 +558,7 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(102))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        .sample(50, shuffle=True)
+                        .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -568,17 +568,17 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(95))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        .sample(50, shuffle=True)
+                        .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
                 st.dataframe((results_df
                         .lazy()
                         .filter(pl.col('bpm').le(88)
-                                & pl.col('bpm').gt(0))
+                                & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
-                        .sample(50, shuffle=True)
+                        .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
