@@ -574,7 +574,8 @@ if song_locator_toggle:
                 
                 st.dataframe((results_df
                         .lazy()
-                        .filter(pl.col('bpm').le(88))
+                        .filter(pl.col('bpm').le(88)
+                                & pl.col('bpm').gt(0))
                         .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
                         .sample(50, shuffle=True)
