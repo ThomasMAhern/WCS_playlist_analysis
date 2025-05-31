@@ -542,7 +542,39 @@ if song_locator_toggle:
                 #         ax.imshow(w)
                 #         ax.axis('off')
                 #         st.pyplot(fig)
-                        
+                
+                
+                #creates a playlist based on the results
+                playlist_generator_toggle = st.toggle("Make a playlist from the results!")
+                        if playlist_generator_toggle:
+                                bpm_high = st.slider("BPM-high:", 85, 130, 101)
+                                bpm_med = st.slider("BPM-med:", 80, 100, 95)
+                                bpm_low = st.slider("BPM-low:", 85, 130, 88)
+                                how_many_songs = st.slider("Playlist length:", 3, 60, 18)
+                                
+                                st.dataframe((song_search_df
+                                 .filter(pl.col('bpm').gt(bpm_med[0])
+                                         & pl.col('bpm').le(bpm_high[0]))
+                                 .sort('bpm', descending=True)
+                                 ._fetch(50)
+                                 ), 
+                                column_config={"song_url": st.column_config.LinkColumn()})
+                                
+                                st.dataframe((song_search_df
+                                 .filter(pl.col('bpm').gt(bpm_low[0]) 
+                                         & pl.col('bpm').le(bpm_med[0]))
+                                 .sort('bpm', descending=True)
+                                 ._fetch(50)
+                                 ), 
+                                column_config={"song_url": st.column_config.LinkColumn()})
+                                
+                                st.dataframe((song_search_df
+                                 .filter(pl.col('bpm').le(bpm_low[0]))
+                                 .sort('bpm', descending=True)
+                                 ._fetch(50)
+                                 ), 
+                                column_config={"song_url": st.column_config.LinkColumn()})
+
                 
         
         st.markdown(f"#### ")
