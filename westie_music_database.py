@@ -439,7 +439,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
-                num_results = st.slider("Skip the top __ results", 0, 111000, step=1000)
+                num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
         
         if queer_toggle:
@@ -556,8 +556,9 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(102))
-                        # .sort('bpm', descending=True)
-                        .with_columns(pl.col('playlist_name').list.head(50))
+                        .sort('bpm', descending=True)
+                        .with_columns(order = pl.lit(1))
+                        .with_columns(pl.col('order').rolling_sum(4))
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
@@ -566,8 +567,9 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').gt(88) 
                                 & pl.col('bpm').le(95))
-                        # .sort('bpm', descending=True)
-                        .with_columns(pl.col('playlist_name').list.head(50))
+                        .sort('bpm', descending=True)
+                        .with_columns(order = pl.lit(2))
+                        .with_columns(pl.col('order').rolling_sum(2))
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
@@ -576,13 +578,14 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').le(88)
                                 & pl.col('bpm').gt(40))
-                        # .sort('bpm', descending=True)
-                        .with_columns(pl.col('playlist_name').list.head(50))
+                        .sort('bpm', descending=True)
+                        .with_columns(order = pl.lit(3))
+                        .with_columns(pl.col('order').rolling_sum(4))
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
-                
+                1 2 3 2 1 2 3 2 1
         
         st.markdown(f"#### ")
         
