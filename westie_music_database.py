@@ -556,7 +556,7 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(102))
-                        .sort('bpm', descending=True)
+                        # .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
                         .head(50)
                         ), 
@@ -566,7 +566,7 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').gt(88) 
                                 & pl.col('bpm').le(95))
-                        .sort('bpm', descending=True)
+                        # .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
                         .head(50)
                         ), 
@@ -576,7 +576,7 @@ if song_locator_toggle:
                         .lazy()
                         .filter(pl.col('bpm').le(88)
                                 & pl.col('bpm').gt(40))
-                        .sort('bpm', descending=True)
+                        # .sort('bpm', descending=True)
                         .with_columns(pl.col('playlist_name').list.head(50))
                         .head(50)
                         ), 
