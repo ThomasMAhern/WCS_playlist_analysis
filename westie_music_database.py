@@ -557,8 +557,8 @@ if song_locator_toggle:
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(102))
                         .sort('bpm', descending=True)
-                        .with_columns(order = pl.lit(5))
-                        .with_columns(pl.col('order').cum_count()+4)
+                        .with_columns(order = pl.lit(4))
+                        .with_columns(pl.col('order').cum_sum())
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
@@ -579,8 +579,8 @@ if song_locator_toggle:
                         .filter(pl.col('bpm').le(88)
                                 & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
-                        .with_columns(order = pl.lit(3))
-                        .with_columns(pl.col('order').cum_count()+4)
+                        .with_columns(order = pl.lit(4))
+                        .with_columns(pl.col('order').cum_sum())
                         .head(50)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
