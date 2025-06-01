@@ -552,37 +552,35 @@ if song_locator_toggle:
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
                 #         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
                         
-                st.dataframe((results_df
-                        .lazy()
+                pl_1 = (results_df
                         .filter(pl.col('bpm').gt(95)
-                                & pl.col('bpm').le(102))
+                                & pl.col('bpm').le(100))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 3 )
                         .head(50)
-                        ), 
-                column_config={"song_url": st.column_config.LinkColumn()})
+                        )
                 
-                st.dataframe((results_df
-                        .lazy()
+                pl_2 = (results_df
                         .filter(pl.col('bpm').gt(88) 
                                 & pl.col('bpm').le(95))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2)
                         .head(100)
-                        ), 
-                column_config={"song_url": st.column_config.LinkColumn()})
+                        )
                 
-                st.dataframe((results_df
-                        .lazy()
+                pl_3 (results_df
                         .filter(pl.col('bpm').le(88)
                                 & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 )
                         .head(50)
-                        ), 
+                        )
+                st.dataframe((pl.concat([pl_1, pl_2, pl_3])
+                              .sort('order')
+                              ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
                 # 1 2 3 2 1 2 3 2 1
