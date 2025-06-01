@@ -559,7 +559,7 @@ if song_locator_toggle:
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 3 )
-                        .head(50)
+                        .head(200).sample(50, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -570,7 +570,7 @@ if song_locator_toggle:
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2)
-                        .head(100)
+                        .head(200).sample(100, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -581,7 +581,7 @@ if song_locator_toggle:
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 )
-                        .head(50)
+                        .head(200).sample(50, shuffle=True)
                         ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
