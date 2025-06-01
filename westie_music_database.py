@@ -559,7 +559,8 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(100))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
-                        .with_columns((pl.col('order') * 4) - 3 )
+                        .with_columns((pl.col('order') * 4) - 3 ,
+                                      level = pl.lit('high'))
                         .head(50)
                         )
                 
@@ -568,7 +569,8 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(95))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
-                        .with_columns(pl.col('order') * 2)
+                        .with_columns(pl.col('order') * 2, 
+                                      level = pl.lit('medium'))
                         .head(100)
                         )
                 
@@ -577,12 +579,14 @@ if song_locator_toggle:
                                 & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
-                        .with_columns((pl.col('order') * 4) - 1 )
+                        .with_columns((pl.col('order') * 4) - 1 ,
+                                      level = pl.lit('low'))
                         .head(50)
                         )
                 
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
                               .sort('order')
+                              .drop('order')
                               ), 
                 column_config={"song_url": st.column_config.LinkColumn()})
 
