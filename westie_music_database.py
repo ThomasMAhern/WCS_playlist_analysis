@@ -552,7 +552,7 @@ if song_locator_toggle:
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
                 #         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
                 
-                st.text("Pretend you're Koichi with a ↗️↘️↗️↘️ playlist:")
+                st.text("Pretend you're Koichi with a ↗️↘️ playlist:")
                 
                 #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
                 pl_1 = (results_df
