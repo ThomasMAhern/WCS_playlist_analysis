@@ -586,6 +586,8 @@ if song_locator_toggle:
                         )
                 
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
+                              .select('index', 'level', 'bpm',  
+                                      pl.all().exclude('index', 'bpm', 'level'))
                               .sort('order')
                               .drop('order')
                               ), 
