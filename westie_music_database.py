@@ -551,7 +551,9 @@ if song_locator_toggle:
                 #         bpm_med = st.slider("BPM-med:", 80, 100, 95)
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
                 #         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
-                        
+                
+                st.text('Generated playlist')
+                
                 pl_1 = (results_df
                         .filter(pl.col('bpm').gt(95)
                                 & pl.col('bpm').le(100))
@@ -570,7 +572,7 @@ if song_locator_toggle:
                         .head(100)
                         )
                 
-                pl_3 (results_df
+                pl_3 = (results_df
                         .filter(pl.col('bpm').le(88)
                                 & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
@@ -578,6 +580,7 @@ if song_locator_toggle:
                         .with_columns((pl.col('order') * 4) - 1 )
                         .head(50)
                         )
+                
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
                               .sort('order')
                               ), 
