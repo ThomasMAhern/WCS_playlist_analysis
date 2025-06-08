@@ -119,16 +119,17 @@ def load_playlist_data():
                                       .then(True)
                                       .otherwise(False)
                     )
-      .with_columns(apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) 
-                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 33))
-                                                        .then(pl.lit('beginning'))
-                                                        .when((pl.col('actual_social_set').eq(True)) 
-                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33) 
-                                                              & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 66))
-                                                        .then(pl.lit('middle'))
-                                                        .when((pl.col('actual_social_set').eq(True)) 
-                                                                & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 66))
-                                                        .then(pl.lit('end')),
+      .with_columns(
+        #       apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) 
+        #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 33))
+        #                                                 .then(pl.lit('beginning'))
+        #                                                 .when((pl.col('actual_social_set').eq(True)) 
+        #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33) 
+        #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 66))
+        #                                                 .then(pl.lit('middle'))
+        #                                                 .when((pl.col('actual_social_set').eq(True)) 
+        #                                                         & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 66))
+        #                                                 .then(pl.lit('end')),
                     geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
                                                 .then(pl.col('regions').str.split(', ').list.len())
                                                 .otherwise(0),
@@ -137,7 +138,8 @@ def load_playlist_data():
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
-                    pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 'apprx_song_position_in_playlist',
+                    pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 
+                        #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
                             'owner.id',
                             ]).cast(pl.Categorical())
@@ -402,11 +404,13 @@ def top_songs():
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                     'apprx_song_position_in_playlist', 'notes', 'note_source',
+                #      'apprx_song_position_in_playlist', 
+                     'notes', 'note_source',
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 
-                                     'apprx_song_position_in_playlist', 'track.artists.name', 'country',
+                                #      'apprx_song_position_in_playlist', 
+                                     'track.artists.name', 'country',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
@@ -482,14 +486,15 @@ if song_locator_toggle:
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                        'apprx_song_position_in_playlist', 
+                        # 'apprx_song_position_in_playlist', 
                         # 'notes', 'note_source', 
                                 #connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
                                       pl.col('owner.display_name', 
-                                        'apprx_song_position_in_playlist', 'track.artists.name', 'country',
+                                        # 'apprx_song_position_in_playlist', 
+                                        'track.artists.name', 'country',
                                                 #connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                                 # 'Familiarity', 'Transition type'
