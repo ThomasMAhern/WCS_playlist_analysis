@@ -197,7 +197,7 @@ def load_playlist_data():
                                             | pl.col('owner.display_name').cast(pl.String).eq('Koichi Tsunoda') 
                                             )
                                       .then(True)
-                                      .otherwise(False)
+                                      .otherwise(False),
                     queer_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(only_fabulous_people))
                                      .then(True)
                                      .otherwise(False),
