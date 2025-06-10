@@ -273,6 +273,9 @@ queer_artists =[
 "Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
 "Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", 'Sasami', 
 'Lambrini Girls', 'Victoria Monét', 'Teddy Swims', 'Benson Boone', 'Raye', 'Chappell Roan',
+'Devon Cole', 'Emeline', 'Gaustad', 'Xana', 'Coudy June', 'Emlyn', 'Renee Rapp',
+'Hayley Kiyoko', 'Fletcher', 'Ruby Waters', 'Jess Glynne', 'Zolita', 'Rita Ora', 'Big Joe Turner',
+'Madeleine Peyroux', 'Amos Milburn', 'Wrabel'
 ]
 
 
