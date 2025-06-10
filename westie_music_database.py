@@ -50,6 +50,86 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 '21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng', 
 'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', '11149862781']
 
+#based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
+# and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
+# and lots of googling + chatGPT
+queer_artists = [name.lower() for name in [
+"Ben Abraham", "Jennifer Knapp", "Will Young", "Sam Smith",
+"Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist", "Hope Tala",
+"TJ Osborne", "Angel Olson", "Joy Oladokun", "Sufjan Stevens", "Evil", "KD Lang", "Izzy Heltai", "Trixie Mattel",
+"Steve Grand", "Adrianne Lenker", "Taylor Bennett", "Snow Tha Product",
+"Zebra Katz", "Shygirl", "Rob.B", "Tiger Goods", "Naeem", "Mykki Blanco", "Princess Nokia", "Mahawam",
+"Heems", "Saul Williams", "Kalifa", "Omar Apollo", "Keanan", "Drebae", "Cuee", "Junglepussy",
+"Angel Haze", "Mista Strange", "The Last Artful, Dodgr", "Dizzy Fae",
+"Kelechi", "ILoveMakonnen", "Kamaiyah", "Kidd Kenn", "Chika", "Jaboukie", "Dapper Dan Midas", "Baby Tate",
+"Leikeli47", "Isaiah Rashad", "Dai Burger", "Azealia Banks", "Benjamin Britten", 
+"Kevin Abstract", "Cakes Da Killa", "IamJakeHill", "Cazwell",
+"Lil Lotus", "Lil Aaron", "Purple Crush", "Aurora", "Kim Petras",
+"St. Vincent", "Black Dresses", "Anohni", "Maggie Lindemann", "Halsey", "Ashley Frangipane",
+"Scott Matthew", "Oscar and the Wolf", "Steve Lacy", "Dreamer Isioma",
+"Vaultboy", "Coco & Clair Clair", "Shamir", "Empress Of", "Ms.Boogie",
+"Cat Burns", "Kučka", "King Mala", "Lava La Rue", "Iman Jordan", "William Matthews", "Semler", "Ethel Cain",
+"Devonté Hynes", "Jessica 6", "Adore Delano", "Orion Sun", "Thorgy Thor",
+"PVRIS", "Japanese Breakfast", "Dorian Electra", "Yeule",
+"Christine & The Queens", "Davy Boi", "Declan McKenna", "Yungblud",
+"Jazmin Bean", "Durand Bernarr", "Keiynan Lonsdale", "Frank Ocean", "Towa Bird",
+"Noah Davis", "Serpentwithfeet", "Isaac Dunbar", "Kwaye",
+"Kyle Dion", "Janelle Monáe", "Kelela", "Jeremy Pope", "Lil Darkie", "Dounia", "Dua Saleh", "Raveena",
+"Syd", "Jamila Woods", "Kehlani", "070 Shake", "Leonard Bernstein",
+"Destin Conrad", "Michelle", "Coco & Breezy", "Arlo Parks",
+"Bartees Strange", "Brayton Bowman", "Bronze Avery", "Cain Culto",
+"Olivia O'Brien", "The Muslims", "Hamed Sinno", "Wafia", "Jamie Barton", 
+"Remi Wolf", "Rostam", "Freddie Mercury", "Leo Kalyan", "Ambré",
+"Mavi Phoenix", "Ray Laurel", "Kevin Terry", "Mo Heart",
+"Resistance Revival Chorus", "James Cleveland", "Sister Rosetta Tharpe", "Tonex",
+"Donnie McClurkin", "Billy Wright", "Bessie Smith", "Frankie Jaxon",
+"Big Mama Thornton", "Johnny Mathis", "Ethel Waters", "Billie Holiday",
+"Little Richard", "Ma Rainey", "Billy Strayhorn", "Langston Hughes",
+"IAMJakeHill", "Qaadir Howard", "Whitney Houston", "Monifah",
+"Julien Baker", "Ray Boltz", "Dan Haseltine", "Vicky Beeching",
+"Kaytranada", "Amorphous", "Sophie", "MNEK", "Mike Q", "Woodkid", "Robert Alfons", 
+"Bright Light Bright Lights", "K Flay", "Beth Ditto", "Midnight Pool Party", "Sylvester",
+"Eartheater", "Yves Tumor", "Passion Pit", "Peaches", "Fever Ray", "Jessica 6", "Hercules & Love Affair", 
+"Kele Okereke", "Madison Rose", "Michael Medrano", "TT The Artist", "Dorian Electra",
+"Mickey Darling", "Cub Sport", "Moses Sumney", "Minute Taker", "Michael Tippett",
+"Morgxn", "MUNA", "Tawnted", "The Aces", "Noahfinnce", "Bambie Thug",
+"Angel Olsen", "Mothica", "Peter Thomas", "Japanese Breakfast", "Rob Halford",
+"Royal & The Serpent", "Royal and the Serpent", "Boyish", "Courtney Barnett", "Joe Talbot", "Evann Mcintosh", 
+"Le Tigre", "John Grant", "Lucy Dacus", "Big Thief", "Rodney Chrome",
+"Black Belt Eagle Scout", "Trixie Mattel", "Mrshll", "Holland", "Rina Sawayama",
+"Lionesses", "Jiae", "Wonho", "Arca", "Demi Lovato", "Mia Wray", "Emily Jeffri",
+"Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai", "Against Me!", "Laura Jane Grace", 
+"Anitta", "Kali Uchis", "girl in red",
+"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland", "Geo Jordan", "Girli", 
+"Omar Apollo", "Bentley Robles", "Lauren Jauregui", "Lagoona Bloo",
+"Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai", "Tsatsamis", "Jade LeMac", 
+"Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black", "Karin Ann", "Anthony Lexa",
+"Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan", "Hey, Baby",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", "Chappell Roan",
+"David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko", "Baby Queen",
+"Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep", "The Last Dinner Party",
+"Cardi B", "Saucy Santana", "Doechii", "Tyler, The Creator",
+"Six: The Musical", "Leave It On The Floor", "Boy George", "Village People",
+"Erasure", "Pet Shop Boys", "Skin", "Big Joanie", "Mel4Ever", "HEIDI",
+"Tyler Glenn", "Lil Lotus", "PWR BTTM", "The Muslims", "Cooza", "montykeates",
+"Special Interest", "Le Tigre", "Limp Wrist", "Mannequin Pussy",
+"Meet Me @ The Altar", "She/Her/Hers", "James Nielsen", "Max Bemis",
+"Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser", "MINOE",
+"Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
+"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", 'Sasami', 
+'Lambrini Girls', 'Victoria Monét', 'Teddy Swims', 'Benson Boone', 'Raye', 
+'Devon Cole', 'Emeline', 'Gaustad', 'Xana', 'Coudy June', 'Emlyn', 'Renee Rapp',
+'Hayley Kiyoko', 'Fletcher', 'Ruby Waters', 'Jess Glynne', 'Zolita', 'Rita Ora', 'Big Joe Turner',
+'Madeleine Peyroux', 'Amos Milburn', 'Wrabel', 'G Flip', 'KATSEYE', 'King Princess', 
+'Ana Frango Elétrico', 'Nakhane', 'Leith Ross', 'Claud', 'NoSo', 'Frances Forever', 
+'Roxen', 'Tash Sultana', 'Mal Blum', 'Honey Dijon', 'Octo Octa', 'Eris Drew', 'DJ Sprinkles', 
+'Ekko Astral', 'Ariel Zetina', 'Keo Nozari', 'July Jones', 'Nxdia', 'Naomi McPherson', 'Katie Gavin', 'Josette Maskin', 
+'Lushious Massacr', 'Mila Jam', 'VINCINT', 'David Archuleta', 'Marko Bošnjak', 'ADONXS', 'jasmine.4.t', 'Paisley Fields', 
+'Caleb de Casper', 'Molly Grace', 'Grace Gaustad', 'Matt Fishel', 'Ekko Astral', "Prince",
+'Clementaum', 'Abdu Ali', 'Christine and the Queens', 'Tegan & Sara', 'Elton John', 'RuPaul', 'Boygenius', 'Big Freedia', 
+'Pinkshift', 'Home Is Where', 'JustB', 'Just B', 'Rhea Raj', 'Brooke Eden', 'Cobrah', 'Siena Liggins', 
+]]
+
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
     for _ in iterable:
@@ -118,6 +198,9 @@ def load_playlist_data():
                                             )
                                       .then(True)
                                       .otherwise(False)
+                    queer_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(only_fabulous_people))
+                                     .then(True)
+                                     .otherwise(False),
                     )
       .with_columns(
         #       apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) 
@@ -197,85 +280,7 @@ countries = load_countries()
 # stats = load_stats()
 # st.write(f"stats is good")
 
-#based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
-# and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
-queer_artists = [name.lower() for name in [
-"Ben Abraham", "Jennifer Knapp", "Will Young", "Sam Smith",
-"Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist", "Hope Tala",
-"TJ Osborne", "Angel Olson", "Joy Oladokun", "Sufjan Stevens", "Evil", "KD Lang", "Izzy Heltai", "Trixie Mattel",
-"Steve Grand", "Adrianne Lenker", "Taylor Bennett", "Snow Tha Product",
-"Zebra Katz", "Shygirl", "Rob.B", "Tiger Goods", "Naeem", "Mykki Blanco", "Princess Nokia", "Mahawam",
-"Heems", "Saul Williams", "Kalifa", "Omar Apollo", "Keanan", "Drebae", "Cuee", "Junglepussy",
-"Angel Haze", "Mista Strange", "The Last Artful, Dodgr", "Dizzy Fae",
-"Kelechi", "ILoveMakonnen", "Kamaiyah", "Kidd Kenn", "Chika", "Jaboukie", "Dapper Dan Midas", "Baby Tate",
-"Leikeli47", "Isaiah Rashad", "Dai Burger", "Azealia Banks", "Benjamin Britten", 
-"Kevin Abstract", "Cakes Da Killa", "IamJakeHill", "Cazwell",
-"Lil Lotus", "Lil Aaron", "Purple Crush", "Aurora", "Kim Petras",
-"St. Vincent", "Black Dresses", "Anohni", "Maggie Lindemann", "Halsey", "Ashley Frangipane",
-"Scott Matthew", "Oscar and the Wolf", "Steve Lacy", "Dreamer Isioma",
-"Vaultboy", "Coco & Clair Clair", "Shamir", "Empress Of", "Ms.Boogie",
-"Cat Burns", "Kučka", "King Mala", "Lava La Rue", "Iman Jordan", "William Matthews", "Semler", "Ethel Cain",
-"Devonté Hynes", "Jessica 6", "Adore Delano", "Orion Sun", "Thorgy Thor",
-"PVRIS", "Japanese Breakfast", "Dorian Electra", "Yeule",
-"Christine & The Queens", "Davy Boi", "Declan McKenna", "Yungblud",
-"Jazmin Bean", "Durand Bernarr", "Keiynan Lonsdale", "Frank Ocean", "Towa Bird",
-"Noah Davis", "Serpentwithfeet", "Isaac Dunbar", "Kwaye",
-"Kyle Dion", "Janelle Monáe", "Kelela", "Jeremy Pope", "Lil Darkie", "Dounia", "Dua Saleh", "Raveena",
-"Syd", "Jamila Woods", "Kehlani", "070 Shake", "Leonard Bernstein",
-"Destin Conrad", "Michelle", "Coco & Breezy", "Arlo Parks",
-"Bartees Strange", "Brayton Bowman", "Bronze Avery", "Cain Culto",
-"Olivia O'Brien", "The Muslims", "Hamed Sinno", "Wafia", "Jamie Barton", 
-"Remi Wolf", "Rostam", "Freddie Mercury", "Leo Kalyan", "Ambré",
-"Mavi Phoenix", "Ray Laurel", "Kevin Terry", "Mo Heart",
-"Resistance Revival Chorus", "James Cleveland", "Sister Rosetta Tharpe", "Tonex",
-"Donnie McClurkin", "Billy Wright", "Bessie Smith", "Frankie Jaxon",
-"Big Mama Thornton", "Johnny Mathis", "Ethel Waters", "Billie Holiday",
-"Little Richard", "Ma Rainey", "Billy Strayhorn", "Langston Hughes",
-"IAMJakeHill", "Qaadir Howard", "Whitney Houston", "Monifah",
-"Julien Baker", "Ray Boltz", "Dan Haseltine", "Vicky Beeching",
-"Kaytranada", "Amorphous", "Sophie", "MNEK", "Mike Q", "Woodkid", "Robert Alfons", 
-"Bright Light Bright Lights", "K Flay", "Beth Ditto", "Midnight Pool Party", "Sylvester",
-"Eartheater", "Yves Tumor", "Passion Pit", "Peaches", "Fever Ray", "Jessica 6", "Hercules & Love Affair", 
-"Kele Okereke", "Madison Rose", "Michael Medrano", "TT The Artist", "Dorian Electra",
-"Mickey Darling", "Cub Sport", "Moses Sumney", "Minute Taker", "Michael Tippett",
-"Morgxn", "MUNA", "Tawnted", "The Aces", "Noahfinnce", "Bambie Thug",
-"Angel Olsen", "Mothica", "Peter Thomas", "Japanese Breakfast", "Rob Halford",
-"Royal & The Serpent", "Boyish", "Courtney Barnett", "Joe Talbot", "Evann Mcintosh", 
-"Le Tigre", "John Grant", "Lucy Dacus", "Big Thief", "Rodney Chrome",
-"Black Belt Eagle Scout", "Trixie Mattel", "Mrshll", "Holland", "Rina Sawayama",
-"Lionesses", "Jiae", "Wonho", "Arca", "Demi Lovato", "Mia Wray", "Emily Jeffri",
-"Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai", "Against Me!", "Laura Jane Grace",
-"Snow Tha Product", "070 Shake", "Anitta", "Kali Uchis", "girl in red",
-"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland", "Geo Jordan", "Girli", 
-"Omar Apollo", "Bentley Robles", "Lauren Jauregui", "Lagoona Bloo",
-"Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai", "Tsatsamis", "Jade LeMac", 
-"Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black", "Karin Ann", "Anthony Lexa",
-"Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan", "Hey, Baby",
-"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", "Chappell Roan",
-"David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko", "Baby Queen",
-"Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep", "The Last Dinner Party",
-"Cardi B", "Saucy Santana", "Doechii", "Tyler, The Creator",
-"Six: The Musical", "Leave It On The Floor", "Boy George", "Village People",
-"Erasure", "Pet Shop Boys", "Skin", "Big Joanie", "Mel4Ever", "HEIDI",
-"Tyler Glenn", "Lil Lotus", "PWR BTTM", "The Muslims", "Cooza", "montykeates",
-"Special Interest", "Le Tigre", "Limp Wrist", "Mannequin Pussy",
-"Meet Me @ The Altar", "She/Her/Hers", "James Nielsen", "Max Bemis",
-"Scene Queen", "Pete Wentz", "Gerard Way", "Bonnie Fraser", "MINOE",
-"Little Richard", "Alabama Shakes", "Tracy Chapman", "Meshell Ndegeocello",
-"Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", 'Sasami', 
-'Lambrini Girls', 'Victoria Monét', 'Teddy Swims', 'Benson Boone', 'Raye', 
-'Devon Cole', 'Emeline', 'Gaustad', 'Xana', 'Coudy June', 'Emlyn', 'Renee Rapp',
-'Hayley Kiyoko', 'Fletcher', 'Ruby Waters', 'Jess Glynne', 'Zolita', 'Rita Ora', 'Big Joe Turner',
-'Madeleine Peyroux', 'Amos Milburn', 'Wrabel', 'G Flip', 'KATSEYE', 'King Princess', 
-'Ana Frango Elétrico', 'Nakhane', 'Leith Ross', 'Claud', 'NoSo', 'Frances Forever', 
-'Roxen', 'Tash Sultana', 'Mal Blum', 'Honey Dijon', 'Octo Octa', 'Eris Drew', 'DJ Sprinkles', 
-'Ekko Astral', 'Ariel Zetina', 'Keo Nozari', 'July Jones', 'Nxdia', 'Naomi McPherson', 'Katie Gavin', 'Josette Maskin', 
-'Lushious Massacr', 'Mila Jam', 'VINCINT', 'David Archuleta', 'Marko Bošnjak', 'ADONXS', 'jasmine.4.t', 'Paisley Fields', 
-'Caleb de Casper', 'Molly Grace', 'Grace Gaustad', 'Matt Fishel', 'Ekko Astral',
-'Clementaum', 'Abdu Ali', 'Christine and the Queens', 'Tegan & Sara', 'Elton John', 'RuPaul', 'Boygenius', 'Big Freedia', 
-'Pinkshift', 'Home Is Where', 'JustB', 'Just B', 'Rhea Raj', 'Brooke Eden', 'Cobrah', 'Siena Liggins', 
-]
-]
+
 
 
 
@@ -473,9 +478,8 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
-                        .filter(pl.col('track.artists.name').str.to_lowercase().is_in(only_fabulous_people),
-                                # pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                        .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
+                        .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
@@ -574,7 +578,7 @@ if song_locator_toggle:
                         )
                 
                 pl_2 = (results_df
-                        .filter(pl.col('bpm').gt(88) 
+                        .filter(pl.col('bpm').gt(90) 
                                 & pl.col('bpm').le(95))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
@@ -584,7 +588,7 @@ if song_locator_toggle:
                         )
                 
                 pl_3 = (results_df
-                        .filter(pl.col('bpm').le(88)
+                        .filter(pl.col('bpm').le(90)
                                 & pl.col('bpm').gt(40))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
