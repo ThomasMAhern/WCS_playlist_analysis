@@ -408,7 +408,8 @@ def top_songs():
                         on=['track.artists.name', 'track.name'])
                  #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',)
+                .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm', 'queer_artist')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                 #      'apprx_song_position_in_playlist', 
@@ -478,8 +479,8 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM')).fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
-                                      )
+                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
+                        .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
@@ -501,14 +502,18 @@ if song_locator_toggle:
                                 )
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
                                       pl.col('owner.display_name', 
-                                        # 'apprx_song_position_in_playlist', 
-                                        'track.artists.name', 'country',
-                                                #connie's notes
+                                                # 'apprx_song_position_in_playlist', 
+                                                'track.artists.name', 'country',
+                                                ##connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                                 # 'Familiarity', 'Transition type'
-                                                ).list.unique().list.drop_nulls().list.sort().list.head(50),
+                                                )
+                                        .list.unique()
+                                        .list.drop_nulls()
+                                        .list.sort()
+                                        .list.head(50),
                                         # pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-                                        hit_terms = pl.col('playlist_name')
+                                      hit_terms = pl.col('playlist_name')
                                                         .cast(pl.List(pl.String))
                                                         .list.join(', ')
                                                         .str.to_lowercase()
@@ -516,7 +521,7 @@ if song_locator_toggle:
                                                         .list.drop_nulls()
                                                         .list.unique()
                                                         .list.sort(),
-                                        )
+                                      )
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
