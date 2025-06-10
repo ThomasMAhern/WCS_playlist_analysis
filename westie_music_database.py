@@ -575,7 +575,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 3 ,
                                       level = pl.lit('high'))
-                        .head(50)
+                        .shuffle()
+                        .head(80)
                         )
                 
                 pl_2 = (results_df
@@ -585,7 +586,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
-                        .head(100)
+                        .shuffle()
+                        .head(120)
                         )
                 
                 pl_3 = (results_df
@@ -595,7 +597,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
-                        .head(50)
+                        .shuffle()
+                        .head(80)
                         )
                 
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
