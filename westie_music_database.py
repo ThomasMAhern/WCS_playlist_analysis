@@ -120,7 +120,9 @@ queer_artists = [name.lower() for name in [
 'Willam', 'William Matthews', 'Wonho', 'Woodkid', 'Worthy', 'Wrabel', 'Wreckno', 'Xana', 'Xiu Xiu', 'YULTRON', 'Yeule', 'Yungblud', 'Yves Tumor', 
 'Zebra Katz', 'Zolita', 'adam daylight', 'aishii', 'bears in trees', 'blackwinterwells', 'brakence', 'd0llywood1', 'dltzk', 'dsg', 'food house', 
 'girl in red', 'glaive', 'grape milk', 'gupi', 'gyrofield', 'jasmine.4.t', 'k. d. lang', 'kiraku', 'montykeates', 'quinn', 'sakuraburst', 
-'scrdycat', 'serpentwithfeet', 'umru', 'underscores', 'voxkai', 'webcage', 'xaviersobased'
+'scrdycat', 'serpentwithfeet', 'umru', 'underscores', 'voxkai', 'webcage', 'xaviersobased', 'Gossip',
+'Adult Mom', 'Foxy Dads', 'Now, Now', 'Pronoun', 'Sad13', 'Sir Babygirl', 'Vanessa Carlton', 
+'ieuan', 'felix vespestad', 'FHAT', 'TWINKIDS', 'Emily Burns', 'Carlos Vara', 'Leland', 'REYNA', 'Sam Bluer'
 ]]
 
 def gen(iterable):
@@ -568,7 +570,7 @@ if song_locator_toggle:
                 #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
                 pl_1 = (results_df
                         .filter(pl.col('bpm').gt(95)
-                                & pl.col('bpm').le(100))
+                                & pl.col('bpm').le(103))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 3 ,
