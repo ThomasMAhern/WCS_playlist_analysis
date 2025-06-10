@@ -198,7 +198,7 @@ def load_playlist_data():
                                             )
                                       .then(True)
                                       .otherwise(False),
-                    queer_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(only_fabulous_people))
+                    queer_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(queer_artists))
                                      .then(True)
                                      .otherwise(False),
                     )
