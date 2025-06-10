@@ -199,7 +199,7 @@ countries = load_countries()
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
 # and https://www.reddit.com/r/popheads/comments/c3rpga/happy_pride_in_honor_of_the_month_here_is_a_list/
-queer_artists =[
+queer_artists = [name.lower() for name in [
 "Ben Abraham", "Jennifer Knapp", "Will Young", "Sam Smith",
 "Billy Porter", "Michaela Jai", "Orville Peck", "Adeem the Artist", "Hope Tala",
 "TJ Osborne", "Angel Olson", "Joy Oladokun", "Sufjan Stevens", "Evil", "KD Lang", "Izzy Heltai", "Trixie Mattel",
@@ -252,7 +252,6 @@ queer_artists =[
 "Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black", "Karin Ann", "Anthony Lexa",
 "Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan", "Hey, Baby",
 "Dove Cameron", "Calum Scott", "Greyson Chance", "L Devine", "Chappell Roan",
-"Lil Nas X", "George Michael", "Freddie Mercury", "Frank Ocean",
 "David Bowie", "Jake Zyrus", "Peach PRC", "Ashnikko", "Baby Queen",
 "Megan Thee Stallion", "Isaiah Rashad", "Doja Cat", "Lil Peep", "The Last Dinner Party",
 "Cardi B", "Saucy Santana", "Doechii", "Tyler, The Creator",
@@ -275,7 +274,7 @@ queer_artists =[
 'Caleb de Casper', 'Molly Grace', 'Grace Gaustad', 'Matt Fishel', 'Ekko Astral',
 'Clementaum', 'Abdu Ali', 'Christine and the Queens', 'Tegan & Sara', 'Elton John', 'RuPaul', 'Boygenius', 'Big Freedia', 
 'Pinkshift', 'Home Is Where', 'JustB', 'Just B', 'Rhea Raj', 'Brooke Eden', 'Cobrah', 'Siena Liggins', 
-
+]
 ]
 
 
@@ -475,7 +474,8 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
-                        .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                        .filter(pl.col('track.artists.name').is_in(only_fabulous_people),
+                                # pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
