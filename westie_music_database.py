@@ -575,7 +575,7 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 3 ,
                                       level = pl.lit('high'))
-                        .shuffle()
+                  
                         .head(80)
                         )
                 
@@ -586,7 +586,7 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
-                        .shuffle()
+      
                         .head(120)
                         )
                 
@@ -597,7 +597,7 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
-                        .shuffle()
+               
                         .head(80)
                         )
                 
