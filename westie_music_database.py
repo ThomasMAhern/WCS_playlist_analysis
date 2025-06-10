@@ -478,7 +478,8 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
+                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM')).fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
+                                      )
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
@@ -490,7 +491,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm')
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm', 'queer_artist')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         # 'apprx_song_position_in_playlist', 
