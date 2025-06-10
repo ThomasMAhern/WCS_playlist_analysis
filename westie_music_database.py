@@ -246,8 +246,8 @@ queer_artists =[
 "Lionesses", "Jiae", "Wonho", "Arca", "Demi Lovato", "Mia Wray", "Emily Jeffri",
 "Ricky Martin", "Villano Antillano", "Tokischa", "Mad Tsai", "Against Me!", "Laura Jane Grace",
 "Snow Tha Product", "070 Shake", "Anitta", "Kali Uchis", "girl in red",
-"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland", "Geo Jordan", "Girli",
-"Princess Nokia", "Omar Apollo", "Bentley Robles", "Lauren Jauregui", "Lagoona Bloo",
+"Blue Rojo", "Pabllo Vittar", "Maria Becerra", "Mabiland", "Geo Jordan", "Girli", 
+"Omar Apollo", "Bentley Robles", "Lauren Jauregui", "Lagoona Bloo",
 "Lady Gaga", "Doja Cat", "Tove Lo", "Mad Tsai", "Tsatsamis", "Jade LeMac", 
 "Miley Cyrus", "Betty Who", "Clairo", "Rebecca Black", "Karin Ann", "Anthony Lexa",
 "Janelle Monáe", "Grant Knoche", "Dusty Springfield", "Troye Sivan", "Hey, Baby",
@@ -274,7 +274,7 @@ queer_artists =[
 'Lushious Massacr', 'Mila Jam', 'VINCINT', 'David Archuleta', 'Marko Bošnjak', 'ADONXS', 'jasmine.4.t', 'Paisley Fields', 
 'Caleb de Casper', 'Molly Grace', 'Grace Gaustad', 'Matt Fishel', 'Ekko Astral',
 'Clementaum', 'Abdu Ali', 'Christine and the Queens', 'Tegan & Sara', 'Elton John', 'RuPaul', 'Boygenius', 'Big Freedia', 
-'Prince', 'Pinkshift', 'Home Is Where', 'JustB', 'Just B', 'Rhea Raj', 'Brooke Eden', 'Cobrah', 'Siena Liggins', 
+'Pinkshift', 'Home Is Where', 'JustB', 'Just B', 'Rhea Raj', 'Brooke Eden', 'Cobrah', 'Siena Liggins', 
 
 ]
 
