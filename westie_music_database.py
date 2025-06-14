@@ -451,6 +451,7 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
+                num_results = st.number_input("Skip the top __ results", value=0, min_value=0)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 # bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
                 
@@ -461,8 +462,7 @@ if song_locator_toggle:
                 bpm_med = st.number_input("BPM medium-limit: ", value=95, min_value=0)
         with col3:
                 bpm_high = st.number_input("BPM high-limit: ", value=105, min_value=0)
-        with col4:
-                num_results = st.number_input("Skip the top __ results", value=0, min_value=0)
+                
                 
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -592,8 +592,8 @@ if song_locator_toggle:
                         #This gives them the order when combined with the other tracks
                         .with_columns((pl.col('order') * 4) - 3 , 
                                       level = pl.lit('high'))
+                        .head(100)
                         #this shuffles that order so the songs aren't strictly high - low bpm 
-                        .head(80)
                         .with_columns(pl.col('order').shuffle())
                         )
                 
@@ -603,19 +603,17 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
-                        #this shuffles that order so the songs aren't strictly high - low bpm
-                        .head(160)
+                        .head(200)
                         .with_columns(pl.col('order').shuffle()) 
                         )
                 
                 pl_3 = (results_df
-                        .filter(pl.col('bpm').le(bpm_med) & pl.col('bpm').gt(bpm_low))
+                        .filter(pl.col('bpm').le(bpm_low) & pl.col('bpm').gt(0))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
-                        # #this shuffles that order so the songs aren't strictly high - low bpm
-                        .head(80)
+                        .head(100)
                         .with_columns(pl.col('order').shuffle()) 
                         )
                 
