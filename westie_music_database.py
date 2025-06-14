@@ -601,8 +601,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
-                        #this shuffles that order so the songs aren't strictly high - low bpm
-                        .with_columns(pl.col('order').shuffle()) 
+                        # #this shuffles that order so the songs aren't strictly high - low bpm
+                        # .with_columns(pl.col('order').shuffle()) 
                         .head(80)
                         )
                 
