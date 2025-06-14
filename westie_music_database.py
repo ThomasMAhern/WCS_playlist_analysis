@@ -634,20 +634,16 @@ if song_locator_toggle:
                 # # 1 2 3 2 1 2 3 2 1
                 
                 # Tag levels based on BPM
-                results_df = results_df.with_columns(
-                pl.when(pl.col("bpm") > bpm_med).then("high")
-                .when(pl.col("bpm") > bpm_low).then("medium")
-                .otherwise("low")
-                .alias("level")
-                )
-
-
-
+                results_df2 = results_df.with_columns(
+                                        pl.when(pl.col("bpm") > bpm_med).then("high")
+                                        .when(pl.col("bpm") > bpm_low).then("medium")
+                                        .otherwise("low")
+                                        .alias("level")
+                                        )
                 # Get pools by level
-                
-                high_df = results_df.filter(pl.col("level") == "high")
-                medium_df = results_df.filter(pl.col("level") == "medium")
-                low_df = results_df.filter(pl.col("level") == "low")
+                high_df = results_df2.filter(pl.col("level") == "high")
+                medium_df = results_df2.filter(pl.col("level") == "medium")
+                low_df = results_df2.filter(pl.col("level") == "low")
 
                 # Build playlist
                 playlist_parts = []
@@ -672,9 +668,6 @@ if song_locator_toggle:
                 playlist_parts.append(m2)
                 prev_bpm = m2["bpm"][0]
 
-                # Step 5: High song (return)
-                h2 = sample_with_bpm_range(high_df, prev_bpm)
-                playlist_parts.append(h2)
 
                 # Combine and add index
                 playlist_df = pl.concat(playlist_parts).with_row_index(name="order", offset=1)
