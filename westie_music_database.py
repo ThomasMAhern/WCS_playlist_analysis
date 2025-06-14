@@ -679,8 +679,11 @@ if song_locator_toggle:
                 playlist_df = pl.concat(playlist_parts).with_row_index(name="order", offset=1)
 
                 # Display
-                st.dataframe(
-                playlist_df.select("order", "level", "bpm", "song_url"),
+                st.dataframe((playlist_df
+                              .select('index', 'level', 'bpm',  
+                                      pl.all().exclude('index', 'bpm', 'level'))
+                              .drop('order')
+                              ),
                 column_config={"song_url": st.column_config.LinkColumn("Song")}
                 )
                 
