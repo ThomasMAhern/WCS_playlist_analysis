@@ -130,6 +130,12 @@ def gen(iterable):
     for _ in iterable:
         yield _
 
+def sample_with_bpm_range(df, prev_bpm):
+        '''Helper function to sample song with 5–8 bpm diff for playlist generator'''
+        return df.filter(
+                (pl.col("bpm") - prev_bpm).abs().is_between(5, 8)
+        ).sample(n=1, seed=42)
+
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
@@ -627,19 +633,15 @@ if song_locator_toggle:
 
                 # # 1 2 3 2 1 2 3 2 1
                 
-                # # Tag levels based on BPM
-                # results_df = results_df.with_columns(
-                # pl.when(pl.col("bpm") > bpm_med).then("high")
-                # .when(pl.col("bpm") > bpm_low).then("medium")
-                # .otherwise("low")
-                # .alias("level")
-                # )
+                # Tag levels based on BPM
+                results_df = results_df.with_columns(
+                pl.when(pl.col("bpm") > bpm_med).then("high")
+                .when(pl.col("bpm") > bpm_low).then("medium")
+                .otherwise("low")
+                .alias("level")
+                )
 
-                # Helper function to sample song with 5–8 bpm diff
-                def sample_with_bpm_range(df, prev_bpm):
-                        return df.filter(
-                                (pl.col("bpm") - prev_bpm).abs().is_between(5, 8)
-                        ).sample(n=1, seed=42)
+
 
                 # Get pools by level
                 
