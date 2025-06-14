@@ -404,8 +404,8 @@ def top_songs():
                  #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'queer_artist')
-                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm',
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm', 'queer_artist')
+                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                 #      'apprx_song_position_in_playlist', 
                      'notes', 'note_source',
