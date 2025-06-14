@@ -453,24 +453,16 @@ if song_locator_toggle:
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 # bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
+                
         col1, col2, col3, col4 = st.columns(4)
         with col1: 
                 num_results = st.number_input("Skip the top __ results")
         with col2:
-                bpm_high = st.number_input("BPM high-limit: ")
+                bpm_high = st.number_input("BPM high-limit: ", value=300, min_value=0, max_value=500)
         with col3:
-                bpm_low = st.number_input("BPM low-limit: ")
+                bpm_low = st.number_input("BPM low-limit: ", value=0, min_value=0, max_value=500)
         with col4:
-                bpm_med = st.number_input("BPM medium-limit (only for playlist generation): ")
-                
-        if not num_results:
-                num_results = 0
-        if not bpm_high:
-                bpm_high = 200
-        if not bpm_low:
-                bpm_low = 0
-        if not bpm_med:
-                bpm_med = 95
+                bpm_med = st.number_input("BPM medium-limit (only for playlist generation): ", value=95, min_value=0, max_value=500)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
