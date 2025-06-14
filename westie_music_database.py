@@ -405,8 +405,7 @@ def top_songs():
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm', 'queer_artist')
-                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
-                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                .agg('playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                 #      'apprx_song_position_in_playlist', 
                      'notes', 'note_source',
                         #connies notes
@@ -422,7 +421,7 @@ def top_songs():
                                 )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
-                .sort('matching_playlist_count', descending=True)
+                .sort('playlist_name', descending=True)
                 .with_row_index(offset=1)
                 .head(1000).collect(streaming=True)
                 )
