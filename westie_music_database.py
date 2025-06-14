@@ -415,7 +415,7 @@ def top_songs():
                                 #      'apprx_song_position_in_playlist', 
                                      'track.artists.name', 'country',
                                         #connies notes
-                                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        'Starting energy', 'Ending energy', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
