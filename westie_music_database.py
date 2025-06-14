@@ -573,8 +573,11 @@ if song_locator_toggle:
                                 & pl.col('bpm').le(103))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
-                        .with_columns((pl.col('order') * 4) - 3 ,
+                        #This gives them the order when combined with the other tracks
+                        .with_columns((pl.col('order') * 4) - 3 , 
                                       level = pl.lit('high'))
+                        #this shuffles that order so the songs aren't strictly high - low bpm
+                        .with_columns(pl.col('order').shuffle()) 
                   
                         .head(80)
                         )
@@ -586,7 +589,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
-      
+                        #this shuffles that order so the songs aren't strictly high - low bpm
+                        .with_columns(pl.col('order').shuffle()) 
                         .head(120)
                         )
                 
@@ -597,7 +601,8 @@ if song_locator_toggle:
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
-               
+                        #this shuffles that order so the songs aren't strictly high - low bpm
+                        .with_columns(pl.col('order').shuffle()) 
                         .head(80)
                         )
                 
