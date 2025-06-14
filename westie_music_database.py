@@ -649,26 +649,30 @@ if song_locator_toggle:
 
                 # Build playlist
                 playlist_parts = []
+                
+                for i in range(0,50):
+                        try:
+                                # Step 1: High song (start)
+                                h1 = high_df.sample(n=1, seed=42)
+                                playlist_parts.append(h1)
+                                prev_bpm = h1["bpm"][i]
 
-                # Step 1: High song (start)
-                h1 = high_df.sample(n=1, seed=42)
-                playlist_parts.append(h1)
-                prev_bpm = h1["bpm"][0]
+                                # Step 2: Medium song
+                                m1 = sample_with_bpm_range(medium_df, prev_bpm)
+                                playlist_parts.append(m1)
+                                prev_bpm = m1["bpm"][i]
 
-                # Step 2: Medium song
-                m1 = sample_with_bpm_range(medium_df, prev_bpm)
-                playlist_parts.append(m1)
-                prev_bpm = m1["bpm"][0]
+                                # Step 3: Low song
+                                l1 = sample_with_bpm_range(low_df, prev_bpm)
+                                playlist_parts.append(l1)
+                                prev_bpm = l1["bpm"][i]
 
-                # Step 3: Low song
-                l1 = sample_with_bpm_range(low_df, prev_bpm)
-                playlist_parts.append(l1)
-                prev_bpm = l1["bpm"][0]
-
-                # Step 4: Medium song
-                m2 = sample_with_bpm_range(medium_df, prev_bpm)
-                playlist_parts.append(m2)
-                prev_bpm = m2["bpm"][0]
+                                # Step 4: Medium song
+                                m2 = sample_with_bpm_range(medium_df, prev_bpm)
+                                playlist_parts.append(m2)
+                                prev_bpm = m2["bpm"][i]
+                        except:
+                                pass
 
 
                 # Combine and add index
