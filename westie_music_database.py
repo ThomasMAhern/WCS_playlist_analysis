@@ -458,11 +458,11 @@ if song_locator_toggle:
         with col1: 
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0)
         with col2:
-                bpm_high = st.number_input("BPM high-limit: ", value=130, min_value=0)
-        with col3:
                 bpm_low = st.number_input("BPM low-limit: ", value=0, min_value=0)
+        with col3:
+                bpm_med = st.number_input("BPM medium-limit: ", value=95, min_value=0)
         with col4:
-                bpm_med = st.number_input("BPM medium-limit (only for playlist generation): ", value=95, min_value=0)
+                bpm_high = st.number_input("BPM high-limit: ", value=105, min_value=0)
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -599,7 +599,7 @@ if song_locator_toggle:
                         )
                 
                 pl_2 = (results_df
-                        .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_high))
+                        .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_med))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
