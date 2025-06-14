@@ -457,11 +457,11 @@ if song_locator_toggle:
                 
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-                bpm_low = st.number_input("BPM low: ", value=91, min_value=0, step=2)
+                bpm_low = st.number_input("Playlist low: ", value=91, min_value=0, step=2)
         with col2:
-                bpm_med = st.number_input("BPM med (playlist): ", value=96, min_value=0, step=2)
+                bpm_med = st.number_input("Playlist med: ", value=96, min_value=0, step=2)
         with col3:
-                bpm_high = st.number_input("BPM high: ", value=105, min_value=0, step=2)
+                bpm_high = st.number_input("Playlist high: ", value=105, min_value=0, step=2)
                 
                 
         if queer_toggle:
