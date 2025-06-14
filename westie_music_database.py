@@ -467,7 +467,7 @@ if song_locator_toggle:
         with col2:
                 bpm_med = st.number_input("Playlist med: ", value=96, min_value=0, step=2)
         with col3:
-                bpm_high = st.number_input("Playlist high: ", value=105, min_value=0, step=2)
+                bpm_high = st.number_input("Playlist high: ", value=103, min_value=0, step=2)
                 
                 
         if queer_toggle:
@@ -600,7 +600,7 @@ if song_locator_toggle:
                                       level = pl.lit('high'))
                         .head(100)
                         #this shuffles that order so the songs aren't strictly high - low bpm 
-                        .with_columns(pl.col('order').shuffle())
+                        # .with_columns(pl.col('order').shuffle())
                         )
                 
                 pl_2 = (results_df
@@ -610,7 +610,7 @@ if song_locator_toggle:
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
                         .head(200)
-                        .with_columns(pl.col('order').shuffle()) 
+                        # .with_columns(pl.col('order').shuffle())
                         )
                 
                 pl_3 = (results_df
@@ -620,7 +620,7 @@ if song_locator_toggle:
                         .with_columns((pl.col('order') * 4) - 1 ,
                                       level = pl.lit('low'))
                         .head(100)
-                        .with_columns(pl.col('order').shuffle()) 
+                        # .with_columns(pl.col('order').shuffle())
                         )
                 
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
