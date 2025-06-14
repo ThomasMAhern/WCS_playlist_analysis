@@ -550,7 +550,7 @@ if song_locator_toggle:
                 
                 results_df = (song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(1000).collect(engine="streaming"))
+                             .head(2000).collect(engine="streaming"))
                 st.dataframe(results_df, 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
@@ -590,102 +590,103 @@ if song_locator_toggle:
                 
                 st.text("Pretend you're Koichi with a ↗️↘️ playlist:")
                 
-                # #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
-                # pl_1 = (results_df
-                #         .filter(pl.col('bpm').gt(bpm_med) & pl.col('bpm').le(bpm_high))
-                #         .sort('bpm', descending=True)
-                #         .with_row_index('order', offset=1)
-                #         #This gives them the order when combined with the other tracks
-                #         .with_columns((pl.col('order') * 4) - 3 , 
-                #                       level = pl.lit('high'))
-                #         .head(100)
-                #         #this shuffles that order so the songs aren't strictly high - low bpm 
-                #         .with_columns(pl.col('order').shuffle())
-                #         )
+                #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
+                pl_1 = (results_df
+                        .filter(pl.col('bpm').gt(bpm_med) & pl.col('bpm').le(bpm_high))
+                        .sort('bpm', descending=True)
+                        .with_row_index('order', offset=1)
+                        #This gives them the order when combined with the other tracks
+                        .with_columns((pl.col('order') * 4) - 3 , 
+                                      level = pl.lit('high'))
+                        .head(100)
+                        #this shuffles that order so the songs aren't strictly high - low bpm 
+                        .with_columns(pl.col('order').shuffle())
+                        )
                 
-                # pl_2 = (results_df
-                #         .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_med))
-                #         .sort('bpm', descending=True)
-                #         .with_row_index('order', offset=1)
-                #         .with_columns(pl.col('order') * 2, 
-                #                       level = pl.lit('medium'))
-                #         .head(200)
-                #         .with_columns(pl.col('order').shuffle()) 
-                #         )
+                pl_2 = (results_df
+                        .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_med))
+                        .sort('bpm', descending=True)
+                        .with_row_index('order', offset=1)
+                        .with_columns(pl.col('order') * 2, 
+                                      level = pl.lit('medium'))
+                        .head(200)
+                        .with_columns(pl.col('order').shuffle()) 
+                        )
                 
-                # pl_3 = (results_df
-                #         .filter(pl.col('bpm').le(bpm_low) & pl.col('bpm').gt(0))
-                #         .sort('bpm', descending=True)
-                #         .with_row_index('order', offset=1)
-                #         .with_columns((pl.col('order') * 4) - 1 ,
-                #                       level = pl.lit('low'))
-                #         .head(100)
-                #         .with_columns(pl.col('order').shuffle()) 
-                #         )
+                pl_3 = (results_df
+                        .filter(pl.col('bpm').le(bpm_low) & pl.col('bpm').gt(0))
+                        .sort('bpm', descending=True)
+                        .with_row_index('order', offset=1)
+                        .with_columns((pl.col('order') * 4) - 1 ,
+                                      level = pl.lit('low'))
+                        .head(100)
+                        .with_columns(pl.col('order').shuffle()) 
+                        )
                 
-                # st.dataframe((pl.concat([pl_1, pl_2, pl_3])
-                #               .select('index', 'level', 'bpm',  
-                #                       pl.all().exclude('index', 'bpm', 'level'))
-                #               .sort('order')
-                #               .drop('order')
-                #               ), 
-                # column_config={"song_url": st.column_config.LinkColumn()})
+                st.dataframe((pl.concat([pl_1, pl_2, pl_3])
+                              .select('index', 'level', 'bpm',  
+                                      pl.all().exclude('index', 'bpm', 'level'))
+                              .sort('order')
+                              .drop('order')
+                              ), 
+                column_config={"song_url": st.column_config.LinkColumn()})
 
                 # # 1 2 3 2 1 2 3 2 1
                 
-                # Tag levels based on BPM
-                results_df2 = (results_df
-                               .with_columns(level = pl.when(pl.col("bpm") > bpm_med)
-                                                        .then(pl.lit("high"))
-                                                        .when(pl.col("bpm") > bpm_low)
-                                                        .then(pl.lit("medium"))
-                                                        .otherwise(pl.lit("low"))
-                                               )
-                                )
-                # Get pools by level
-                high_df = results_df2.filter(pl.col("level") == "high")
-                medium_df = results_df2.filter(pl.col("level") == "medium")
-                low_df = results_df2.filter(pl.col("level") == "low")
+                ##attempt at better playlist generation
+                # # Tag levels based on BPM
+                # results_df2 = (results_df
+                #                .with_columns(level = pl.when(pl.col("bpm") > bpm_med)
+                #                                         .then(pl.lit("high"))
+                #                                         .when(pl.col("bpm") > bpm_low)
+                #                                         .then(pl.lit("medium"))
+                #                                         .otherwise(pl.lit("low"))
+                #                                )
+                #                 )
+                # # Get pools by level
+                # high_df = results_df2.filter(pl.col("level") == "high")
+                # medium_df = results_df2.filter(pl.col("level") == "medium")
+                # low_df = results_df2.filter(pl.col("level") == "low")
 
-                # Build playlist
-                playlist_parts = []
+                # # Build playlist
+                # playlist_parts = []
                 
-                for i in range(0,50):
-                        try:
-                                # Step 1: High song (start)
-                                h1 = high_df.sample(n=1, seed=42)
-                                playlist_parts.append(h1)
-                                prev_bpm = h1["bpm"][i]
+                # for i in range(0,50):
+                #         try:
+                #                 # Step 1: High song (start)
+                #                 h1 = high_df.sample(n=1, seed=42)
+                #                 playlist_parts.append(h1)
+                #                 prev_bpm = h1["bpm"][i]
 
-                                # Step 2: Medium song
-                                m1 = sample_with_bpm_range(medium_df, prev_bpm)
-                                playlist_parts.append(m1)
-                                prev_bpm = m1["bpm"][i]
+                #                 # Step 2: Medium song
+                #                 m1 = sample_with_bpm_range(medium_df, prev_bpm)
+                #                 playlist_parts.append(m1)
+                #                 prev_bpm = m1["bpm"][i]
 
-                                # Step 3: Low song
-                                l1 = sample_with_bpm_range(low_df, prev_bpm)
-                                playlist_parts.append(l1)
-                                prev_bpm = l1["bpm"][i]
+                #                 # Step 3: Low song
+                #                 l1 = sample_with_bpm_range(low_df, prev_bpm)
+                #                 playlist_parts.append(l1)
+                #                 prev_bpm = l1["bpm"][i]
 
-                                # Step 4: Medium song
-                                m2 = sample_with_bpm_range(medium_df, prev_bpm)
-                                playlist_parts.append(m2)
-                                prev_bpm = m2["bpm"][i]
-                        except:
-                                pass
+                #                 # Step 4: Medium song
+                #                 m2 = sample_with_bpm_range(medium_df, prev_bpm)
+                #                 playlist_parts.append(m2)
+                #                 prev_bpm = m2["bpm"][i]
+                #         except:
+                #                 pass
 
 
-                # Combine and add index
-                playlist_df = pl.concat(playlist_parts).with_row_index(name="order", offset=1)
+                # # Combine and add index
+                # playlist_df = pl.concat(playlist_parts).with_row_index(name="order", offset=1)
 
-                # Display
-                st.dataframe((playlist_df
-                              .select('index', 'level', 'bpm',  
-                                      pl.all().exclude('index', 'bpm', 'level'))
-                              .drop('order')
-                              ),
-                column_config={"song_url": st.column_config.LinkColumn("Song")}
-                )
+                # # Display
+                # st.dataframe((playlist_df
+                #               .select('index', 'level', 'bpm',  
+                #                       pl.all().exclude('index', 'bpm', 'level'))
+                #               .drop('order')
+                #               ),
+                # column_config={"song_url": st.column_config.LinkColumn("Song")}
+                # )
                 
                 
                 
