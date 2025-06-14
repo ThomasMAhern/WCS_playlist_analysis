@@ -451,17 +451,16 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
+                num_results = st.number_input("Skip the top __ results", value=0, min_value=0)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 # bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
                 
         col1, col2, col3, col4 = st.columns(4)
-        with col1: 
-                num_results = st.number_input("Skip the top __ results", value=0, min_value=0)
-        with col2:
+        with col1:
                 bpm_low = st.number_input("BPM low-limit: ", value=0, min_value=0)
-        with col3:
+        with col2:
                 bpm_med = st.number_input("BPM medium-limit: ", value=95, min_value=0)
-        with col4:
+        with col3:
                 bpm_high = st.number_input("BPM high-limit: ", value=105, min_value=0)
         
         if queer_toggle:
