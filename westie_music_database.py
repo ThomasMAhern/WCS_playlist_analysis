@@ -453,15 +453,15 @@ if song_locator_toggle:
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0, step=250)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
-                # bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
+                bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
                 
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-                bpm_low = st.number_input("BPM low: ", value=0, min_value=0, step=2)
+                bpm_low = st.number_input("BPM low: ", value=91, min_value=0, step=2)
         with col2:
-                bpm_med = st.number_input("BPM med (playlist): ", value=95, min_value=0, step=2)
+                bpm_med = st.number_input("BPM med (playlist): ", value=96, min_value=0, step=2)
         with col3:
-                bpm_high = st.number_input("BPM high: ", value=115, min_value=0, step=2)
+                bpm_high = st.number_input("BPM high: ", value=105, min_value=0, step=2)
                 
                 
         if queer_toggle:
@@ -494,7 +494,7 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
-                                (pl.col('bpm').ge(bpm_low) & pl.col('bpm').le(bpm_high)),
+                                (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
