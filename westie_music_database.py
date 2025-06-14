@@ -510,8 +510,9 @@ if song_locator_toggle:
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
-                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm', 'queer_artist',
-                                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
+                             'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
+                             'owner.display_name', 'country',
                                 # 'apprx_song_position_in_playlist', 
                                 # 'notes', 'note_source', 
                                 ##connie's notes
@@ -539,7 +540,9 @@ if song_locator_toggle:
                                                         .list.unique()
                                                         .list.sort(),
                                       )
-                        .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()))
+                        .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
+                                      pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
+                                      )
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
