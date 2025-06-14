@@ -429,7 +429,7 @@ def top_songs():
 top_songs = top_songs()
 
 top_songs_toggle = st.toggle("Top 1000 WCS songs!")
-if song_locator_toggle:
+if top_songs_toggle:
         st.dataframe(top_songs, 
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
