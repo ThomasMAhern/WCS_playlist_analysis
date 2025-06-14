@@ -454,7 +454,7 @@ if song_locator_toggle:
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 # bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
                 
-        col1, col2, col3, col4 = st.columns(5)
+        col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
                 bpm_low = st.number_input("BPM low-limit: ", value=0, min_value=0)
         with col2:
