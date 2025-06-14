@@ -404,8 +404,8 @@ def top_songs():
                  #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
-                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'queer_artist')
-                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm',
+                .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
+                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                 #      'apprx_song_position_in_playlist', 
                      'notes', 'note_source',
@@ -415,7 +415,7 @@ def top_songs():
                                 #      'apprx_song_position_in_playlist', 
                                      'track.artists.name', 'country',
                                         #connies notes
-                                        'Starting energy', 'Ending energy', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type'
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
@@ -424,11 +424,11 @@ def top_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(1000).collect(streaming=True)
+                .head(500).collect(streaming=True)
                 )
 top_songs = top_songs()
 
-top_songs_toggle = st.toggle("Top 1000 WCS songs!")
+top_songs_toggle = st.toggle("Top 500 WCS songs!")
 if top_songs_toggle:
         st.dataframe(top_songs.drop('matching_playlist_count'), 
                      column_config={"song_url": st.column_config.LinkColumn()}
@@ -503,12 +503,12 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'queer_artist')
-                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm',
+                        .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
+                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm', 'queer_artist',
                                          'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
-                        # 'apprx_song_position_in_playlist', 
-                        # 'notes', 'note_source', 
-                                #connie's notes
+                                # 'apprx_song_position_in_playlist', 
+                                # 'notes', 'note_source', 
+                                ##connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
