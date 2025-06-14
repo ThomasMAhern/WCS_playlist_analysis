@@ -518,7 +518,7 @@ if song_locator_toggle:
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
-                                      pl.col('owner.display_name', 'bpm',
+                                      pl.col('owner.display_name', 'bpm', 'queer_artist',
                                                 # 'apprx_song_position_in_playlist', 
                                                 'track.artists.name', 'country',
                                                 ##connie's notes
