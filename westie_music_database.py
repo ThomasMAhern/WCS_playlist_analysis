@@ -635,13 +635,13 @@ if song_locator_toggle:
                 
                 # Tag levels based on BPM
                 results_df2 = (results_df
-                               .with_columns(pl.when(pl.col("bpm") > bpm_med)
-                                               .then(pl.lit("high"))
-                                               .when(pl.col("bpm") > bpm_low)
-                                               .then(pl.lit("medium"))
-                                               .otherwise(pl.lit("low"))
-                                               ).alias("level")
-                                        )
+                               .with_columns(level = pl.when(pl.col("bpm") > bpm_med)
+                                                        .then(pl.lit("high"))
+                                                        .when(pl.col("bpm") > bpm_low)
+                                                        .then(pl.lit("medium"))
+                                                        .otherwise(pl.lit("low"))
+                                               )
+                                )
                 # Get pools by level
                 high_df = results_df2.filter(pl.col("level") == "high")
                 medium_df = results_df2.filter(pl.col("level") == "medium")
