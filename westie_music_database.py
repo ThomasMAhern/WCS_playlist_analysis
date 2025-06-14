@@ -456,7 +456,7 @@ if song_locator_toggle:
                 
         col1, col2, col3, col4 = st.columns(4)
         with col1: 
-                num_results = st.number_input("Skip the top __ results")
+                num_results = st.number_input("Skip the top __ results", value=0, min_value=0, max_value=1_000_000_000_000)
         with col2:
                 bpm_high = st.number_input("BPM high-limit: ", value=300, min_value=0, max_value=500)
         with col3:
