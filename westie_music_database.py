@@ -438,7 +438,6 @@ if top_songs_toggle:
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song 🎵")
 if song_locator_toggle:
-        
         song_col1, song_col2 = st.columns(2)
         with song_col1:
                 song_input = st.text_input("Song name:").lower()
@@ -452,8 +451,26 @@ if song_locator_toggle:
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
-                num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
-                bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
+                # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
+                # bpm_slider = st.slider("BPM:", 0, 150, (0, 150))
+        col1, col2, col3, col4 = st.columns(4)
+        with col1: 
+                num_results = st.number_input("Skip the top __ results")
+        with col2:
+                bpm_high = st.number_input("BPM high-limit: ")
+        with col3:
+                bpm_low = st.number_input("BPM low-limit: ")
+        with col4:
+                bpm_med = st.number_input("BPM medium-limit (only for playlist generation): ")
+                
+        if not num_results:
+                num_results = 0
+        if not bpm_high:
+                bpm_high = 200
+        if not bpm_low:
+                bpm_low = 0
+        if not bpm_med:
+                bpm_med = 95
         
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -474,7 +491,8 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
-                song_search_df = (df
+                song_search_df = (
+                        df
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
@@ -484,7 +502,7 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
-                                (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
+                                (pl.col('bpm').ge(bpm_low) & pl.col('bpm').le(bpm_high)),
                                 pl.col('country').cast(pl.String).str.contains('|'.join(countries_selectbox)), #courtesy of Franzi M.
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
@@ -495,7 +513,7 @@ if song_locator_toggle:
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', 'queer_artist')
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'bpm',
-                        'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                                         'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
                         # 'apprx_song_position_in_playlist', 
                         # 'notes', 'note_source', 
                                 #connie's notes
@@ -576,8 +594,7 @@ if song_locator_toggle:
                 
                 #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
                 pl_1 = (results_df
-                        .filter(pl.col('bpm').gt(95)
-                                & pl.col('bpm').le(103))
+                        .filter(pl.col('bpm').gt(bpm_med) & pl.col('bpm').le(bpm_high))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         #This gives them the order when combined with the other tracks
@@ -590,20 +607,18 @@ if song_locator_toggle:
                         )
                 
                 pl_2 = (results_df
-                        .filter(pl.col('bpm').gt(90) 
-                                & pl.col('bpm').le(95))
+                        .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_high))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns(pl.col('order') * 2, 
                                       level = pl.lit('medium'))
                         #this shuffles that order so the songs aren't strictly high - low bpm
                         .with_columns(pl.col('order').shuffle()) 
-                        .head(120)
+                        .head(160)
                         )
                 
                 pl_3 = (results_df
-                        .filter(pl.col('bpm').le(90)
-                                & pl.col('bpm').gt(40))
+                        .filter(pl.col('bpm').le(bpm_med) & pl.col('bpm').gt(bpm_low))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         .with_columns((pl.col('order') * 4) - 1 ,
