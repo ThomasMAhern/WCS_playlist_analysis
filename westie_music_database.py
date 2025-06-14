@@ -550,7 +550,7 @@ if song_locator_toggle:
                 
                 results_df = (song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
-                             .head(2000).collect(engine="streaming"))
+                             .head(1000).collect(engine="streaming"))
                 st.dataframe(results_df, 
                         column_config={"song_url": st.column_config.LinkColumn()})
                 
