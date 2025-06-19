@@ -35,6 +35,14 @@ pattern_dd_mm = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ](?:0[1-9]|1[0-2])\b'
 pattern_yy_mm = r'\b\d{2}[-/. ](?:0[1-9]|1[0-2])\b'
 pattern_mm_dd = r'\b(?:0[1-9]|1[0-2])[-/. ](?:0[1-9]|[12]\d|3[01])\b'
 
+pattern_bpm_range = r'(\d{2,3})\s*[-–]\s*(\d{2,3})\s*(?:bpm|BPM)?' #70 – 79bpm
+pattern_bpm_appx = r'[~≈]\s*(\d{2,3})\s*(?:bpm|BPM)?' #~100bpm
+pattern_bpm_relational = r'[<>]=?\s*(\d{2,3})\s*(?:bpm|BPM)?' #>120 BPM
+pattern_bpm_mention = r'(?:bpm|BPM)[^\d]{0,5}(\d{2,3})' #bpm 105
+pattern_bpm_loose_fallback = r'\b(\d{2,3})\s*(?:bpm|BPM)\b' # 117 BPM”
+
+
+
 pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
 #based on Westie DJs https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY
@@ -426,6 +434,8 @@ def top_songs():
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
+                .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
+                              )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
