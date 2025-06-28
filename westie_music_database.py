@@ -845,12 +845,12 @@ search_dj_toggle = st.toggle("DJ insights 🎧")
 if search_dj_toggle:
         dj_col1, dj_col2 = st.columns(2)
         with dj_col1:
-                id_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)")
-                dj_id = id_input.lower().split(',')
+                dj_input = st.text_input("DJ name/ID (ex. Kasia Stepek or 1185428002)").lower().split(',')
+                # dj_id = id_input.lower().split(',')
         with dj_col2:
                 dj_playlist_input = st.text_input("DJ playlist name:").lower().split(',')
         
-        if (id_input == ['']) and (dj_id  == ['']) and (dj_playlist_input == ['']):
+        if (id_input == ['']) and (dj_playlist_input == ['']):
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
@@ -890,14 +890,18 @@ if search_dj_toggle:
                 if total_djs_from_search > 0 and total_djs_from_search <= 10: #so it doesn't have to process if nothing
                         ##too much data now that we have more music, that list is blowing up the streamlit
                         others_music = (df
-                                        .filter(~(pl.col('owner.id').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
-                                                | pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)))
+                                        .filter(~(pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
+                                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
+                                                 | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                                                )
                                         .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                                         )
 
                         djs_music = (df
-                                .filter((pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains_any(dj_id, ascii_case_insensitive=True)
-                                        | pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)))
+                                .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
+                                        # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
+                                        | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                                        )
                                 .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'playlist_name', 'song_url')
                                 .unique()
                                 )
