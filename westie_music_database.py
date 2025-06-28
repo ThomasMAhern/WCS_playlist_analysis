@@ -850,7 +850,7 @@ if search_dj_toggle:
         with dj_col2:
                 dj_playlist_input = st.text_input("DJ playlist name:").lower().split(',')
         
-        if (id_input == ['']) and (dj_playlist_input == ['']):
+        if (dj_input == ['']) and (dj_playlist_input == ['']):
                 st.dataframe(djs_data, 
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
