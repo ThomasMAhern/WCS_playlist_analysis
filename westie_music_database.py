@@ -768,10 +768,12 @@ if playlist_locator_toggle:
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
-                                (pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input)
-                                # | pl.col('dj_name').cast(pl.String).str.to_lowercase().str.contains(dj_input) #m3u playlists
-                                | pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains(dj_input)),
-                                # pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
+                                
+                                # (pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input)
+                                # # | pl.col('dj_name').cast(pl.String).str.to_lowercase().str.contains(dj_input) #m3u playlists
+                                # | pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains(dj_input)),
+                                
+                                pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
                                 )
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
@@ -855,9 +857,15 @@ if search_dj_toggle:
         # else:
         if st.button("Search djs", type="primary"):
                 dj_search_df = (df
-                        .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
+                        .filter(
+                                # (pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input)
+                                # # | pl.col('dj_name').cast(pl.String).str.to_lowercase().str.contains(dj_input) #m3u playlists
+                                # | pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains(dj_input))
+                                
+                                (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True)
                                 |pl.col('owner.id').cast(pl.String).str.contains_any(dj_id, ascii_case_insensitive=True))
-                                &pl.col('playlist_name').cast(pl.String).str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
+                                
+                                & pl.col('playlist_name').cast(pl.String).str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
                                 )
                         .group_by('owner.display_name', 'owner_url')
                         .agg(pl.n_unique('track.name').alias('song_count'),
