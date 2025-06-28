@@ -773,7 +773,11 @@ if playlist_locator_toggle:
                                 # # | pl.col('dj_name').cast(pl.String).str.to_lowercase().str.contains(dj_input) #m3u playlists
                                 # | pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains(dj_input)),
                                 
-                                pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
+                                (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
+                                # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
+                                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
+                                
+                                # pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
                                 )
                         .group_by('playlist_name', 'playlist_url')
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
