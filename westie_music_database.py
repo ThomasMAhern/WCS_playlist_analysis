@@ -516,6 +516,7 @@ if song_locator_toggle:
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('owner.display_name').cast(pl.String).str.to_lowercase().str.contains(dj_input),
+                                pl.col('owner.id').cast(pl.String).str.to_lowercase().str.contains(dj_input),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
