@@ -907,7 +907,7 @@ if search_dj_toggle:
                                 )
                         
                         
-                        st.text(f"Music unique to _{id_input}_")
+                        st.text(f"Music unique to _{dj_input}_")
                         st.dataframe(djs_music.join(others_music, 
                                                 how='anti', 
                                                 on=['track.name', pl.col('owner.display_name').cast(pl.String), 
@@ -922,7 +922,7 @@ if search_dj_toggle:
                         
                         
                         
-                        st.text(f"Popular music _{id_input}_ doesn't play")
+                        st.text(f"Popular music _{dj_input}_ doesn't play")
                         st.dataframe(others_music.join(djs_music, how='anti', 
                                         on=['track.name', 'dj_count', 
                                         'playlist_count', 'song_url'])
