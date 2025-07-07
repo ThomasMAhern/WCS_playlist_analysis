@@ -880,7 +880,7 @@ if search_dj_toggle:
                 st.dataframe(dj_search_df, 
                              column_config={"owner_url": st.column_config.LinkColumn()})
         
-                total_djs_from_search = dj_search_df.select('owner.display_name').unique()['owner.display_name'].shape[0]
+                total_djs_from_search = dj_search_df.select(pl.n_unique('owner.display_name')).collect(streaming=True)
         # elif dj_id:
                 if total_djs_from_search > 0 and total_djs_from_search <= 10: #so it doesn't have to process if nothing
 
