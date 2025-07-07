@@ -294,7 +294,7 @@ countries = load_countries()
 
 
 
-stats_counts = (pl.scan_parquet('data_playlists.parquet')
+stats_counts = (df
                 .select(pl.n_unique('track.name'),
                         pl.n_unique('track.artists.name'),
                         pl.n_unique('name'),
@@ -306,7 +306,7 @@ stats_counts = (pl.scan_parquet('data_playlists.parquet')
 
 songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
 
-wcs_stats_counts = (pl.scan_parquet('data_playlists.parquet')
+wcs_stats_counts = (df
                 .pipe(wcs_specific)
                 .select(pl.n_unique('track.name'),
                         pl.n_unique('track.artists.name'),
