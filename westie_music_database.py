@@ -297,7 +297,7 @@ countries = load_countries()
 stats_counts = (df
                 .select(pl.n_unique('track.name'),
                         pl.n_unique('track.artists.name'),
-                        pl.n_unique('name'),
+                        pl.n_unique('playlist_name'),
                         pl.n_unique('owner.display_name'),
                         )
                 .collect(streaming=True)
@@ -310,7 +310,7 @@ wcs_stats_counts = (df
                 .pipe(wcs_specific)
                 .select(pl.n_unique('track.name'),
                         pl.n_unique('track.artists.name'),
-                        pl.n_unique('name'),
+                        pl.n_unique('playlist_name'),
                         )
                 .collect(streaming=True)
                 .iter_rows()
