@@ -294,10 +294,10 @@ countries = load_countries()
 
 
 
-stats_counts = (df
+stats_counts = (pl.scan_parquet('data_playlists.parquet')
                 .select(pl.n_unique('track.name'),
                         pl.n_unique('track.artists.name'),
-                        pl.n_unique('playlist_name'),
+                        pl.n_unique('name'),
                         pl.n_unique('owner.display_name'),
                         )
                 .collect(streaming=True)
@@ -306,16 +306,6 @@ stats_counts = (df
 
 songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
 
-wcs_stats_counts = (df
-                .pipe(wcs_specific)
-                .select(pl.n_unique('track.name'),
-                        pl.n_unique('track.artists.name'),
-                        pl.n_unique('playlist_name'),
-                        )
-                .collect(streaming=True)
-                .iter_rows()
-                )
-wcssongs_count, wcsartists_count, wcsplaylists_count = list(stats_counts)[0]
 
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
@@ -330,9 +320,9 @@ st.text("An aggregated collection of West Coast Swing (WCS) music and playlists 
 
 # 1,298 **Westies/DJs**''')
 
-st.write(f"{songs_count:,}   Songs ({wcssongs_count:,} wcs specific)")
-st.write(f"{artists_count:,}   Artists ({wcsartists_count:,} wcs specific)")
-st.write(f"{playlists_count:,}   Playlists ({wcsplaylists_count:,} wcs specific)")
+st.write(f"{songs_count:,}   Songs")
+st.write(f"{artists_count:,}   Artists")
+st.write(f"{playlists_count:,}   Playlists")
 st.write(f"{djs_count:,}   Westies/DJs\n\n")
 
 
