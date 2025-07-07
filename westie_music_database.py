@@ -300,7 +300,7 @@ stats_counts = (pl.scan_parquet('data_playlists.parquet')
                         pl.n_unique('name'),
                         pl.n_unique('owner.display_name'),
                         )
-                .collect()
+                .collect(streaming=True)
                 .iter_rows()
                 )
 
@@ -312,7 +312,7 @@ wcs_stats_counts = (pl.scan_parquet('data_playlists.parquet')
                         pl.n_unique('track.artists.name'),
                         pl.n_unique('name'),
                         )
-                .collect()
+                .collect(streaming=True)
                 .iter_rows()
                 )
 wcssongs_count, wcsartists_count, wcsplaylists_count = list(stats_counts)[0]
