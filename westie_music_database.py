@@ -266,17 +266,18 @@ def load_countries():
 def load_stats():
         '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
         should make it much more responsive'''
-        song_count = df.select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        wcs_song_count = df.pipe(wcs_specific).select(pl.concat_str('track.name', pl.lit(' - '), 'track.id')).unique().collect(streaming=True).shape[0]
-        artist_count = df.select('track.artists.name').unique().collect(streaming=True).shape[0]
-        wcs_artist_count = df.pipe(wcs_specific).select('track.artists.name').unique().collect(streaming=True).shape[0]
-        playlist_count = df.select(pl.col('playlist_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
-        wcs_playlist_count = df.pipe(wcs_specific).select(pl.col('playlist_name').cast(pl.String)).collect(streaming=True).unique().shape[0]
-        dj_count = df.select(pl.col('owner.display_name').cast(pl.String)).unique().collect(streaming=True).shape[0]
+        stats_counts = (pl.scan_parquet('data_playlists.parquet')
+                        .select(pl.n_unique('track.name'),
+                                pl.n_unique('track.artists.name'),
+                                pl.n_unique('name'),
+                                pl.n_unique('owner.display_name'),
+                                )
+                        .collect(streaming=True)
+                        .iter_rows()
+                        )
+        songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
         
-        return song_count, wcs_song_count, artist_count, wcs_artist_count, playlist_count, wcs_playlist_count, dj_count
-
-# st.write(f"rest of defs aret good")
+        return songs_count, artists_count, playlists_count, djs_count
 
 df = load_playlist_data()
 # st.write(f"df is good")
@@ -286,25 +287,8 @@ df_notes = load_notes()
 # st.write(f"notes is good")
 countries = load_countries()
 # st.write(f"countries is good")
-# stats = load_stats()
+songs_count, artists_count, playlists_count, djs_count = load_stats()
 # st.write(f"stats is good")
-
-
-
-
-
-
-stats_counts = (pl.scan_parquet('data_playlists.parquet')
-                .select(pl.n_unique('track.name'),
-                        pl.n_unique('track.artists.name'),
-                        pl.n_unique('name'),
-                        pl.n_unique('owner.display_name'),
-                        )
-                .collect(streaming=True)
-                .iter_rows()
-                )
-
-songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
 
 
 
@@ -313,11 +297,8 @@ st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
 # st.markdown('''468,348 **Songs** (160,661 wcs specific)
-
 # 124,957 **Artists** (53,789 wcs specific)
-
 # 54,005 **Playlists** (17,274 wcs specific)
-
 # 1,298 **Westies/DJs**''')
 
 st.write(f"{songs_count:,}   Songs")
