@@ -294,26 +294,48 @@ countries = load_countries()
 
 
 
+stats_counts = (pl.scan_parquet('data_playlists.parquet')
+                .select(pl.n_unique('track.name'),
+                        pl.n_unique('track.artists.name'),
+                        pl.n_unique('name'),
+                        pl.n_unique('owner.display_name'),
+                        )
+                .collect()
+                .iter_rows()
+                )
 
+songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
 
+wcs_stats_counts = (pl.scan_parquet('data_playlists.parquet')
+                .pipe(wcs_specific)
+                .select(pl.n_unique('track.name'),
+                        pl.n_unique('track.artists.name'),
+                        pl.n_unique('name'),
+                        )
+                .collect()
+                .iter_rows()
+                )
+wcssongs_count, wcsartists_count, wcsplaylists_count = list(stats_counts)[0]
 
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
 st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
 
-st.markdown('''468,348 **Songs** (160,661 wcs specific)
+# st.markdown('''468,348 **Songs** (160,661 wcs specific)
 
-124,957 **Artists** (53,789 wcs specific)
+# 124,957 **Artists** (53,789 wcs specific)
 
-54,005 **Playlists** (17,274 wcs specific)
+# 54,005 **Playlists** (17,274 wcs specific)
 
-1,298 **Westies/DJs**''')
+# 1,298 **Westies/DJs**''')
 
-# st.write(f"{stats[0]:,}   Songs ({stats[1]:,} wcs specific)")
-# st.write(f"{stats[2]:,}   Artists ({stats[3]:,} wcs specific)")
-# st.write(f"{stats[4]:,}   Playlists ({stats[5]:,} wcs specific)")
-# st.write(f"{stats[6]:,}   Westies/DJs\n\n")
+st.write(f"{songs_count:,}   Songs ({wcssongs_count:,} wcs specific)")
+st.write(f"{artists_count:,}   Artists ({wcsartists_count:,} wcs specific)")
+st.write(f"{playlists_count:,}   Playlists ({wcsplaylists_count:,} wcs specific)")
+st.write(f"{djs_count:,}   Westies/DJs\n\n")
+
+
 
 
 st.link_button("Help fill in country info!", 
@@ -412,11 +434,13 @@ st.markdown("#### Choose your own adventure!")
 def top_songs():
         '''creates the standard top songs until user '''
         return (df
+                #add notes
                  .join(df_notes,
                         how='full',
                         on=['track.artists.name', 'track.name'])
-                 #add bpm
+                #add bpm
                 .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
@@ -937,7 +961,15 @@ if search_dj_toggle:
                 
 
         st.markdown(f"#### Compare DJs:")
-        dj_list = sorted(df.select('owner.display_name').cast(pl.String).unique().drop_nulls().collect(streaming=True)['owner.display_name'].to_list())
+        dj_list = sorted(df
+                         .select('owner.display_name')
+                         .cast(pl.String)
+                         .unique()
+                         .drop_nulls()
+                         .collect(streaming=True)
+                         ['owner.display_name']
+                         .to_list()
+                         )
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
