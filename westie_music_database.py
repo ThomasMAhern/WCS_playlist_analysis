@@ -466,8 +466,13 @@ if song_locator_toggle:
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
         
+        st.write(countries)
+        st.write(countries_selectbox)
+        
         if not countries_selectbox:
                 countries_selectbox = ['']
+        st.write(countries_selectbox)
+                
         
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
@@ -509,7 +514,7 @@ if song_locator_toggle:
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
-                                pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                # pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.name').str.to_lowercase().str.contains(song_input),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
