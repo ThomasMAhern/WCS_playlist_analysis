@@ -466,9 +466,14 @@ if song_locator_toggle:
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
         
+        st.write(countries)
+        st.write(countries_selectbox)
+        
         if not countries_selectbox:
                 countries_selectbox = [countries]
+        st.write(countries_selectbox)
                 
+        
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
                 bpm_low = st.number_input("Playlist low: ", value=90, min_value=0, step=2)
