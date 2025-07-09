@@ -473,7 +473,7 @@ if song_locator_toggle:
                 bpm_med = st.number_input("Playlist med: ", value=95, min_value=0, step=2)
         with col3:
                 bpm_high = st.number_input("Playlist high: ", value=100, min_value=0, step=2)
-        st.write("DJ Input:", dj_input) 
+                
                 
         if queer_toggle:
                 only_fabulous_people = queer_artists
@@ -752,7 +752,6 @@ if playlist_locator_toggle:
         with playlist_col2:
                 dj_input = st.text_input("DJ name:").lower().split(',')
                 anti_playlist_input2 = st.text_input("Not in playlist name: ").lower().split(',')
-        st.write("DJ Input", dj_input)
         
         if anti_playlist_input2 == ['']:
                 anti_playlist_input2 = ['this_is_a_bogus_value_to_hopefully_not_break_things']
