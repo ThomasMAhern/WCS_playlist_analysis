@@ -451,8 +451,8 @@ song_locator_toggle = st.toggle("Find a Song 🎵")
 if song_locator_toggle:
         song_col1, song_col2 = st.columns(2)
         with song_col1:
-                song_input = st.text_input("Song name:").lower()
-                artist_name = st.text_input("Artist name:").lower()
+                song_input = st.text_input("Song name:").lower().split(',')
+                artist_name = st.text_input("Artist name:").lower().split(',')
                 dj_input = st.text_input("DJ/user name:").lower().split(',')
                 playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
@@ -514,11 +514,12 @@ if song_locator_toggle:
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
-                                pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
-                                pl.col('track.name').str.to_lowercase().str.contains(song_input),
-                                pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
-                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 
+                                # pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                
+                                pl.col('track.name').str.to_lowercase().str.contains_any(song_input, ascii_case_insensitive=True),
+                                pl.col('track.artists.name').str.to_lowercase().str.contains_any(artist_name, ascii_case_insensitive=True),
+                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
                                   | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),                                                                                    
