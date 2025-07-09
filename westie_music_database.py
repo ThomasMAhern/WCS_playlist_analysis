@@ -458,7 +458,7 @@ if song_locator_toggle:
                 queer_toggle = st.checkbox("🏳️‍🌈")
                 
         with song_col2:
-                countries_selectbox = st.multiselect("Country:", countries)
+                # countries_selectbox = st.multiselect("Country:", countries)
                 # countries_selectbox = st.text_input("Country:").lower().split(',')
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
