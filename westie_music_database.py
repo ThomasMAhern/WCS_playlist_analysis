@@ -514,7 +514,7 @@ if song_locator_toggle:
                                 # #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
                                 #   | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
                                 
-                                pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
+                                pl.col('owner.display_name').cast(pl.String).str.contains_any('saschasprott', ascii_case_insensitive=True),
                                 # pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
                                                                                     
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
