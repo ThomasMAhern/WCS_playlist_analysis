@@ -473,7 +473,7 @@ if song_locator_toggle:
                 bpm_med = st.number_input("Playlist med: ", value=95, min_value=0, step=2)
         with col3:
                 bpm_high = st.number_input("Playlist high: ", value=100, min_value=0, step=2)
-                
+        st.write("DJ Input:", dj_input) 
                 
         if queer_toggle:
                 only_fabulous_people = queer_artists
