@@ -518,8 +518,8 @@ if song_locator_toggle:
                                 
                                 pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 
-                                pl.col('track.name').str.to_lowercase().str.contains_any(song_input, ascii_case_insensitive=True),
-                                pl.col('track.artists.name').str.to_lowercase().str.contains_any(artist_name, ascii_case_insensitive=True),
+                                pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
+                                pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
