@@ -458,7 +458,8 @@ if song_locator_toggle:
                 queer_toggle = st.checkbox("🏳️‍🌈")
                 
         with song_col2:
-                countries_selectbox = st.multiselect("Country:", countries)
+                # countries_selectbox = st.multiselect("Country:", countries)
+                countries_selectbox = st.text_input("Country:").lower().split(',')
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
@@ -466,12 +467,12 @@ if song_locator_toggle:
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
         
-        st.write(countries)
-        st.write(countries_selectbox)
+        # st.write(countries)
+        # st.write(countries_selectbox)
         
-        if not countries_selectbox:
-                countries_selectbox = [countries]
-        st.write(countries_selectbox)
+        # if not countries_selectbox:
+        #         countries_selectbox = [countries]
+        # st.write(countries_selectbox)
                 
         
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -515,7 +516,7 @@ if song_locator_toggle:
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
-                                # pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 
                                 pl.col('track.name').str.to_lowercase().str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.to_lowercase().str.contains_any(artist_name, ascii_case_insensitive=True),
