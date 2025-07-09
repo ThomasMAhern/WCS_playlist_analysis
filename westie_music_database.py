@@ -468,11 +468,11 @@ if song_locator_toggle:
                 
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-                bpm_low = st.number_input("Playlist low: ", value=91, min_value=0, step=2)
+                bpm_low = st.number_input("Playlist low: ", value=90, min_value=0, step=2)
         with col2:
-                bpm_med = st.number_input("Playlist med: ", value=96, min_value=0, step=2)
+                bpm_med = st.number_input("Playlist med: ", value=95, min_value=0, step=2)
         with col3:
-                bpm_high = st.number_input("Playlist high: ", value=103, min_value=0, step=2)
+                bpm_high = st.number_input("Playlist high: ", value=100, min_value=0, step=2)
                 
                 
         if queer_toggle:
@@ -511,8 +511,8 @@ if song_locator_toggle:
                                 pl.col('track.artists.name').str.to_lowercase().str.contains(artist_name),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
-                                # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
+                                  | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
+                                  | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
