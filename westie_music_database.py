@@ -459,7 +459,7 @@ if song_locator_toggle:
                 
         with song_col2:
                 # countries_selectbox = st.multiselect("Country:", countries)
-                # countries_selectbox = st.text_input("Country:").lower().split(',')
+                countries_selectbox = st.text_input("Country:").lower().split(',')
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
@@ -516,7 +516,7 @@ if song_locator_toggle:
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
-                                # pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                pl.col('country').cast(pl.List(pl.String)).list.join(', ').str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
