@@ -925,7 +925,7 @@ if search_dj_toggle:
                                               .list.unique()
                                                 .list.drop_nulls()
                                                 .list.sort()
-                                                .list.head(50))
+                                                .list.head(20))
                                 .sort('playlist_count', descending=True)
                                 .filter(pl.col('dj_count').eq(1))
                                 .head(100)
