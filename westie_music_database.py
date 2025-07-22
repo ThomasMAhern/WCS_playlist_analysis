@@ -64,6 +64,7 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 # https://www.reddit.com/r/popheads/comments/h0fbxn/happy_pride_month_heres_a_list_of_some_lgbt/
 # and lots of googling + chatGPT
 
+# https://docs.google.com/spreadsheets/d/1-elrLd_3tX4QTLQjj4EmPxRSzXHcxs6tZp5Y5fRFalc/edit?usp=sharing
 poc_artists = [name.lower() for name in [
 '27Delly', 'ABIR', 'AFROJACK', 'ALTÉGO', 'AWA', 'Aaradhna', 'Aaries', 'Aaron Frazer', 'Aaron Neville', 'Abhi The Nomad', 
 'Adi Oasis', 'Ady Suleiman', 'Al Green', 'Alex Newell', 'Alexander Oscar', 'Alextbh', 'Alicia Keys', 'Alvin Garrett', 'Amanda Yang', 
@@ -507,6 +508,7 @@ if song_locator_toggle:
                 playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
                 poc_toggle = st.checkbox("POC")
+                st.markdown("[Add/correct POC artists](https://docs.google.com/spreadsheets/d/1-elrLd_3tX4QTLQjj4EmPxRSzXHcxs6tZp5Y5fRFalc/edit?usp=sharing)")
                 
         with song_col2:
                 # countries_selectbox = st.multiselect("Country:", countries)
