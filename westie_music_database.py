@@ -76,7 +76,7 @@ poc_artists = [name.lower() for name in [
 'Calvin Harris', 'Camila Cabello', 'Carlos Santana', 'Carneyval', 'Cat Burns', 'Charlie Wilson', 'Chiiild', 'Chris Thomas King', 
 'Christian Scott aTunde Adjuah', 'Christopher', 'Ciara', 'Cleo Sol', 'Col3trane', 'Corinne Bailey Rae', 'Cruel Santino', 
 'D-Hack', 'D-Nice', 'D.O.E.', 'DJ Khaled', 'DaBaby', 'Dane Amar', 'Darius', 'Darius Coleman', 'Davido', 'Delilah Montagu',  
-'Dhibu Ninan Thomas', 'Disclosure', 'Doechii', 'Doja Cat', 'Don Toliver', 'Dru Hill', 'Dua Lipa', 'Duckwrth', 'Durand Bernarr', 
+'Dhibu Ninan Thomas', 'Disclosure', 'Doechii', 'Doja Cat', 'Don Toliver', 'Dru Hill', 'Duckwrth', 'Durand Bernarr', 
 'Durand Jones & The Indications', 'EZI', 'Ella Mai', 'Eloise', 'Emily Burns', 'Emily King', 'Emotional Oranges', 
 'Empire Cast', 'Enrique Iglesias', 'Eric Benét', 'Eric Bibb', 'Eric Nam', 'Erykah Badu', 'Eryn Allen Kane', 'Etta James', 'Everett Bradley', 
 'FHAT', 'FINNEAS', 'FKJ', 'FP', 'Faouzia', 'Fenton Robinson', 'Florida Georgia Line', 'Floyd Fuji', 'Foxy Brown', 'Franc Moody', 
