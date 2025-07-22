@@ -464,7 +464,7 @@ def top_songs():
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
-                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist'
+                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
                 #      'apprx_song_position_in_playlist', 
                      'notes', 'note_source',
                         #connies notes
