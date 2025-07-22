@@ -63,6 +63,52 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 # and https://www.reddit.com/r/Monstercat/comments/ueqi9f/lgbtq_edm_artists/
 # https://www.reddit.com/r/popheads/comments/h0fbxn/happy_pride_month_heres_a_list_of_some_lgbt/
 # and lots of googling + chatGPT
+
+poc_artists = [name.lower() for name in [
+'27Delly', 'ABIR', 'AFROJACK', 'ALTÉGO', 'AWA', 'Aaradhna', 'Aaries', 'Aaron Frazer', 'Aaron Neville', 'Abhi The Nomad', 
+'Adi Oasis', 'Ady Suleiman', 'Al Green', 'Alex Newell', 'Alexander Oscar', 'Alextbh', 'Alicia Keys', 'Alvin Garrett', 'Amanda Yang', 
+'Amber Mark', 'Anderson .Paak', 'Angela Johnson', 'Anthony Ramos', 'Appleby', 'Aretha Franklin', 'Ariana Grande', 'Arlene Zelina', 
+'Arthur Adams', 'Ashanti', 'Ashley DuBose', 'Ashley Mehta', 'Astrid S', 'Ava Max', 'B.B. King', 'B.o.B', 'BABYMONSTER', 'BAYNK', 
+'BLACKPINK', 'BTS', 'Beau Diako', 'Ben Folds', 'Ben&Ben', 'Betty Who', 'Beyoncé', 'Black Eyed Peas', 'Black Pumas', 'Blame Jones', 
+'Blithe', 'Bluey Robinson', "Blush'ko", 'Blxst', 'Boyz II Men', 'Brandon Beal', 'Brandy', 'Britney Spears', 'Brother Yusef', 
+'Brothers Osborne', 'Bruno Mars', 'Bryce Vine', 'Bryson Tiller', 'Burna Boy', 'CHUNG HA', 'CLAY', 'Caleborate', 'Calimossa', 
+'Calvin Harris', 'Camila Cabello', 'Carlos Santana', 'Carneyval', 'Cat Burns', 'Charlie Wilson', 'Chiiild', 'Chris Thomas King', 
+'Christian Scott aTunde Adjuah', 'Christopher', 'Ciara', 'Clean Bandit', 'Cleo Sol', 'Col3trane', 'Corinne Bailey Rae', 'Cruel Santino', 
+'D-Hack', 'D-Nice', 'D.O.E.', 'DJ Khaled', 'DaBaby', 'Dane Amar', 'Darius', 'Darius Coleman', 'Davido', 'Delilah Montagu', 'Devon Cole', 
+'Dhibu Ninan Thomas', 'Disclosure', 'Doechii', 'Doja Cat', 'Don Toliver', 'Dru Hill', 'Dua Lipa', 'Duckwrth', 'Durand Bernarr', 
+'Durand Jones & The Indications', 'EZI', 'Ed Sheeran', 'Ella Mai', 'Eloise', 'Emily Burns', 'Emily King', 'Emotional Oranges', 
+'Empire Cast', 'Enrique Iglesias', 'Eric Benét', 'Eric Bibb', 'Eric Nam', 'Erykah Badu', 'Eryn Allen Kane', 'Etta James', 'Everett Bradley', 
+'FHAT', 'FINNEAS', 'FKJ', 'FP', 'Faouzia', 'Fenton Robinson', 'Florida Georgia Line', 'Floyd Fuji', 'Foxy Brown', 'Franc Moody', 
+'Frank Ocean', 'Funk Wav', 'GIMS', 'Gary Clark Jr.', 'Gaustad', 'Gen Hoshino', 'Gerald Levert', 'Ginuwine', 'Greyson Chance', 'Griff', 
+'H.E.R.', 'HARLOE', 'HONNE', 'Hailee Steinfeld', 'Hanz', 'Hayley Kiyoko', 'Hil St. Soul', 'Hollie Carmen', 'Hongjoong of ATEEZ', 
+'Hook N Sling', 'IDRIS', 'Ife Kehinde', 'India.Arie', 'Isaac Dunbar', 'Izzy Bizu', 'J. Brown', 'JAIE', 'JAY-Z', 'Ja Rule', 'Janet Jackson', 
+'Jany Green', 'Jared Brady', 'Jarreau Vandal', 'Jasmine Thompson', 'Jason Derulo', 'Jay Sean', 'Jay Wile', 'Jay-Way', 'Jeezy', 
+'Jereena Montemayor', 'Jessica Domingo', 'Jhameel', 'John Legend', 'Jon Batiste', 'Jon Mero', 'Joni Mitchell', 'Jonita Gandhi', 
+'Jordin Sparks', 'Jorja Smith', 'Josh Tobias', 'Joy Crookes', 'Joy Oladokun', 'Justin Timberlake', 'Justine Skye', 'KALEO', 'KAMAUU', 
+'KAYTRANADA', 'KWAYE', 'Kaiya', 'Kamakshi Khanna', 'Kane Brown', 'Kapil Kapilan', "Keb' Mo'", 'Kendrick Lamar', 'Kent Jones', 'Keri Hilson', 
+'Kevin Michael', 'Khalid', 'KiNG MALA', 'Kiana Ledé', 'Kim Petras', 'Kina Grannis', 'King George', 'Kodak Black', 'Koffee Brown', 
+'Kurt Hugo Schneider', 'Kygo', 'Kyshona', "L'Impératrice", 'LIE NING', 'LU KALA', 'LaMorris Williams', 'Latasha Lee', 'Latto', 
+'Lauren Jauregui', 'Ledisi', 'Leon Bridges', 'Lianne La Havas', 'Lil Halima', 'Lil Jon', 'Lily Allen', 'Lindsey Lomis', 'Little Mix', 
+'Lizzo', 'Lori Jenaire', 'Lucky Daye', 'Ludacris', 'Luke James', 'Lyn Lapid', 'LÒNIS', 'MAX', 'MICHELLE', 'MILCK', 'MONTMARTRE', 
+'MUNA', 'Mabel', 'Madilyn Bailey', 'Madonna', 'Mahalia', 'Maisie Peters', 'Maiya Sykes', 'Majid Jordan', 'Mali Music', 'Malia Civetz', 
+'Mapei', 'Mariah Carey', 'Marian Hill', 'Mario', 'Marwin', 'Masego', 'Maxwell', 'Maze & Frankie Beverly', 'Mega', 'Megan Thee Stallion', 
+'Meridian', 'Metropole Orkest', 'Midas Hutch', 'Miguel', 'Musiq Soulchild', 'MØ', 'NEZZA', 'NNAVY', 'Nahko And Medicine For The People', 
+'Navy', 'Nayer', 'Ne-Yo', 'Nelly', 'Nico & Vinz', 'Noah Kahan', 'Noah Slee', 'Normani', 'Now United', 'NuChoyce', 'Nylo', 'Olivia Dean', 
+'Otis Kane', 'Otis Redding', 'P.Keys', 'P3GI-13', 'PJ Morton', 'Parson James', 'Patrik Jean', 'Paulo Londra', 'Pentatonix', 
+'Pharrell Williams', 'Phoebe Bridgers', 'Phon', 'Phony Ppl', 'Pink Sweat$', 'Pitbull', 'Playboi Carti', 'Post Malone', 'Prince', 'Q', 
+'Q-Tip', 'Queen D', 'Queen Latifah', 'R.LUM.R', 'Raiche', 'Raleigh Ritchie', 'Ray Dalton', 'Revel Day', 'Rita Ora', 'Ruth B.', 'RuthAnne', 
+'Ruthie Foster', 'SERA', 'SG Lewis', 'SOLOMON', 'SZA', 'Sabrina Carpenter', 'Sabrina Claudio', 'Sadie', 'Saffire-The Uppity Blues Women', 
+'Saint Joshua', 'Sam Smith', 'Samm Henshaw', 'Sampha', 'Sandro Cavazza', 'Scary Pockets', 'Sean Paul', 'Sebastian Yatra', 'Selena Gomez', 
+'Seori', 'Sickick', 'Silk Sonic', 'Smokey James & the Avalanche', 'Snoh Aalegra', 'Snoop Dogg', 'Social House', 'Sofi Tukker', 'Solange', 
+'Sophia Bromberg', 'Soul For Real', 'Sting', 'Stromae', 'Sunshine Anderson', 'Superfruit', 'Susan H', 'Swae Lee', 'T-Pain', 'TAEYEON', 
+'THE ANXIETY', 'TLC', 'Tai Verdes', 'Takara', 'Tamia', 'Tank', 'Tank and The Bangas', 'Tash Sultana', 'Taste of Pluto', 'Tate McRae', 
+'Tems', 'Tessa Violet', 'The Acoustic Room', 'The Blues Brothers', 'The Marías', 'The Notorious B.I.G.', 'The Weeknd', 'Thirdstory', 
+'Timbaland', 'Tinashe', 'Tiësto', 'Todrick Hall', 'Tom Misch', 'Tove Lo', 'Trey Songz', 'Trinix', 'Ty Dolla $ign', 'Tyler Cole', 
+'UNO Stereo', 'USHER', 'Uncle Maximilien', 'Unlike Pluto', 'VanJess', 'Victor Franco', 'Vory', 'Véyah', 'WAYNE SNOW', 'WILLOW', 
+'WOOSUNG', 'Wafia', 'Will Smith', 'William Singe', 'Wiz Khalifa', 'Wizkid', 'Xavier Omär', 'YAØ', 'YongYong', 'Young Cocoa', 'Young Thug', 
+'Yuna', 'ZAYN', 'Zacari', 'Zach Ezzy', 'Zaeden', 'Zedd', 'Zola Courtney', 'eaJ', 'emawk', 'keshi', 'lost spaces', 'morgxn', 'mxmtoon', '张天枢'
+]]
+
 queer_artists = [name.lower() for name in [
 '070 Shake', '100 gecs', 'ADONXS', 'AKVMA', 'Abdu Ali', 'Adam Lambert', 'Adeem the Artist', 'Adore Delano', 'Adrianne Lenker', 
 'Against Me!', 'Akeos', 'Akira Complex', 'Alabama Shakes', 'Alex Chapman', 'Alex the Astronaut', 'Alexandra Stan', 'Amaarae', 
@@ -208,6 +254,9 @@ def load_playlist_data():
                                       .then(True)
                                       .otherwise(False),
                     queer_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(queer_artists))
+                                     .then(True)
+                                     .otherwise(False),
+                    poc_artist = pl.when(pl.col('track.artists.name').str.to_lowercase().is_in(poc_artists))
                                      .then(True)
                                      .otherwise(False),
                     )
@@ -415,7 +464,7 @@ def top_songs():
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
-                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country',
+                     'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist'
                 #      'apprx_song_position_in_playlist', 
                      'notes', 'note_source',
                         #connies notes
@@ -425,11 +474,12 @@ def top_songs():
                                      'track.artists.name', 'country',
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
-                                        'Familiarity', 'Transition type'
+                                        'Familiarity', 'Transition type', 'poc_artist',
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
+                              pl.col("poc_artist").list.any(),
                               )
                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
@@ -456,6 +506,7 @@ if song_locator_toggle:
                 dj_input = st.text_input("DJ/user name:").lower().split(',')
                 playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
+                poc_toggle = st.checkbox("POC")
                 
         with song_col2:
                 # countries_selectbox = st.multiselect("Country:", countries)
@@ -488,6 +539,11 @@ if song_locator_toggle:
                 only_fabulous_people = queer_artists
         if not queer_toggle:
                 only_fabulous_people = ['']
+                
+        if poc_toggle:
+                only_poc_people = poc_artists
+        if not poc_toggle:
+                only_poc_people = ['']
         
         # if ''.join(anti_playlist_input).strip() == '':
         if anti_playlist_input == ['']:
@@ -513,6 +569,7 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                                pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
