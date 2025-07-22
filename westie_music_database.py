@@ -80,7 +80,7 @@ poc_artists = [name.lower() for name in [
 'Durand Jones & The Indications', 'EZI', 'Ella Mai', 'Eloise', 'Emily Burns', 'Emily King', 'Emotional Oranges', 
 'Empire Cast', 'Enrique Iglesias', 'Eric Benét', 'Eric Bibb', 'Eric Nam', 'Erykah Badu', 'Eryn Allen Kane', 'Etta James', 'Everett Bradley', 
 'FHAT', 'FINNEAS', 'FKJ', 'FP', 'Faouzia', 'Fenton Robinson', 'Florida Georgia Line', 'Floyd Fuji', 'Foxy Brown', 'Franc Moody', 
-'Frank Ocean', 'Funk Wav', 'GIMS', 'Gary Clark Jr.', 'Gaustad', 'Gen Hoshino', 'Gerald Levert', 'Ginuwine', 'Greyson Chance', 'Griff', 
+'Frank Ocean', 'Funk Wav', 'GIMS', 'Gary Clark Jr.', 'Gen Hoshino', 'Gerald Levert', 'Ginuwine', 'Greyson Chance', 'Griff', 
 'H.E.R.', 'HARLOE', 'HONNE', 'Hailee Steinfeld', 'Hanz', 'Hayley Kiyoko', 'Hil St. Soul', 'Hollie Carmen', 'Hongjoong of ATEEZ', 
 'Hook N Sling', 'IDRIS', 'Ife Kehinde', 'India.Arie', 'Isaac Dunbar', 'Izzy Bizu', 'J. Brown', 'JAIE', 'JAY-Z', 'Ja Rule', 'Janet Jackson', 
 'Jany Green', 'Jared Brady', 'Jarreau Vandal', 'Jasmine Thompson', 'Jason Derulo', 'Jay Sean', 'Jay Wile', 'Jay-Way', 'Jeezy', 
