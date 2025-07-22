@@ -92,7 +92,7 @@ poc_artists = [name.lower() for name in [
 'Lauren Jauregui', 'Ledisi', 'Leon Bridges', 'Lianne La Havas', 'Lil Halima', 'Lil Jon', 'Lily Allen', 'Lindsey Lomis', 'Little Mix', 
 'Lizzo', 'Lori Jenaire', 'Lucky Daye', 'Ludacris', 'Luke James', 'Lyn Lapid', 'LÒNIS', 'MAX', 'MICHELLE', 'MILCK', 'MONTMARTRE', 
 'Mabel', 'Madilyn Bailey', 'Madonna', 'Mahalia', 'Maisie Peters', 'Maiya Sykes', 'Majid Jordan', 'Mali Music', 'Malia Civetz', 
-'Mapei', 'Mariah Carey', 'Marian Hill', 'Mario', 'Marwin', 'Masego', 'Maxwell', 'Maze & Frankie Beverly', 'Mega', 'Megan Thee Stallion', 
+'Mapei', 'Mariah Carey', 'Mario', 'Marwin', 'Masego', 'Maxwell', 'Maze & Frankie Beverly', 'Mega', 'Megan Thee Stallion', 
 'Meridian', 'Metropole Orkest', 'Midas Hutch', 'Miguel', 'Musiq Soulchild', 'MØ', 'NEZZA', 'NNAVY', 'Nahko And Medicine For The People', 
 'Navy', 'Nayer', 'Ne-Yo', 'Nelly', 'Nico & Vinz', 'Noah Slee', 'Normani', 'Now United', 'NuChoyce', 'Nylo', 'Olivia Dean', 
 'Otis Kane', 'Otis Redding', 'P.Keys', 'P3GI-13', 'PJ Morton', 'Parson James', 'Patrik Jean', 'Paulo Londra', 'Pentatonix', 
@@ -107,8 +107,18 @@ poc_artists = [name.lower() for name in [
 'Timbaland', 'Tinashe', 'Tiësto', 'Todrick Hall', 'Tom Misch', 'Tove Lo', 'Trey Songz', 'Trinix', 'Ty Dolla $ign', 'Tyler Cole', 
 'UNO Stereo', 'USHER', 'Uncle Maximilien', 'Unlike Pluto', 'VanJess', 'Victor Franco', 'Vory', 'Véyah', 'WAYNE SNOW', 'WILLOW', 
 'WOOSUNG', 'Wafia', 'Will Smith', 'William Singe', 'Wiz Khalifa', 'Wizkid', 'Xavier Omär', 'YAØ', 'YongYong', 'Young Cocoa', 'Young Thug', 
-'Yuna', 'ZAYN', 'Zacari', 'Zach Ezzy', 'Zaeden', 'Zedd', 'Zola Courtney', 'eaJ', 'emawk', 'keshi', 'lost spaces', 'morgxn', 'mxmtoon', '张天枢'
-]]
+'Yuna', 'ZAYN', 'Zacari', 'Zach Ezzy', 'Zaeden', 'Zola Courtney', 'eaJ', 'emawk', 'keshi', 'lost spaces', 'morgxn', 'mxmtoon', '张天枢',
+'Amber Navran', 'Buddy', 'Chika', 'Duckie', 'Duckie Thot', 'Leikeli47', 'Nao', 'Ravyn Lenae', 'Tierra Whack', 'Tobe Nwigwe',
+"Big Mama Thornton", "Son House", "Skip James", "Lightnin' Hopkins", "Junior Kimbrough", "R.L. Burnside", "Mississippi Fred McDowell", 
+"Big Bill Broonzy", "Memphis Minnie", "Rev. Gary Davis", "Blind Lemon Jefferson", "Blind Willie Johnson", "Blind Willie McTell", 
+"Taj Mahal", "Corey Harris", "Otis Rush", "Buddy Guy", "Lurrie Bell", "Albert King", "Freddie King", "Little Milton", "Johnny Copeland", 
+"Luther Allison", "Robert Cray", "Lucky Peterson", "Clarence 'Gatemouth' Brown", "Big Jack Johnson", "Shannon Curfman", "Joanna Connor", 
+"Toronzo Cannon", "Shemekia Copeland", "Eric Gales", 'Christone "Kingfish" Ingram', "Shemekia Copeland", "Eric Gales", 
+"Gary Clark Jr.", "Fantastic Negrito", "Joe Louis Walker", "Selwyn Birchwood", "Adia Victoria", "Buffalo Nichols", "Jackie Venson", 
+"Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox", "Shemekia Copeland", "Eric Gales", 
+"Toronzo Cannon", "Gary Clark Jr.", "Fantastic Negrito", "Joe Louis Walker", "Selwyn Birchwood", "Adia Victoria", "Buffalo Nichols",
+"Jackie Venson", "Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox",
+ ]]
 
 queer_artists = [name.lower() for name in [
 '070 Shake', '100 gecs', 'ADONXS', 'AKVMA', 'Abdu Ali', 'Adam Lambert', 'Adeem the Artist', 'Adore Delano', 'Adrianne Lenker', 
