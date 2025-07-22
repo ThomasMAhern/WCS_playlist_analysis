@@ -587,7 +587,7 @@ if song_locator_toggle:
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                              'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
-                             'owner.display_name', 'country',
+                             'owner.display_name', 'country', 'poc_artist',
                                 # 'apprx_song_position_in_playlist', 
                                 # 'notes', 'note_source', 
                                 ##connie's notes
@@ -600,6 +600,7 @@ if song_locator_toggle:
                                                 ##connie's notes
                                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                                 # 'Familiarity', 'Transition type'
+                                                'poc_artist',
                                                 )
                                         .list.unique()
                                         .list.drop_nulls()
@@ -617,6 +618,7 @@ if song_locator_toggle:
                                       )
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
+                                      pl.col("poc_artist").list.any(),
                                       )
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
