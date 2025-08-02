@@ -592,7 +592,7 @@ if song_locator_toggle:
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
-                                pl.col('country').cast(pl.List(pl.String)).list.unique().list.drop_nulls().list.join(', ').str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
+                                ~pl.col('country').cast(pl.List(pl.String)).list.unique().list.drop_nulls().list.join(', ').str.contains_any(countries_selectbox, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
