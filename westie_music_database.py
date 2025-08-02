@@ -536,7 +536,7 @@ if song_locator_toggle:
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
         
         # st.write(countries)
-        # st.write(countries_selectbox)
+        st.write(countries_selectbox)
         
         # if not countries_selectbox:
         #         countries_selectbox = [countries]
