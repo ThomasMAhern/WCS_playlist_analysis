@@ -604,7 +604,7 @@ if song_locator_toggle:
                                           .list.join(', ')
                                         )
                                   .otherwise('')
-                                .str.contains('|'.join(countries_2_filter_out)))
+                                .str.contains('|'.join(countries_2_filter_out))),
 
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
