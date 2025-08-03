@@ -588,7 +588,9 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
-                                ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                
+                                # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
@@ -609,6 +611,8 @@ if song_locator_toggle:
                                 ##connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
                                 )
+                        .filter(~pl.col('playlist_name').list.contains('|'.join(anti_playlist_input)))
+                        
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
                                       pl.col('owner.display_name', 'bpm', 'queer_artist',
                                                 # 'apprx_song_position_in_playlist', 
