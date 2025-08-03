@@ -532,7 +532,6 @@ if song_locator_toggle:
                 
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
-                # countries_selectbox = st.text_input("Country:").lower().split(',')
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
                 anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
@@ -540,18 +539,10 @@ if song_locator_toggle:
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
         
-        # st.write(countries)
-        # st.write(countries_selectbox)
-        
         if not countries_selectbox:
                 countries_2_filter = countries
-        else:
-                # countries_2_filter_out = [c for c in countries 
-                #                           if c not in countries_selectbox 
-                #                           and c not in ('', None)]
-                countries_2_filter = countries_selectbox
-        # st.write(countries_2_filter)
-                
+        if countries_selectbox:
+                countries_2_filter = countries_selectbox                
         
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
