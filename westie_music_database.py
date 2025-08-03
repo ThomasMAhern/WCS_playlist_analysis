@@ -589,7 +589,7 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
-                        .with_columns(pl.col('bpm').fill_null(0.0) #otherwise the None's won't appear in the filter for bpm
+                        .with_columns(pl.col('bpm').fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
                                       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.drop_nulls().list.join(', ')
                                      )
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
