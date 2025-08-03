@@ -594,9 +594,7 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
-                        .with_columns(pl.col('bpm').fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
-                                #       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.join(', ')
-                                     )
+                        .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
@@ -655,7 +653,11 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
                                       pl.col("poc_artist").list.any(),
+                                      countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.join(', ')
                                       )
+                        
+                        .filter(pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True),) #courtesy of Franzi M.
+                        
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
