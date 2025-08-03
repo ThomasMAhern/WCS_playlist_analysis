@@ -617,7 +617,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                              'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
