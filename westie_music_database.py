@@ -544,13 +544,13 @@ if song_locator_toggle:
         # st.write(countries_selectbox)
         
         if not countries_selectbox:
-                countries_2_filter_out = countries
+                countries_2_filter = countries
         else:
                 # countries_2_filter_out = [c for c in countries 
                 #                           if c not in countries_selectbox 
                 #                           and c not in ('', None)]
-                countries_2_filter_out = countries_selectbox
-        # st.write(countries_2_filter_out)
+                countries_2_filter = countries_selectbox
+        # st.write(countries_2_filter)
                 
         
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -595,16 +595,15 @@ if song_locator_toggle:
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
+                        
+                        .pipe(just_a_peek)
+                        
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
-                                # pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True), #courtesy of Franzi M.
-                                # (pl.when(pl.col('country').is_not_null())
-                                #    .then(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True))
-                                #    .otherwise(pl.col('country').cast(pl.String).str.contains_any(countries, ascii_case_insensitive=True))
-                                #    ),
+                                # pl.col('country').cast(pl.String).str.contains_any(countries_2_filter, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
@@ -653,11 +652,9 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
                                       pl.col("poc_artist").list.any(),
-                                      countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.join(', ')
+                                #       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.join(', ')
                                       )
-                        
-                        # .filter(pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True),) #courtesy of Franzi M.
-                        
+                                                
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
