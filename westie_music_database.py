@@ -542,7 +542,7 @@ if song_locator_toggle:
                 countries_2_filter_out = ['Fantasia']
         else:
                 countries_2_filter_out = [c for c in countries if c not in countries_selectbox]
-        # st.write(countries_2_filter_out)
+        st.write(countries_2_filter_out)
                 
         
         col1, col2, col3, col4, col5 = st.columns(5)
