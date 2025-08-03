@@ -545,7 +545,7 @@ if song_locator_toggle:
                 #                           if c not in countries_selectbox 
                 #                           and c not in ('', None)]
                 countries_2_filter_out = countries_selectbox
-        # st.write(countries_2_filter_out)
+        st.write(countries_2_filter_out)
                 
         
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -590,7 +590,7 @@ if song_locator_toggle:
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
-                                      countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.join(', ')
+                                #       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.join(', ')
                                      )
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
@@ -598,7 +598,7 @@ if song_locator_toggle:
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
                                 # pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True), #courtesy of Franzi M.
-
+                                pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True),
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
