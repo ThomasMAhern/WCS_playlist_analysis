@@ -600,7 +600,7 @@ if song_locator_toggle:
                                 # pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 (pl.when(pl.col('country').is_not_null())
                                    .then(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True))
-                                #    .otherwise('None')
+                                   .otherwise(pl.col('country').cast(pl.String).str.contains_any(countries, ascii_case_insensitive=True))
                                    ),
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
