@@ -589,22 +589,15 @@ if song_locator_toggle:
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
-                        .with_columns(pl.col('bpm').fill_null(0.0)) #otherwise the None's won't appear in the filter for bpm
+                        .with_columns(pl.col('bpm').fill_null(0.0) #otherwise the None's won't appear in the filter for bpm
+                                      countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.drop_nulls().list.join(', ')
+                                     )
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
-                                # pl.col('country').cast(pl.List(pl.String)).list.unique().list.drop_nulls().list.join(', ').str.contains('|'.join(countries_2_filter_out)), #courtesy of Franzi M.
-                                (pl.when(pl.col('country').is_not_null())
-                                  .then(pl.col('country')
-                                          .cast(pl.List(pl.String))
-                                          .list.drop_nulls()
-                                          .list.unique()
-                                          .list.join(', ')
-                                        )
-                                  .otherwise(pl.col('country'))
-                                .str.contains('|'.join(countries_2_filter_out))),
+                                pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True), #courtesy of Franzi M.
 
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
