@@ -197,7 +197,7 @@ queer_artists = [name.lower() for name in [
 
 def just_a_peek(df_):
         '''just peeks at the df where it is'''
-        st.write(df_.lazy().schema)
+        st.write(df_.schema)
         return df_
 
 def gen(iterable):
