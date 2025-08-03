@@ -603,7 +603,7 @@ if song_locator_toggle:
                                           .list.unique()
                                           .list.join(', ')
                                         )
-                                  .otherwise('')
+                                  .otherwise(pl.col('country'))
                                 .str.contains('|'.join(countries_2_filter_out))),
 
                                 
