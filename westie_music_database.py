@@ -198,6 +198,7 @@ queer_artists = [name.lower() for name in [
 def just_a_peek(df_):
         '''just peeks at the df where it is'''
         st.dataframe(df_.lazy()._fetch())
+        return df_
 
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
