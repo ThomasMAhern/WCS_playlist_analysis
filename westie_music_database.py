@@ -616,7 +616,7 @@ if song_locator_toggle:
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
                         
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
@@ -656,7 +656,7 @@ if song_locator_toggle:
                                       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.join(', ')
                                       )
                         
-                        .filter(pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True),) #courtesy of Franzi M.
+                        # .filter(pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True),) #courtesy of Franzi M.
                         
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
@@ -665,7 +665,7 @@ if song_locator_toggle:
                         .with_row_index(offset=1)
                         .slice(num_results)
                         
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         
                         )
                 
