@@ -595,7 +595,7 @@ if song_locator_toggle:
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0), #otherwise the None's won't appear in the filter for bpm
-                                      countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.join(', ')
+                                #       countries_4_filter = pl.col('country').cast(pl.List(pl.String)).list.unique().list.join(', ')
                                      )
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
@@ -617,7 +617,9 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
+                        
                         .pipe(just_a_peek)
+                        
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                              'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
@@ -660,6 +662,9 @@ if song_locator_toggle:
                                 'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         .with_row_index(offset=1)
                         .slice(num_results)
+                        
+                        .pipe(just_a_peek)
+                        
                         )
                 
                 results_df = (song_search_df
