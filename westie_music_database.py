@@ -195,6 +195,10 @@ queer_artists = [name.lower() for name in [
 'ieuan', 'felix vespestad', 'FHAT', 'TWINKIDS', 'Emily Burns', 'Carlos Vara', 'Leland', 'REYNA', 'Sam Bluer'
 ]]
 
+def just_a_peek(df_):
+        '''just peeks at the df where it is'''
+        st.dataframe(df_.lazy()._fetch())
+
 def gen(iterable):
     '''converts iterable item to generator to save on memory'''
     for _ in iterable:
@@ -598,10 +602,10 @@ if song_locator_toggle:
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 
                                 # pl.col('countries_4_filter').str.contains_any(countries_2_filter_out, ascii_case_insensitive=True), #courtesy of Franzi M.
-                                (pl.when(pl.col('country').is_not_null())
-                                   .then(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True))
-                                   .otherwise(pl.col('country').cast(pl.String).str.contains_any(countries, ascii_case_insensitive=True))
-                                   ),
+                                # (pl.when(pl.col('country').is_not_null())
+                                #    .then(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox, ascii_case_insensitive=True))
+                                #    .otherwise(pl.col('country').cast(pl.String).str.contains_any(countries, ascii_case_insensitive=True))
+                                #    ),
                                 
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
@@ -612,6 +616,7 @@ if song_locator_toggle:
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
+                        .pipe(just_a_peek)
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
                         .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
                              'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
