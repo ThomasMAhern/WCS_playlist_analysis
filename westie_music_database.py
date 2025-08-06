@@ -994,7 +994,7 @@ if search_dj_toggle:
                                 .list.head(50)
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
-                        .head(300)
+                        .head(100)
                         .collect(streaming=True)
                         )
                 st.dataframe(dj_search_df, 
