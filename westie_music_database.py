@@ -1109,20 +1109,20 @@ if search_dj_toggle:
                                         on=['song_url']
                                         )
                                 # .unique()
-                                .sort('dj_count', descending=True)
+                                # .sort('dj_count', descending=True)
                                 .head(50).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 
-                st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
-                st.dataframe(dj_2_df
-                              .join(dj_1_df, 
-                                        how='anti', 
-                                        on=['song_url']
-                                        )
-                                # .unique()
-                                .sort('dj_count', descending=True)
-                                .head(50).collect(streaming=True) ,
-                                column_config={"song_url": st.column_config.LinkColumn()})
+                # st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
+                # st.dataframe(dj_2_df
+                #               .join(dj_1_df, 
+                #                         how='anti', 
+                #                         on=['song_url']
+                #                         )
+                #                 # .unique()
+                #                 # .sort('dj_count', descending=True)
+                #                 .head(50).collect(streaming=True) ,
+                #                 column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
 
 
