@@ -301,10 +301,10 @@ def load_playlist_data():
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
-                    pl.col(['song_url', 'playlist_url', 'owner_url', 'song_position_in_playlist', 
+                    pl.col(['song_url', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
                         #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
-                            'owner.id',
+                            'owner.id', 
                             ]).cast(pl.Categorical())
                     )
 )
