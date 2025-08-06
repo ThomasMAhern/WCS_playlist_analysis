@@ -414,10 +414,10 @@ st.link_button("Help fill in country info!",
 @st.cache_data
 def sample_of_raw_data():
         return (df
-                .with_columns(pl.col('track.artists.name').cast(pl.String))
-                .join(pl.scan_parquet('data_song_bpm.parquet'), 
+                # .with_columns(pl.col('track.artists.name').cast(pl.String))
+                .join(pl.scan_parquet('data_song_bpm.parquet').with_columns(pl.col('track.artists.name').cast(pl.Categorical)), 
                       how='left', on=['track.name', 'track.artists.name'])
-                .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                # .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
                 ._fetch(100000).sample(1000)
                 )
 sample_of_raw_data = sample_of_raw_data()
@@ -477,11 +477,15 @@ def top_songs():
         '''creates the standard top songs until user '''
         return (df
                 #add notes
-                 .join(df_notes.with_columns(pl.col('track.artists.name').cast(pl.String)),
+                 .join((df_notes
+                        .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                        ),
                         how='full',
                         on=['track.artists.name', 'track.name'])
                 #add bpm
-                .join(pl.scan_parquet('data_song_bpm.parquet').with_columns(pl.col('track.artists.name').cast(pl.String)), how='left', on=['track.name', 'track.artists.name'])
+                .join((pl.scan_parquet('data_song_bpm.parquet')
+                       .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                       ), how='left', on=['track.name', 'track.artists.name'])
                 
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
