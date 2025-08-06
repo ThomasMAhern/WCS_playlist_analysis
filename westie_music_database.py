@@ -675,7 +675,6 @@ if song_locator_toggle:
                         )
                 
                 results_df = (song_search_df
-                        #       .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
                              .with_columns(pl.col('playlist_name').list.head(50))
                              .head(1000).collect(engine="streaming"))
                 st.dataframe(results_df, 
