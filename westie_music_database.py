@@ -578,7 +578,7 @@ if song_locator_toggle:
         # else:
         if st.button("Search songs", type="primary"):
                 anti_df = (df
-                           .select('playlist_name')
+                           .select('playlist_name', 'playlist_id')
                            .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
                                                                                             ascii_case_insensitive=True))
                            )
@@ -590,7 +590,7 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         .join(anti_df,
                               how='anti',
-                              on='playlist_name')
+                              on='playlist_name', 'playlist_id')
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
