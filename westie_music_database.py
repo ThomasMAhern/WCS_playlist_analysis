@@ -1353,12 +1353,12 @@ if songs_together_toggle:
                         .unique()
                         .sort('playlist_name', 'song_number')
                         .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                                                .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                                                        pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                                .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id').cast(pl.String), pl.lit(' --- '),
+                                                                        pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').cast(pl.String).shift(-1),
                                                                         )),
                                         pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                                                .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                                                        pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                                .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').cast(pl.String).shift(1), pl.lit(' --- '),
+                                                                        pl.col('track.name'), pl.lit(': '), pl.col('track.id').cast(pl.String),
                                                                         )),
                                         )
                         .with_columns(pair = pl.concat_list('pair1', 'pair2'))
@@ -1396,12 +1396,12 @@ if songs_together_toggle:
                         .unique()
                         .sort('playlist_name', 'song_number')
                         .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
-                                                .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
-                                                                        pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
+                                                .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id').cast(pl.String), pl.lit(' --- '),
+                                                                        pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').cast(pl.String).shift(-1),
                                                                         )),
                                         pair2 = pl.when(pl.col('song_number').shift(1) < pl.col('song_number'))
-                                                .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(1), pl.lit(' --- '),
-                                                                        pl.col('track.name'), pl.lit(': '), pl.col('track.id'),
+                                                .then(pl.concat_str(pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').cast(pl.String).shift(1), pl.lit(' --- '),
+                                                                        pl.col('track.name'), pl.lit(': '), pl.col('track.id').cast(pl.String),
                                                                         )),
                                         )
                         .with_columns(pair = pl.concat_list('pair1', 'pair2'))
