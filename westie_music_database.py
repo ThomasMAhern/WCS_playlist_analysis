@@ -881,7 +881,7 @@ if playlist_locator_toggle:
                 st.dataframe(df
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
-                                pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
+                                pl.col('track.name').cast(pl.String).str.contains_any(song_input, ascii_case_insensitive=True),
                                 
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
