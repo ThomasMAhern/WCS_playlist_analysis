@@ -893,7 +893,6 @@ if playlist_locator_toggle:
                         .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), 
                              pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                        .pipe(just_a_peek)
                         .head(500).collect(streaming=True), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
