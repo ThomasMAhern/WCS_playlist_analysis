@@ -601,7 +601,7 @@ if song_locator_toggle:
                 
                 song_search_df = (
                         df
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
@@ -671,6 +671,7 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                                 'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
+                        .pipe(just_a_peek)
                         .with_row_index(offset=1)
                         .slice(num_results)
                         )
