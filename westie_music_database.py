@@ -662,7 +662,7 @@ if song_locator_toggle:
                                                         .list.drop_nulls()
                                                         .list.unique()
                                                         .list.sort()
-                                                        .cast(pl.Categorical),
+                                                        .cast(pl.List(pl.Categorical)),
                                       )
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
@@ -672,7 +672,7 @@ if song_locator_toggle:
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
                         .sort([pl.col('hit_terms').list.len(), 
                                 'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         .with_row_index(offset=1)
                         .slice(num_results)
                         )
