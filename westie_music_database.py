@@ -1110,7 +1110,7 @@ if search_dj_toggle:
                                         )
                                 # .unique()
                                 # .sort('dj_count', descending=True)
-                                .head(50).collect(streaming=True) ,
+                                .head(500).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 
                 # st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
