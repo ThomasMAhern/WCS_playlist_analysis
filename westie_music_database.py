@@ -590,7 +590,7 @@ if song_locator_toggle:
                                 on=['track.artists.name', 'track.name'])
                         .join(anti_df,
                               how='anti',
-                              on='playlist_name', 'playlist_id')
+                              on=['playlist_name', 'playlist_id'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
