@@ -582,13 +582,9 @@ if song_locator_toggle:
                 anti_df = (df
                            .group_by('track.id')
                            .agg('playlist_name')
-                           .filter(pl.col('playlist_name')
-                                     .cast(pl.List(pl.String))
-                                     .arr.eval(pl.element().str.contains_any(anti_playlist_input, 
-                                                                              ascii_case_insensitive=True)
-                                                )
-                                     .arr.any()
-                                   )
+                           .explode('playlist_name')
+                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
+                                                                                            ascii_case_insensitive=True))
                            .select('track.id')
                            
                            )
