@@ -534,7 +534,7 @@ if song_locator_toggle:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
-                anti_playlist_input = st.text_input("Exclude playlists ('blues', or 'zouk'):").lower().split(',')
+                anti_playlist_input = st.text_input("Exclude if in playlists ('blues', or 'zouk'):").lower().split(',')
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0, step=250)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
@@ -577,12 +577,17 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
+                
+                #if any
                 anti_df = (df
                            .group_by('track.id')
                            .agg('playlist_name')
-                           .explode('playlist_name')
-                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
-                                                                                            ascii_case_insensitive=True))
+                           .filter(pl.col('playlist_name')
+                                     .cast(pl.List(pl.String))
+                                     .list.eval(pl.element().str.contains_any(anti_playlist_input, 
+                                                                              ascii_case_insensitive=True)
+                                                )
+                                   )
                            .select('track.id')
                            
                            )
