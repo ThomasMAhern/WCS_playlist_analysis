@@ -1078,9 +1078,9 @@ if search_dj_toggle:
         # djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
         compare_1, compare_2 = st.columns(2)
         with compare_1:
-        dj_compare_1 = st.text_input("DJ/user 1 to compare:").lower()
+                dj_compare_1 = st.text_input("DJ/user 1 to compare:").lower()
         with compare_2:
-        dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
+                dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
         if st.button("Compare DJs/users", type="primary"):
                 st.dataframe(df
