@@ -890,8 +890,10 @@ if playlist_locator_toggle:
                                 # pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
                                 )
                         .group_by('playlist_name', 'playlist_url')
-                        .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
+                        .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), 
+                             pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
+                        .pipe(just_a_peek)
                         .head(500).collect(streaming=True), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
