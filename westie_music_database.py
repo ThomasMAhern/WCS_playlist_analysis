@@ -622,7 +622,7 @@ if song_locator_toggle:
                                 
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
-                                pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
+                                pl.col('track.name').cast(pl.String).str.contains_any(song_input, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').cast(pl.String).str.contains_any(artist_name, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
