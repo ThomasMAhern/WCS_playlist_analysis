@@ -587,6 +587,7 @@ if song_locator_toggle:
                                      .list.eval(pl.element().str.contains_any(anti_playlist_input, 
                                                                               ascii_case_insensitive=True)
                                                 )
+                                     .list.any()
                                    )
                            .select('track.id')
                            
