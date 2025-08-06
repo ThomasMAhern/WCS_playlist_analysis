@@ -974,7 +974,7 @@ if search_dj_toggle:
                 dj_search_df = (df
                         .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                                 | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
                                 & pl.col('playlist_name').cast(pl.String).str.contains_any(dj_playlist_input, ascii_case_insensitive=True),
                                 )
                         .group_by('owner.display_name', 'owner_url')
@@ -994,7 +994,7 @@ if search_dj_toggle:
                                 .list.head(50)
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
-                        .head(2000)
+                        .head(300)
                         .collect(streaming=True)
                         )
                 st.dataframe(dj_search_df, 
@@ -1052,15 +1052,15 @@ if search_dj_toggle:
                 
 
         st.markdown(f"#### Compare DJs:")
-        dj_list = sorted(df
-                         .select('owner.display_name')
-                         .cast(pl.String)
-                         .unique()
-                         .drop_nulls()
-                         .collect(streaming=True)
-                         ['owner.display_name']
-                         .to_list()
-                         )
+        # dj_list = sorted(df
+        #                  .select('owner.display_name')
+        #                  .cast(pl.String)
+        #                  .unique()
+        #                  .drop_nulls()
+        #                  .collect(streaming=True)
+        #                  ['owner.display_name']
+        #                  .to_list()
+        #                  )
         
         # st.dataframe(df
         #                 .group_by('owner.display_name')
