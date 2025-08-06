@@ -481,11 +481,11 @@ def top_songs():
         '''creates the standard top songs until user '''
         return (df
                 #add notes
-                #  .join((df_notes
-                #         .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
-                #         ),
-                #         how='full',
-                #         on=['track.artists.name', 'track.name'])
+                 .join((df_notes
+                        .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                        ),
+                        how='full',
+                        on=['track.artists.name', 'track.name'])
                 #add bpm
                 .join((pl.scan_parquet('data_song_bpm.parquet')
                        .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
@@ -496,16 +496,15 @@ def top_songs():
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
                 #      'apprx_song_position_in_playlist', 
-                #      'notes', 'note_source',
+                     'notes', 'note_source',
                         #connies notes
-                        # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
-                        )
+                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 
                                 #      'apprx_song_position_in_playlist', 
-                                     'track.artists.name', 'country', 'queer_artist', 'bpm',  'poc_artist',
+                                     'track.artists.name', 'country',
                                         #connies notes
-                                        # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
-                                        # 'Familiarity', 'Transition type', 
+                                        'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        'Familiarity', 'Transition type', 'poc_artist',
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
@@ -602,15 +601,15 @@ if song_locator_toggle:
                 song_search_df = (
                         df
                         .pipe(just_a_peek)
-                        # .join(df_notes,
-                        #         how='full',
-                        #         on=['track.artists.name', 'track.name'])
+                        .join(df_notes,
+                                how='full',
+                                on=['track.artists.name', 'track.name'])
                         .join(anti_df,
                               how='anti',
                               on=['track.id'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        # .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
+                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').cast(pl.String).str.contains_any(only_poc_people, ascii_case_insensitive=True),
