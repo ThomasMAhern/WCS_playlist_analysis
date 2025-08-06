@@ -661,7 +661,8 @@ if song_locator_toggle:
                                                         .str.extract_all('|'.join(playlist_input))
                                                         .list.drop_nulls()
                                                         .list.unique()
-                                                        .list.sort(),
+                                                        .list.sort()
+                                                        .cast(pl.Categorical),
                                       )
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
