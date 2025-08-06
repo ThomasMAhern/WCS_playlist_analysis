@@ -481,11 +481,11 @@ def top_songs():
         '''creates the standard top songs until user '''
         return (df
                 #add notes
-                 .join((df_notes
-                        .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
-                        ),
-                        how='full',
-                        on=['track.artists.name', 'track.name'])
+                #  .join((df_notes
+                #         .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                #         ),
+                #         how='full',
+                #         on=['track.artists.name', 'track.name'])
                 #add bpm
                 .join((pl.scan_parquet('data_song_bpm.parquet')
                        .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
