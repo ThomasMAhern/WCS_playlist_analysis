@@ -979,10 +979,10 @@ if search_dj_toggle:
                                 )
                         .group_by('owner.display_name', 'owner_url')
                         .agg(pl.n_unique('track.name').alias('song_count'),
-                        pl.n_unique('track.artists.name').alias('artist_count'),
-                        pl.n_unique('playlist_name').alias('playlist_count'),
-                        'playlist_name', 
-                        )
+                             pl.n_unique('track.artists.name').alias('artist_count'),
+                             pl.n_unique('playlist_name').alias('playlist_count'),
+                             'playlist_name', 
+                             )
                         .with_columns(pl.col('playlist_name')
                                 .list.eval(pl.when(pl.element()
                                                    .cast(pl.String)
