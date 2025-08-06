@@ -328,7 +328,7 @@ def load_lyrics():
 
 @st.cache_resource #makes it so streamlit doesn't have to reload for every sesson.
 def load_notes():
-        return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'})
+        return pl.scan_csv('data_notes.csv').rename({'Artist':'track.artists.name', 'Song':'track.name'}).with_columns(pl.col('track.artists.name').cast(pl.Categorical))
 
 @st.cache_data
 def load_countries():
