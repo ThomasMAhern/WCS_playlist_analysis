@@ -1077,47 +1077,50 @@ if search_dj_toggle:
                 st.dataframe(df
                         .filter(pl.col('owner.display_name').cast(pl.String).str.contains_any(djs_selectbox, ascii_case_insensitive=True))
                         .group_by('owner.display_name')
-                        .agg(song_count = pl.n_unique('track.name'), 
-                                playlist_count = pl.n_unique('playlist_name'), 
-                                )
+                        .agg(#song_count = pl.n_unique('track.name'), 
+                             playlist_count = pl.n_unique('playlist_name'), 
+                            )
                         .sort('owner.display_name')
                         .collect(streaming=True)
                 )
 
 
+
                 dj_1_df = (df
-                        .filter(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[0],
-                                ~(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[1]),)
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                        .unique()
-                        )
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[0]),)
+                                .select('track.name', 'song_url', 'dj_count')
+                                .unique()
+                                )
                 dj_2_df = (df
-                        .filter(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[1],
-                                ~(pl.col('owner.display_name').cast(pl.String) == djs_selectbox[0]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                        .unique()
-                        )
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[1]),)
+                                .select('track.name', 'song_url', 'dj_count')
+                                .unique()
+                                )
+                
+                
+                
+                
+                
                 st.text(f"Music _{djs_selectbox[0]}_ has, but _{djs_selectbox[1]}_ doesn't.")
-                st.dataframe(dj_1_df.join(dj_2_df, 
-                                                how='anti', 
-                                                on=['track.name', 'song_url', 
-                                                'dj_count', 'playlist_count']
-                                                )
-                                .unique()
+                st.dataframe(dj_1_df
+                              .join(dj_2_df, 
+                                        how='anti', 
+                                        on=['song_url']
+                                        )
+                                # .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
-                                # ._fetch(10000),
+                                .head(50).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
+                
                 st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
-                st.dataframe(dj_2_df.join(dj_1_df, 
-                                                how='anti', 
-                                                on=['track.name', 'song_url', 
-                                                'dj_count', 'playlist_count']
-                                                )
-                                .unique()
+                st.dataframe(dj_2_df
+                              .join(dj_1_df, 
+                                        how='anti', 
+                                        on=['song_url']
+                                        )
+                                # .unique()
                                 .sort('dj_count', descending=True)
-                                .head(300).collect(streaming=True) ,
-                                # ._fetch(10000),
+                                .head(50).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
 
