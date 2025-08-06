@@ -302,6 +302,7 @@ def load_playlist_data():
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
                     pl.col(['song_url', 'track.id', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
+                            'track.artists.name',
                         #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
                             'owner.id', 
@@ -413,8 +414,7 @@ st.link_button("Help fill in country info!",
 @st.cache_data
 def sample_of_raw_data():
         return (df
-                .with_columns(
-                        pl.col('track.artists.name').cast(pl.String))
+                .with_columns(pl.col('track.artists.name').cast(pl.String))
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                       how='left', on=['track.name', 'track.artists.name'])
                 .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
