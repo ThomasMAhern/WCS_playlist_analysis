@@ -242,7 +242,7 @@ def load_playlist_data():
                                                 # pl.col('playlist_name').str.extract_all(pattern_mm_dd),
                                                 )
                                         .list.unique()
-                                        .cast(pl.Categorical),
+                                        .cast(pl.List(pl.Categorical)),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
@@ -1369,8 +1369,8 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 'playlist_name', 
-                        'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 
+                             'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
                         .filter(#~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
@@ -1412,8 +1412,8 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 'playlist_name', 
-                        'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 
+                             'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
                         .filter(#~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
