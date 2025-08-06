@@ -591,6 +591,7 @@ if song_locator_toggle:
                 
                 song_search_df = (
                         df
+                        .pipe(just_a_peek)
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
