@@ -1075,7 +1075,8 @@ if search_dj_toggle:
 
         if len(djs_selectbox) >= 2:
                 st.dataframe(df
-                        .filter(pl.col('owner.display_name').cast(pl.String).str.contains_any(djs_selectbox, ascii_case_insensitive=True))
+                        .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[0])
+                                | pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[1]))
                         .group_by('owner.display_name')
                         .agg(#song_count = pl.n_unique('track.name'), 
                              playlist_count = pl.n_unique('playlist_name'), 
