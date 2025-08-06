@@ -496,15 +496,16 @@ def top_songs():
                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
                 #      'apprx_song_position_in_playlist', 
-                     'notes', 'note_source',
+                #      'notes', 'note_source',
                         #connies notes
-                        'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
+                        # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
+                        )
                 .with_columns(pl.col('playlist_name', 'owner.display_name', 
                                 #      'apprx_song_position_in_playlist', 
-                                     'track.artists.name', 'country',
+                                     'track.artists.name', 'country', 'queer_artist', 'bpm',  'poc_artist',
                                         #connies notes
-                                        'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
-                                        'Familiarity', 'Transition type', 'poc_artist',
+                                        # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        # 'Familiarity', 'Transition type', 
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
