@@ -584,10 +584,10 @@ if song_locator_toggle:
                            .agg('playlist_name')
                            .filter(pl.col('playlist_name')
                                      .cast(pl.List(pl.String))
-                                     .list.eval(pl.element().str.contains_any(anti_playlist_input, 
+                                     .arr.eval(pl.element().str.contains_any(anti_playlist_input, 
                                                                               ascii_case_insensitive=True)
                                                 )
-                                     .list.any()
+                                     .arr.any()
                                    )
                            .select('track.id')
                            
