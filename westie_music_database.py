@@ -534,7 +534,7 @@ if song_locator_toggle:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
                 track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
-                anti_playlist_input = st.text_input("Not in playlist name ('MADjam', or 'zouk'):").lower().split(',')
+                anti_playlist_input = st.text_input("Exclude playlists ('blues', or 'zouk'):").lower().split(',')
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0, step=250)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
@@ -577,11 +577,20 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
+                anti_df = (df
+                           .select('playlist_name')
+                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
+                                                                                            ascii_case_insensitive=True))
+                           )
+                
                 song_search_df = (
                         df
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
+                        .join(anti_df,
+                              how='anti',
+                              on='playlist_name')
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
@@ -590,6 +599,7 @@ if song_locator_toggle:
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 
                                 # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                # pl.unique('playlist_name').over() #has to be diff df such as anti join
                                 
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
@@ -610,9 +620,7 @@ if song_locator_toggle:
                                 # 'notes', 'note_source', 
                                 ##connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
-                                )
-                        .filter(~pl.col('playlist_name').list.contains('|'.join(anti_playlist_input)))
-                        
+                                )                        
                         .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
                                       pl.col('owner.display_name', 'bpm', 'queer_artist',
                                                 # 'apprx_song_position_in_playlist', 
