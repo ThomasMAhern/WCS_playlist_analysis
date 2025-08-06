@@ -608,7 +608,9 @@ if song_locator_toggle:
                               how='anti',
                               on=['track.id'])
                         #add bpm
-                        .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
+                        .join((pl.scan_parquet('data_song_bpm.parquet')
+                               .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
+                               ), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
