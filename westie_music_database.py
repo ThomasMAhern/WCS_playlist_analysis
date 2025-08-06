@@ -602,15 +602,15 @@ if song_locator_toggle:
                 song_search_df = (
                         df
                         .pipe(just_a_peek)
-                        .join(df_notes,
-                                how='full',
-                                on=['track.artists.name', 'track.name'])
+                        # .join(df_notes,
+                        #         how='full',
+                        #         on=['track.artists.name', 'track.name'])
                         .join(anti_df,
                               how='anti',
                               on=['track.id'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
+                        # .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').cast(pl.String).str.contains_any(only_poc_people, ascii_case_insensitive=True),
