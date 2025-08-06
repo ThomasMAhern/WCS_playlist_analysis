@@ -301,7 +301,7 @@ def load_playlist_data():
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
-                    pl.col(['song_url', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
+                    pl.col(['song_url', 'track.id', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
                         #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
                             'owner.id', 
@@ -1373,7 +1373,7 @@ if songs_together_toggle:
                              'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
-                        .filter(#~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+                        .filter(~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
@@ -1416,7 +1416,7 @@ if songs_together_toggle:
                              'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
-                        .filter(#~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
+                        .filter(~pl.col('playlist_name').cast(pl.List(pl.String)).list.join(', ').str.contains_any(['The Maine', 'delete', 'SPOTIFY']),
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
