@@ -1078,7 +1078,7 @@ if search_dj_toggle:
                         .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[0])
                                 | pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[1]))
                         .group_by('owner.display_name')
-                        .agg(#song_count = pl.n_unique('track.name'), 
+                        .agg(song_count = pl.n_unique('track.name'), 
                              playlist_count = pl.n_unique('playlist_name'), 
                             )
                         .sort('owner.display_name')
