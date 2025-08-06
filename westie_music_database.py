@@ -1071,12 +1071,22 @@ if search_dj_toggle:
         #                 .sort('owner.display_name')
         #                 .collect(streaming=True)
         #         )
-        djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
+        
+        
+        
+        
+        # djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
+        compare_1, compare_2 = st.columns(2)
+        with compare_1:
+        dj_compare_1 = st.text_input("DJ/user 1 to compare:").lower()
+        with compare_2:
+        dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
-        if len(djs_selectbox) >= 2:
+        if st.button("Compare DJs/users", type="primary"):
                 st.dataframe(df
-                        .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[0])
-                                | pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[1]))
+                        .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
+                                | pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_2)
+                                )
                         .group_by('owner.display_name')
                         .agg(song_count = pl.n_unique('track.name'), 
                              playlist_count = pl.n_unique('playlist_name'), 
