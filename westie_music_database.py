@@ -577,20 +577,20 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
-                anti_df = (df
-                           .select('playlist_name', 'playlist_id')
-                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
-                                                                                            ascii_case_insensitive=True))
-                           )
+                # anti_df = (df
+                #            .select('playlist_name', 'playlist_id')
+                #            .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
+                #                                                                             ascii_case_insensitive=True))
+                #            )
                 
                 song_search_df = (
                         df
                         .join(df_notes,
                                 how='full',
                                 on=['track.artists.name', 'track.name'])
-                        .join(anti_df,
-                              how='anti',
-                              on=['playlist_name', 'playlist_id'])
+                        # .join(anti_df,
+                        #       how='anti',
+                        #       on=['playlist_name', 'playlist_id'])
                         #add bpm
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
@@ -598,7 +598,7 @@ if song_locator_toggle:
                         .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 
-                                # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 # pl.unique('playlist_name').over() #has to be diff df such as anti join
                                 
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
