@@ -241,7 +241,8 @@ def load_playlist_data():
                                                 # pl.col('playlist_name').str.extract_all(pattern_yy_mm),
                                                 # pl.col('playlist_name').str.extract_all(pattern_mm_dd),
                                                 )
-                                        .list.unique(),
+                                        .list.unique()
+                                        .cast(pl.Categorical),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
