@@ -481,7 +481,7 @@ def top_songs():
                         how='full',
                         on=['track.artists.name', 'track.name'])
                 #add bpm
-                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=[pl.col('track.name'), pl.col('track.artists.name').cast(pl.String)])
+                .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=[pl.col('track.name'), pl.col('track.artists.name').cast(pl.Categorical)])
                 
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
