@@ -302,7 +302,7 @@ def load_playlist_data():
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
                     pl.col(['song_url', 'track.id', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
-                            
+                            'track.artists.name',
                         #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
                             'owner.id', 
@@ -414,8 +414,7 @@ st.link_button("Help fill in country info!",
 @st.cache_data
 def sample_of_raw_data():
         return (df
-                .with_columns(
-                        pl.col('track.artists.name').cast(pl.String))
+                .with_columns(pl.col('track.artists.name').cast(pl.String))
                 .join(pl.scan_parquet('data_song_bpm.parquet'), 
                       how='left', on=['track.name', 'track.artists.name'])
                 .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
@@ -604,8 +603,8 @@ if song_locator_toggle:
                         .join(pl.scan_parquet('data_song_bpm.parquet'), how='left', on=['track.name', 'track.artists.name'])
                         .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
-                        .filter(pl.col('track.artists.name').str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
-                                pl.col('track.artists.name').str.contains_any(only_poc_people, ascii_case_insensitive=True),
+                        .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
+                                pl.col('track.artists.name').cast(pl.String).str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 
                                 # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 # pl.unique('playlist_name').over() #has to be diff df such as anti join
@@ -613,7 +612,7 @@ if song_locator_toggle:
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
                                 pl.col('track.name').str.contains_any(song_input, ascii_case_insensitive=True),
-                                pl.col('track.artists.name').str.contains_any(artist_name, ascii_case_insensitive=True),
+                                pl.col('track.artists.name').cast(pl.String).str.contains_any(artist_name, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
@@ -1378,7 +1377,7 @@ if songs_together_toggle:
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(0, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
-                                pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
+                                pl.col('track.artists.name').cast(pl.List(pl.String)).list.join(', ').str.to_lowercase().str.contains(artist_name_input))
                         .with_columns(pl.col('pair').str.split(' --- '))
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
@@ -1421,7 +1420,7 @@ if songs_together_toggle:
                                 pl.col('times_played_together').gt(1),
                                 )
                         .filter(pl.col('pair').str.split(' --- ').list.get(1, null_on_oob=True).str.to_lowercase().str.contains(song_input_prepped),
-                                pl.col('track.artists.name').list.join(', ').str.to_lowercase().str.contains(artist_name_input))
+                                pl.col('track.artists.name').cast(pl.List(pl.String)).list.join(', ').str.to_lowercase().str.contains(artist_name_input))
                         .with_columns(pl.col('pair').str.split(' --- '))
                         .sort('times_played_together',
                                 pl.col('owner.display_name').list.len(), 
