@@ -477,7 +477,7 @@ def top_songs():
         '''creates the standard top songs until user '''
         return (df
                 #add notes
-                 .join(df_notes,
+                 .join(df_notes.with_columns(pl.col('track.artists.name').cast(pl.String)),
                         how='full',
                         on=['track.artists.name', 'track.name'])
                 #add bpm
