@@ -1231,12 +1231,12 @@ if geo_region_toggle:
                                 pl.col('playlist_count').gt(3))
 
         country_1_df = (countries_df
-                        .filter(pl.col('country').eq(country_1))
+                        .filter(pl.col('country').cast(pl.String).str.to_lowercase().eq(country_1))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
         country_2_df = (countries_df
-                        .filter(pl.col('country').eq(country_2))
+                        .filter(pl.col('country').cast(pl.String).str.to_lowercase().eq(country_2))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
