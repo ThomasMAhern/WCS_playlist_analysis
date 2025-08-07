@@ -1219,7 +1219,7 @@ if geo_region_toggle:
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
     
-    if st.button("Compare countries", type="primary") and len(countries_selectbox) >= 2:
+    if st.button("Compare countries", type="primary"):
         
         countries_df = df.filter(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox),
                                 pl.col('dj_count').gt(3), 
