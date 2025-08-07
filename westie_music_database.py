@@ -1118,8 +1118,8 @@ if search_dj_toggle:
                                         how='anti', 
                                         on=['song_url']
                                         )
-                                # .unique()
-                                # .sort('dj_count', descending=True)
+                                .unique()
+                                .sort('dj_count', descending=True)
                                 .head(500).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 
