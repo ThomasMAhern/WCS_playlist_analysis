@@ -1098,14 +1098,14 @@ if search_dj_toggle:
 
 
                 dj_1_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[0]),)
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_1),)
                                 .select('track.name', 'song_url', 'dj_count')
-                                .unique()
+                                # .unique()
                                 )
                 dj_2_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).eq(djs_selectbox[1]),)
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_1),)
                                 .select('track.name', 'song_url', 'dj_count')
-                                .unique()
+                                # .unique()
                                 )
                 
                 
