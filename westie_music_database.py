@@ -1114,7 +1114,7 @@ if search_dj_toggle:
                 st.dataframe(dj_1_df
                               .join(dj_2_df, 
                                         how='anti', 
-                                        on=['track.name', 'track.artists.name',]
+                                        on=['track.name', 'song_url']
                                         )
                                 .unique()
                                 .sort('dj_count', descending=True)
