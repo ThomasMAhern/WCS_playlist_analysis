@@ -1098,12 +1098,12 @@ if search_dj_toggle:
 
 
                 dj_1_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_1),)
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_1))
                                 .select('track.name', 'song_url', 'dj_count')
                                 # .unique()
                                 )
                 dj_2_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_1),)
+                                .filter(pl.col('owner.display_name').cast(pl.String).eq(dj_compare_2))
                                 .select('track.name', 'song_url', 'dj_count')
                                 # .unique()
                                 )
@@ -1112,7 +1112,7 @@ if search_dj_toggle:
                 
                 
                 
-                st.text(f"Music _{djs_selectbox[0]}_ has, but _{djs_selectbox[1]}_ doesn't.")
+                st.text(f"Music _{dj_compare_1}_ has, but _{dj_compare_2}_ doesn't.")
                 st.dataframe(dj_1_df
                               .join(dj_2_df, 
                                         how='anti', 
