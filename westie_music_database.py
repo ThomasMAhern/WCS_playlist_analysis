@@ -1099,11 +1099,11 @@ if search_dj_toggle:
 
                 dj_1_df = (df
                                 .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1))
-                                .select('track.name', 'song_url', 'dj_count')
+                                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
                 dj_2_df = (df
                                 .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_2))
-                                .select('track.name', 'song_url', 'dj_count')
+                                .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
                 
                 st.text(f"Music _{dj_compare_1}_ has, but _{dj_compare_2}_ doesn't.")
