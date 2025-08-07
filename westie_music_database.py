@@ -1108,7 +1108,7 @@ if search_dj_toggle:
                                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
                 
-                st.text(f"Music _{dj_compare_1}_ has, but _{dj_compare_2}_ doesn't.")
+                st.text(f"Music {dj_compare_1} has, but {dj_compare_2} doesn't.")
                 st.dataframe(dj_1_df
                               .join(dj_2_df, 
                                         how='anti', 
