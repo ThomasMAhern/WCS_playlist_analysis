@@ -1218,6 +1218,11 @@ if geo_region_toggle:
 
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
+    country_1, country_2 = st.columns(2)
+    with country_1:
+                country_compare_1 = st.text_input("Country 1:").lower()
+    with country_2:
+                country_compare_2 = st.text_input("Country 2:").lower()
     
     if st.button("Compare countries", type="primary"):
         
@@ -1226,12 +1231,12 @@ if geo_region_toggle:
                                 pl.col('playlist_count').gt(3))
 
         country_1_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[0]))
+                        .filter(pl.col('country').eq(country_1))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
         country_2_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[1]))
+                        .filter(pl.col('country').eq(country_2))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
