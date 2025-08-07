@@ -1248,7 +1248,7 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        .pipe(just_a_peek)
+                        # .pipe(just_a_peek)
                         .head(300).collect(streaming=True) ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
