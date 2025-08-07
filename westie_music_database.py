@@ -1098,11 +1098,13 @@ if search_dj_toggle:
 
 
                 dj_1_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1))
+                                .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
+                                        | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_1))
                                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
                 dj_2_df = (df
-                                .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_2))
+                                .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_2)
+                                        | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_2))
                                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
                 
@@ -1117,16 +1119,6 @@ if search_dj_toggle:
                                 .head(500).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
                 
-                # st.text(f"Music _{djs_selectbox[1]}_ has, but _{djs_selectbox[0]}_ doesn't")
-                # st.dataframe(dj_2_df
-                #               .join(dj_1_df, 
-                #                         how='anti', 
-                #                         on=['song_url']
-                #                         )
-                #                 # .unique()
-                #                 # .sort('dj_count', descending=True)
-                #                 .head(50).collect(streaming=True) ,
-                #                 column_config={"song_url": st.column_config.LinkColumn()})
         st.markdown(f"#### ")
 
 
