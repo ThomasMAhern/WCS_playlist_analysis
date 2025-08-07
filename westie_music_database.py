@@ -1218,11 +1218,11 @@ if geo_region_toggle:
 
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect("Compare these countries' music:", countries)
-    country_1, country_2 = st.columns(2)
-    with country_1:
-                country_compare_1 = st.text_input("Country 1:").lower()
-    with country_2:
-                country_compare_2 = st.text_input("Country 2:").lower()
+        # country_1, country_2 = st.columns(2)
+        # with country_1:
+        #         country_compare_1 = st.text_input("Country 1:").lower()
+        # with country_2:
+        #         country_compare_2 = st.text_input("Country 2:").lower()
     
     if st.button("Compare countries", type="primary"):
         
@@ -1231,12 +1231,12 @@ if geo_region_toggle:
                                 pl.col('playlist_count').gt(3))
 
         country_1_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).str.to_lowercase().eq(country_1))
+                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[0]))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
         country_2_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).str.to_lowercase().eq(country_2))
+                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[1]))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
         
@@ -1248,7 +1248,6 @@ if geo_region_toggle:
                                         )
                         .unique()
                         .sort('dj_count', descending=True)
-                        # .pipe(just_a_peek)
                         .head(300).collect(streaming=True) ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
