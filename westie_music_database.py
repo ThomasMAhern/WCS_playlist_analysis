@@ -423,7 +423,7 @@ def sample_of_raw_data():
                       .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical)), 
                       how='left', on=['track.name', 'track.artists.name'])
                 # .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
-                ._fetch(100000).sample(1000)
+                ._fetch(100000).sample(500)
                 )
 sample_of_raw_data = sample_of_raw_data()
 
