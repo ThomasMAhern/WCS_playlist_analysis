@@ -1085,7 +1085,9 @@ if search_dj_toggle:
         if st.button("Compare DJs/users", type="primary"):
                 st.dataframe(df
                         .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
+                                | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
                                 | pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_2)
+                                | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_2)
                                 )
                         .group_by('owner.display_name')
                         .agg(song_count = pl.n_unique('track.name'), 
