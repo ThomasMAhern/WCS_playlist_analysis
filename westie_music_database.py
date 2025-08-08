@@ -1505,8 +1505,8 @@ if lyrics_toggle:
                         how='left', on=['song', 'artist'])
                 .filter(~pl.col('lyrics').str.contains_any(anti_lyrics_input, ascii_case_insensitive=True),
                         pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
-                        pl.col('song').str.contains_any([song_input], ascii_case_insensitive=True),
-                        pl.col('artist').str.contains_any([artist_input], ascii_case_insensitive=True),
+                        pl.col('song').cast(pl.String).str.contains_any([song_input], ascii_case_insensitive=True),
+                        pl.col('artist').cast(pl.String).str.contains_any([artist_input], ascii_case_insensitive=True),
                         )
                 .with_columns(matched_lyrics = pl.col('lyrics')
                                                 .str.to_lowercase()
