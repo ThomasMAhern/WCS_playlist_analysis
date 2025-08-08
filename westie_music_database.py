@@ -1016,7 +1016,7 @@ if search_dj_toggle:
                         others_music = (df
                                         .filter(~(pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                                  # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                                                 | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                                                 | pl.col('owner.id').cast(pl.String).cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
                                                 )
                                         .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                                         )
