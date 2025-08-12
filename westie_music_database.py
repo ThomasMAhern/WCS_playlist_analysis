@@ -10,10 +10,7 @@ import os
 
 def log_query(query_type, params):
         '''sends query logs'''
-    supabase.table("WestieMusicDatabase").insert({
-        "query_type": query_type,
-        "params": params
-    }).execute()
+    supabase.table("WestieMusicDatabase").insert({"query_type": query_type,"params": params}).execute()
     
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
