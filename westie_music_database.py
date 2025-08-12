@@ -4,6 +4,21 @@ import matplotlib.pyplot as plt
 import polars as pl
 import psutil
 
+
+from supabase import create_client
+import os
+
+def log_query(query_type, params):
+        '''sends query logs'''
+    supabase.table("WestieMusicDatabase").insert({
+        "query_type": query_type,
+        "params": params
+    }).execute()
+    
+url = os.getenv("SUPABASE_URL")
+key = os.getenv("SUPABASE_KEY")
+supabase = create_client(url, key)
+
 # avail_threads = pl.threadpool_size()
 
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
@@ -587,7 +602,20 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
-                
+                log_query("Search songs", {'song_input': song_input,
+                                           'artist_name': artist_name,
+                                           'dj_input': dj_input,
+                                           'playlist_input': playlist_input,
+                                           'queer_toggle': queer_toggle,
+                                           'poc_toggle': poc_toggle,
+                                           'countries_selectbox': countries_selectbox,
+                                           'added_2_playlist_date': added_2_playlist_date,
+                                           'track_release_date': track_release_date,
+                                           'anti_playlist_input': anti_playlist_input,
+                                           'num_results': num_results,
+                                           'bpm_slider': bpm_slider,
+                                        }
+                          )
                 #get all playlists a song is in
                 anti_df = (df
                            .group_by('track.id')

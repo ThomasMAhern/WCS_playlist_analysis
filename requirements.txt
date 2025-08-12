@@ -2,3 +2,4 @@ streamlit
 wordcloud
 polars==1.27.0
 psutil
+supabase
