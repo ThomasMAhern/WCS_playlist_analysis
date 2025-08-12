@@ -599,6 +599,7 @@ if song_locator_toggle:
 
         # else:
         if st.button("Search songs", type="primary"):
+                
                 log_query("Search songs", {'song_input': song_input,
                                            'artist_name': artist_name,
                                            'dj_input': dj_input,
@@ -613,6 +614,7 @@ if song_locator_toggle:
                                            'bpm_slider': bpm_slider,
                                         }
                           )
+                
                 #get all playlists a song is in
                 anti_df = (df
                            .group_by('track.id')
@@ -903,6 +905,15 @@ if playlist_locator_toggle:
                 
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
+                
+                log_query("Search playlists", {'song_input': song_input,
+                                           'song_input': song_input,
+                                           'dj_input': dj_input,
+                                           'playlist_input': playlist_input,
+                                           'anti_playlist_input': anti_playlist_input2,
+                                        }
+                          )
+                
                 st.dataframe(df
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
@@ -996,6 +1007,11 @@ if search_dj_toggle:
         
         # else:
         if st.button("Search djs", type="primary"):
+                
+                log_query("Search djs", {'dj_input': dj_input,
+                                           'dj_playlist_input': dj_playlist_input,
+                                        })
+                
                 dj_search_df = (df
                         .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
@@ -1108,6 +1124,11 @@ if search_dj_toggle:
                 dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
         if st.button("Compare DJs/users", type="primary"):
+                
+                log_query("Search djs", {'dj_compare_1': dj_compare_1,
+                                           'dj_compare_2': dj_compare_2,
+                                        })
+                
                 st.dataframe(df
                         .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
                                 | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
