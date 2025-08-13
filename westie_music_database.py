@@ -10,7 +10,8 @@ import os
 
 def log_query(query_type, params):
         '''sends query logs'''
-        supabase.table("WestieMusicDatabase").insert({"query_type": query_type,"params": params}).execute()
+        supabase.table("WestieMusicDatabase").insert({"query_type": query_type,
+                                                      "params": params}).execute()
     
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
@@ -1271,6 +1272,9 @@ if geo_region_toggle:
         #         country_compare_2 = st.text_input("Country 2:").lower()
     
     if st.button("Compare countries", type="primary"):
+            
+        log_query("Comparing Countries' music", {'countries_selectbox': countries_selectbox,
+                                        })
         
         countries_df = df.filter(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox),
                                 pl.col('dj_count').gt(3), 
