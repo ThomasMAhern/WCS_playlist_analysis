@@ -538,7 +538,8 @@ if top_songs_toggle:
         st.dataframe(top_songs.drop('matching_playlist_count'), 
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
-
+st.link_button('Top 100 WCS songs',
+               url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song 🎵")
@@ -1645,7 +1646,7 @@ st.markdown("""####
 * DJs: Send me your VirtualDJ backup database file (it only includes the metadata, not the actual song files)
 
 #### What can the Westie Music Database tell me?
-* What music was played at Budafest, but NOT at Westie Spring Thing (Courtesy of Nicole!)
+* What music was played at Budafest, but NOT at Westie Spring Thing (Courtesy of Nicole Y!)
 * Top 1000 songs
 * Event sets
 * Most popular songs and playlists for:
