@@ -535,11 +535,13 @@ top_songs = top_songs()
 
 top_songs_toggle = st.toggle("Top 500 WCS songs!")
 if top_songs_toggle:
+        st.link_button('Playlist of the top 100',
+               url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
+        
         st.dataframe(top_songs.drop('matching_playlist_count'), 
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
-st.link_button('Top 100 WCS songs',
-               url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
+
 
 #courtesy of Vishal S
 song_locator_toggle = st.toggle("Find a Song 🎵")
