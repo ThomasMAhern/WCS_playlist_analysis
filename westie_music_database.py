@@ -606,9 +606,8 @@ if song_locator_toggle:
         #                     )
 
         # else:
-        if st.button("Search songs", type="primary", disabled=st.session_state["processing"]) and (st.session_state["processing"] == False):
+        if st.button("Search songs", type="primary", disabled=st.session_state["processing"]):# and (st.session_state["processing"] = False):
                 st.session_state["processing"] = True
-                st.write(st.session_state["processing"])
                 log_query("Search songs", {'song_input': song_input,
                                            'artist_name': artist_name,
                                            'dj_input': dj_input,
