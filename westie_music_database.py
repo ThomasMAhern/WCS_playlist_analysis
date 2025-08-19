@@ -375,13 +375,6 @@ def get_global_lock():
 
 lock = get_global_lock()
 
-def run_query():
-    lock["processing"] = True
-    with st.spinner("Processing query... please wait"):
-        time.sleep(10)  # simulate long work
-    lock["processing"] = False
-    st.success("Query finished ✅")
-
 
 
 df = load_playlist_data()
