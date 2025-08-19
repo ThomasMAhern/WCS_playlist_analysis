@@ -368,14 +368,9 @@ def load_stats():
         
         return songs_count, artists_count, playlists_count, djs_count
 
-# Shared lock across all users (per process)
-@st.cache_resource
-def get_global_lock():
-    return {"processing": False}
-
-lock = get_global_lock()
-
-
+# Initialize session state
+if "processing" not in st.session_state:
+    st.session_state["processing"] = False
 
 df = load_playlist_data()
 # st.write(f"df is good")
@@ -611,8 +606,8 @@ if song_locator_toggle:
         #                     )
 
         # else:
-        if st.button("Search songs", type="primary", disabled=lock["processing"]):
-                lock["processing"] = True
+        if st.button("Search songs", type="primary", disabled=st.session_state["processing"]):
+                st.session_state["processing"] = True
                 log_query("Search songs", {'song_input': song_input,
                                            'artist_name': artist_name,
                                            'dj_input': dj_input,
@@ -751,8 +746,8 @@ if song_locator_toggle:
                 
                 
                 #creates a playlist based on the results
-                # if st.button("Generate a playlist?", type="primary", disabled=lock["processing"]):
-                        # lock["processing"] = True
+                # if st.button("Generate a playlist?", type="primary", disabled=st.session_state["processing"]):
+                        # st.session_state["processing"] = True
                 #         bpm_high = st.slider("BPM-high:", 85, 130, 101)
                 #         bpm_med = st.slider("BPM-med:", 80, 100, 95)
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
@@ -857,7 +852,7 @@ if song_locator_toggle:
                 #               ),
                 # column_config={"song_url": st.column_config.LinkColumn("Song")}
                 # )
-                lock["processing"] = False
+                st.session_state["processing"] = False
                 
                 
                 
@@ -918,8 +913,8 @@ if playlist_locator_toggle:
                 
                 
         # if any(val for val in [playlist_input, song_input, dj_input]):
-        if st.button("Search playlists", type="primary", disabled=lock["processing"]):
-                lock["processing"] = True
+        if st.button("Search playlists", type="primary", disabled=st.session_state["processing"]):
+                st.session_state["processing"] = True
                 log_query("Search playlists", {'song_input': song_input,
                                            'song_input': song_input,
                                            'dj_input': dj_input,
@@ -946,7 +941,7 @@ if playlist_locator_toggle:
                         .head(500).collect(streaming=True), 
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
-                lock["processing"] = False
+                st.session_state["processing"] = False
         st.markdown(f"#### ")
 
 
@@ -1021,8 +1016,8 @@ if search_dj_toggle:
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
         # else:
-        if st.button("Search djs", type="primary", disabled=lock["processing"]):
-                lock["processing"] = True
+        if st.button("Search djs", type="primary", disabled=st.session_state["processing"]):
+                st.session_state["processing"] = True
                 log_query("Search djs", {'dj_input': dj_input,
                                            'dj_playlist_input': dj_playlist_input,
                                         })
@@ -1105,7 +1100,7 @@ if search_dj_toggle:
                         #         .head(200)
                         #         .collect(streaming=True), 
                         #         column_config={"song_url": st.column_config.LinkColumn()})
-                lock["processing"] = False
+                st.session_state["processing"] = False
                 
 
         st.markdown(f"#### Compare DJs:")
@@ -1139,8 +1134,8 @@ if search_dj_toggle:
         with compare_2:
                 dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
-        if st.button("Compare DJs/users", type="primary", disabled=lock["processing"]):
-                lock["processing"] = True
+        if st.button("Compare DJs/users", type="primary", disabled=st.session_state["processing"]):
+                st.session_state["processing"] = True
                 log_query("Search djs", {'dj_compare_1': dj_compare_1,
                                            'dj_compare_2': dj_compare_2,
                                         })
@@ -1182,7 +1177,7 @@ if search_dj_toggle:
                                 .sort('dj_count', descending=True)
                                 .head(500).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
-                lock["processing"] = False
+                st.session_state["processing"] = False
         st.markdown(f"#### ")
 
 
@@ -1286,8 +1281,8 @@ if geo_region_toggle:
         # with country_2:
         #         country_compare_2 = st.text_input("Country 2:").lower()
     
-    if st.button("Compare countries", type="primary", disabled=lock["processing"]):
-        lock["processing"] = True
+    if st.button("Compare countries", type="primary", disabled=st.session_state["processing"]):
+        st.session_state["processing"] = True
         log_query("Comparing Countries' music", {'countries_selectbox': countries_selectbox,
                                         })
         
@@ -1316,7 +1311,7 @@ if geo_region_toggle:
                         .head(300).collect(streaming=True) ,
                         # ._fetch(10000),
                         column_config={"song_url": st.column_config.LinkColumn()})
-        lock["processing"] = False
+        st.session_state["processing"] = False
         st.markdown(f"#### ")
 
 
@@ -1414,9 +1409,9 @@ if songs_together_toggle:
     
     
     
-        if st.button("Search songs played together", type="primary", disabled=lock["processing"]):
+        if st.button("Search songs played together", type="primary", disabled=st.session_state["processing"]):
         # if (song_input_prepped + artist_name_input).strip() != '':
-                lock["processing"] = True
+                st.session_state["processing"] = True
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
                 st.dataframe(df
                         .filter(pl.col('actual_social_set')==True,
@@ -1502,7 +1497,7 @@ if songs_together_toggle:
                         .head(100).collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
-                lock["processing"] = False
+                st.session_state["processing"] = False
         st.link_button("Andreas' connected-songs visualization!",
                                 'https://loewclan.de/song-galaxy/')
         st.markdown(f"#### ")
@@ -1564,8 +1559,8 @@ if lyrics_toggle:
         if anti_lyrics_input == ['']:
                 anti_lyrics_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
         
-        if st.button("Search lyrics", type="primary", disabled=lock["processing"]):
-                lock["processing"] = True
+        if st.button("Search lyrics", type="primary", disabled=st.session_state["processing"]):
+                st.session_state["processing"] = True
                 st.dataframe(
                 df_lyrics.with_columns(pl.col(['song', 'artist']).cast(pl.Categorical))
                 .join(df.select('song_url', 'playlist_count', 'dj_count',
@@ -1597,7 +1592,7 @@ if lyrics_toggle:
                 .collect(streaming=True), 
                         column_config={"song_url": st.column_config.LinkColumn()}
                 )
-                lock["processing"] = False
+                st.session_state["processing"] = False
 
 
 
