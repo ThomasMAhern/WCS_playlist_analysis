@@ -606,7 +606,7 @@ if song_locator_toggle:
         #                     )
 
         # else:
-        if st.button("Search songs", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Search songs", type="secondary", disabled=st.session_state["processing"]):
                 st.session_state["processing"] = True
                 log_query("Search songs", {'song_input': song_input,
                                            'artist_name': artist_name,
@@ -746,7 +746,7 @@ if song_locator_toggle:
                 
                 
                 #creates a playlist based on the results
-                # if st.button("Generate a playlist?", type="primary", disabled=st.session_state["processing"]):
+                # if st.button("Generate a playlist?", type="secondary", disabled=st.session_state["processing"]):
                         # st.session_state["processing"] = True
                 #         bpm_high = st.slider("BPM-high:", 85, 130, 101)
                 #         bpm_med = st.slider("BPM-med:", 80, 100, 95)
@@ -913,7 +913,7 @@ if playlist_locator_toggle:
                 
                 
         # if any(val for val in [playlist_input, song_input, dj_input]):
-        if st.button("Search playlists", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Search playlists", type="secondary", disabled=st.session_state["processing"]):
                 st.session_state["processing"] = True
                 log_query("Search playlists", {'song_input': song_input,
                                            'song_input': song_input,
@@ -1016,7 +1016,7 @@ if search_dj_toggle:
                  column_config={"owner_url": st.column_config.LinkColumn()})
         
         # else:
-        if st.button("Search djs", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Search djs", type="secondary", disabled=st.session_state["processing"]):
                 st.session_state["processing"] = True
                 log_query("Search djs", {'dj_input': dj_input,
                                            'dj_playlist_input': dj_playlist_input,
@@ -1134,7 +1134,7 @@ if search_dj_toggle:
         with compare_2:
                 dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
-        if st.button("Compare DJs/users", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Compare DJs/users", type="secondary", disabled=st.session_state["processing"]):
                 st.session_state["processing"] = True
                 log_query("Search djs", {'dj_compare_1': dj_compare_1,
                                            'dj_compare_2': dj_compare_2,
@@ -1281,7 +1281,7 @@ if geo_region_toggle:
         # with country_2:
         #         country_compare_2 = st.text_input("Country 2:").lower()
     
-    if st.button("Compare countries", type="primary", disabled=st.session_state["processing"]):
+    if st.button("Compare countries", type="secondary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True
         log_query("Comparing Countries' music", {'countries_selectbox': countries_selectbox,
                                         })
@@ -1409,7 +1409,7 @@ if songs_together_toggle:
     
     
     
-        if st.button("Search songs played together", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Search songs played together", type="secondary", disabled=st.session_state["processing"]):
         # if (song_input_prepped + artist_name_input).strip() != '':
                 st.session_state["processing"] = True
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
@@ -1559,7 +1559,7 @@ if lyrics_toggle:
         if anti_lyrics_input == ['']:
                 anti_lyrics_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
         
-        if st.button("Search lyrics", type="primary", disabled=st.session_state["processing"]):
+        if st.button("Search lyrics", type="secondary", disabled=st.session_state["processing"]):
                 st.session_state["processing"] = True
                 st.dataframe(
                 df_lyrics.with_columns(pl.col(['song', 'artist']).cast(pl.Categorical))
