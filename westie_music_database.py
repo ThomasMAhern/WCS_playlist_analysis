@@ -54,8 +54,6 @@ pattern_bpm_relational = r'[<>]=?\s*(\d{2,3})\s*(?:bpm|BPM)?' #>120 BPM
 pattern_bpm_mention = r'(?:bpm|BPM)[^\d]{0,5}(\d{2,3})' #bpm 105
 pattern_bpm_loose_fallback = r'\b(\d{2,3})\s*(?:bpm|BPM)\b' # 117 BPM”
 
-
-
 pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
 #based on Westie DJs https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY
@@ -552,19 +550,19 @@ song_locator_toggle = st.toggle("Find a Song 🎵")
 if song_locator_toggle:
         song_col1, song_col2 = st.columns(2)
         with song_col1:
-                song_input = st.text_input("Song name:").lower().split(',')
-                artist_name = st.text_input("Artist name:").lower().split(',')
-                dj_input = st.text_input("DJ/user name:").lower().split(',')
-                playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").lower().split(',')
+                song_input = st.text_input("Song name:").strip().lower().split(',')
+                artist_name = st.text_input("Artist name:").strip().lower().split(',')
+                dj_input = st.text_input("DJ/user name:").strip().lower().split(',')
+                playlist_input = st.text_input("Playlist name ('late night', '80bpm', or 'Budafest'):").strip().lower().split(',')
                 queer_toggle = st.checkbox("🏳️‍🌈")
                 poc_toggle = st.checkbox("POC")
                 st.markdown("[Add/correct POC artists](https://docs.google.com/spreadsheets/d/1-elrLd_3tX4QTLQjj4EmPxRSzXHcxs6tZp5Y5fRFalc/edit?usp=sharing)")
                 
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
-                added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
-                track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").split(',')
-                anti_playlist_input = st.text_input("Exclude if in playlists ('blues', or 'zouk'):").lower().split(',')
+                added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").strip().split(',')
+                track_release_date = st.text_input("Track release date (yyyy-mm-dd or '198' for 1980's music):").strip().split(',')
+                anti_playlist_input = st.text_input("Exclude if in playlists ('blues', or 'zouk'):").strip().lower().split(',')
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0, step=250)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
