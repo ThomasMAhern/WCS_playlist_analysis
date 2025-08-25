@@ -624,7 +624,7 @@ top_poc_songs = top_poc_songs()
 
 
 
-top_songs_toggle = st.toggle("Top 500 WCS songs!")
+top_songs_toggle = st.toggle("Top 100 WCS songs!")
 if top_songs_toggle:
         st.link_button('Playlist of the top 100',
                url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
@@ -633,7 +633,7 @@ if top_songs_toggle:
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
         
-top_songs_toggle = st.toggle("Top 500 🏳️‍🌈 songs!")
+top_songs_toggle = st.toggle("Top 100 🏳️‍🌈 songs!")
 if top_songs_toggle:
         # st.link_button('Playlist of the top 100',
         #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
@@ -642,7 +642,7 @@ if top_songs_toggle:
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
         
-top_songs_toggle = st.toggle("Top 500 POC songs!")
+top_songs_toggle = st.toggle("Top 100 POC songs!")
 if top_songs_toggle:
         # st.link_button('Playlist of the top 100',
         #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
