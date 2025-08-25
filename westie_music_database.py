@@ -521,7 +521,7 @@ def top_songs():
                                         #connies notes
                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
                                         'Familiarity', 'Transition type', 'poc_artist',
-                                        ).list.unique().list.drop_nulls().list.head(50),
+                                        ).list.unique().list.drop_nulls().list.head(30),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                 )
                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
@@ -564,7 +564,7 @@ top_songs = top_songs()
 #                                         #connies notes
 #                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
 #                                         'Familiarity', 'Transition type', 'poc_artist',
-#                                         ).list.unique().list.drop_nulls().list.head(50),
+#                                         ).list.unique().list.drop_nulls().list.head(30),
 #                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
 #                                 )
 #                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
@@ -607,7 +607,7 @@ top_songs = top_songs()
 #                                         #connies notes
 #                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
 #                                         'Familiarity', 'Transition type', 'poc_artist',
-#                                         ).list.unique().list.drop_nulls().list.head(50),
+#                                         ).list.unique().list.drop_nulls().list.head(30),
 #                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
 #                                 )
 #                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
@@ -792,7 +792,7 @@ if song_locator_toggle:
                                         .list.unique()
                                         .list.drop_nulls()
                                         .list.sort()
-                                        .list.head(50),
+                                        .list.head(30),
                                         # pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
                                       hit_terms = pl.col('playlist_name')
                                                         .cast(pl.List(pl.String))
@@ -818,7 +818,7 @@ if song_locator_toggle:
                         )
                 
                 results_df = (song_search_df
-                             .with_columns(pl.col('playlist_name').list.head(50))
+                             .with_columns(pl.col('playlist_name').list.head(30))
                              .head(1000).collect(engine="streaming"))
                 st.dataframe(results_df, 
                         column_config={"song_url": st.column_config.LinkColumn()})
@@ -1094,7 +1094,7 @@ def djs_data():
                               .list.unique()
                               .list.drop_nulls()
                               .list.sort()
-                              .list.head(50)
+                              .list.head(30)
                               )
                 .sort(pl.col('playlist_count'), descending=True)
                 .head(2000)
@@ -1147,7 +1147,7 @@ if search_dj_toggle:
                                 .list.unique()
                                 .list.drop_nulls()
                                 .list.sort()
-                                .list.head(50)
+                                .list.head(30)
                                 )
                         .sort(pl.col('playlist_count'), descending=True)
                         .head(100)
@@ -1200,7 +1200,7 @@ if search_dj_toggle:
                         #                 'playlist_count', 'song_url'])
                         #         .group_by(pl.all().exclude('owner.display_name'))
                         #         .agg('owner.display_name')
-                        #         .with_columns(pl.col('owner.display_name').list.head(50))
+                        #         .with_columns(pl.col('owner.display_name').list.head(30))
                         #         .sort('dj_count', 'playlist_count', descending=True)
                         #         .head(200)
                         #         .collect(streaming=True), 
@@ -1325,7 +1325,7 @@ def region_data():
                       dj_count = pl.n_unique('owner.display_name'),
                       djs = pl.col('owner.display_name'),
                       )
-                 .with_columns(pl.col('djs').list.unique().list.head(50))
+                 .with_columns(pl.col('djs').list.unique().list.head(30))
                  .sort('region')
                  .collect(streaming=True)
                  )
@@ -1339,7 +1339,7 @@ def country_data():
                       dj_count = pl.n_unique('owner.display_name'),
                       djs = pl.col('owner.display_name'),
                       )
-                 .with_columns(pl.col('djs').list.unique().list.head(50))
+                 .with_columns(pl.col('djs').list.unique().list.head(30))
                  .sort('country')
                  .collect(streaming=True)
                  )
