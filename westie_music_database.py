@@ -531,7 +531,7 @@ def top_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(500).collect(streaming=True)
+                .head(100).collect(streaming=True)
                 )
 top_songs = top_songs()
 
@@ -574,7 +574,7 @@ def top_queer_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(500).collect(streaming=True)
+                .head(100).collect(streaming=True)
                 )
 top_queer_songs = top_queer_songs()
 
@@ -617,7 +617,7 @@ def top_poc_songs():
                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
                 .sort('matching_playlist_count', descending=True)
                 .with_row_index(offset=1)
-                .head(500).collect(streaming=True)
+                .head(100).collect(streaming=True)
                 )
 top_poc_songs = top_poc_songs()
 
