@@ -576,7 +576,7 @@ def top_queer_songs():
                 .with_row_index(offset=1)
                 .head(500).collect(streaming=True)
                 )
-top_queer_songs = top_songs()
+top_queer_songs = top_queer_songs()
 
 @st.cache_data
 def top_poc_songs():
@@ -619,7 +619,7 @@ def top_poc_songs():
                 .with_row_index(offset=1)
                 .head(500).collect(streaming=True)
                 )
-top_poc_songs = top_songs()
+top_poc_songs = top_poc_songs()
 
 
 
