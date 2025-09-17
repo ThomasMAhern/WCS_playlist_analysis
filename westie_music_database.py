@@ -762,12 +762,12 @@ if song_locator_toggle:
                                 
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
-                                pl.col('track.name').cast(pl.String).str.contains_any(song_input, ascii_case_insensitive=True),
-                                pl.col('track.artists.name').cast(pl.String).str.contains_any(artist_name, ascii_case_insensitive=True),
-                                pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
-                                (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
+                                pl.col('track.name').cast(pl.String).str.contains_any([i.strip() for i in song_input], ascii_case_insensitive=True),
+                                pl.col('track.artists.name').cast(pl.String).str.contains_any([i.strip() for i in artist_name], ascii_case_insensitive=True),
+                                pl.col('playlist_name').cast(pl.String).str.contains_any([i.strip() for i in playlist_input], ascii_case_insensitive=True),
+                                (pl.col('owner.display_name').cast(pl.String).str.contains_any([i.strip() for i in dj_input], ascii_case_insensitive=True)
                                 #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                                  | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),                                                                                    
+                                  | pl.col('owner.id').cast(pl.String).str.contains_any([i.strip() for i in dj_input], ascii_case_insensitive=True)),                                                                                    
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
