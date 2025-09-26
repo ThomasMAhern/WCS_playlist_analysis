@@ -757,8 +757,8 @@ if song_locator_toggle:
                         .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').cast(pl.String).str.contains_any(only_poc_people, ascii_case_insensitive=True),
                                 
-                                # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
-                                # pl.unique('playlist_name').over() #has to be diff df such as anti join
+                                ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
+                                pl.unique('playlist_name').over() #has to be diff df such as anti join
                                 
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
