@@ -346,7 +346,13 @@ def load_notes():
 
 @st.cache_data
 def load_countries():
-        return sorted(df.select(pl.col('country').cast(pl.String)).unique().drop_nulls().collect(streaming=True)['country'].to_list())
+        return sorted(df
+                      .select(pl.col('country').cast(pl.String))
+                      .unique()
+                      .drop_nulls()
+                      .collect(streaming=True)
+                      ['country']
+                      .to_list())
 
 @st.cache_data
 def load_stats():
