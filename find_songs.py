@@ -65,7 +65,23 @@ if mode == 'live' or mode == 'write':
         pl.col('track.album.release_date').cast(pl.Date),
     ).sort('track.id').unique()
 
-    tracks_extended = tracks.with_columns(
+    # Remove duplicated tracks (which can happen due to data quality issues)
+    # and try to keep only a single copies with complete metadata.
+    # TODO: This drops tracks where no copy with complete metadata exists
+    track_info_columns = ['track.name', 'track.artists.name', 'track.album.release_date']
+
+    unique_tracks = tracks.filter(pl.all_horizontal(pl.col(track_info_columns).is_not_null())).unique('track.id')
+
+    # Remove duplicated tracks (which can happen due to data quality issues)
+    # and try to merge their metadata where possible
+    # unique_tracks = tracks.select('track.id').unique()
+    # for col in track_info_columns:
+    #     unique_tracks = unique_tracks.join(
+    #         tracks.select('track.id', col).filter(
+    #             pl.col(col).is_not_null()).unique('track.id'),
+    #         how='left', on=['track.id'])
+
+    tracks_extended = unique_tracks.with_columns(
         pl.col('track.artists.name').str.to_lowercase().is_in(
             queer_artists).alias("track.artists.is_queer_artist"),
         pl.col('track.artists.name').str.to_lowercase().is_in(
@@ -127,9 +143,12 @@ artist_input: str = ''
 queer_toggle: bool = False
 poc_toggle: bool = True
 
-song_inputs: list[str] = list(filter(bool, song_input.strip().lower().split(',')))
-song_release_dates: list[str] = list(filter(bool, song_release_date.strip().split(',')))
-artist_inputs: list[str] = list(filter(bool, artist_input.strip().lower().split(',')))
+song_inputs: list[str] = list(
+    filter(bool, song_input.strip().lower().split(',')))
+song_release_dates: list[str] = list(
+    filter(bool, song_release_date.strip().split(',')))
+artist_inputs: list[str] = list(
+    filter(bool, artist_input.strip().lower().split(',')))
 
 # Playlist-specific filters
 country_input: str = ''
@@ -249,3 +268,15 @@ q = matching_tracks
 print(q.slice(skip_num_top_results))
 
 print(q.slice(skip_num_top_results).limit(50).collect())
+
+print(playlists_extended.limit(10).collect())
+print(playlist_tracks.filter(pl.col('track.id').eq(
+    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
+print(tracks_extended.filter(pl.col('track.id').eq(
+    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
+print(tracks.filter(pl.col('track.id').eq(
+    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
+
+source_data = pl.scan_parquet('data_playlists.parquet')
+print(source_data.filter(pl.col('track.id').eq(
+    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
