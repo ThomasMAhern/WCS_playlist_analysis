@@ -50,7 +50,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed playlist data to file
     if mode == 'write':
-        playlists_extended.collect().write_parquet('data_playlist_metadata.parquet')
+        playlists_extended.sink_parquet('data_playlist_metadata.parquet')
 
     tracks = source_data.select(
         pl.col('track.id').alias('track.id'),
@@ -68,7 +68,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed track data to file
     if mode == 'write':
-        tracks_extended.collect().write_parquet('data_song_metadata.parquet')
+        tracks_extended.sink_parquet('data_song_metadata.parquet')
 
     playlist_tracks = source_data.select(
         pl.col('playlist_id').alias('playlist.id'),
@@ -80,7 +80,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
-        tracks.collect().write_parquet('data_playlist_songs.parquet')
+        tracks.sink_parquet('data_playlist_songs.parquet')
 
 elif mode == 'load':
     # Load the pre-generated data from the Parquet files
