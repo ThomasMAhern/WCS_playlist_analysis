@@ -1,5 +1,4 @@
 import polars as pl
-import polars.selectors as cs
 import sys
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
@@ -53,7 +52,7 @@ if mode == 'live' or mode == 'write':
     ).with_columns(
         _is_social_set.alias('playlist.is_social_set'),
         _is_wcs_dj.alias('owner.is_wcs_dj'),
-    ).select(cs.all() - cs.by_name('playlist.location'))
+    ).drop('playlist.location')
 
     # Write pre-processed playlist data to file
     if mode == 'write':
@@ -88,11 +87,11 @@ if mode == 'live' or mode == 'write':
         # The following metadata is not strictly required
         pl.col('song_number').alias('playlist_track.number'),
         pl.col('added_at').alias('playlist_track.added_at'),
-    ).sort('playlist_id', 'track_id', 'song_number').unique()
+    ).sort('playlist.id', 'track.id', 'playlist_track.number').unique()
 
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
-        tracks.sink_parquet('data_playlist_songs.parquet')
+        playlist_tracks.sink_parquet('data_playlist_songs.parquet')
 
     countries_df = (
         playlists_extended.select(
