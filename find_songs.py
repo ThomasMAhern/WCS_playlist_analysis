@@ -47,9 +47,9 @@ if mode == 'live' or mode == 'write':
         extract_dates_from_name(pl.col('playlist.name')).cast(
             pl.List(pl.Categorical)).alias('playlist.extracted_date'),
         pl.col('playlist.location').str.split(' - ').list.get(
-            0, null_on_oob=True).alias('playlist.region'),
+            0, null_on_oob=True).cast(pl.Categorical).alias('playlist.region'),
         pl.col('playlist.location').str.split(' - ').list.get(
-            1, null_on_oob=True).alias('playlist.country'),
+            1, null_on_oob=True).cast(pl.Categorical).alias('playlist.country'),
     ).with_columns(
         _is_social_set.alias('playlist.is_social_set'),
         _is_wcs_dj.alias('owner.is_wcs_dj'),
@@ -63,7 +63,7 @@ if mode == 'live' or mode == 'write':
         pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
         pl.col('track.name').cast(TRACK_NAME_DTYPE),
         pl.col('track.artists.name').cast(TRACK_ARTIST_DTYPE),
-        pl.col('track.album.release_date'),
+        pl.col('track.album.release_date').cast(pl.Date),
     ).sort('track.id').unique()
 
     tracks_extended = tracks.with_columns(
