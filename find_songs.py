@@ -153,6 +153,51 @@ added_to_playlist_date_inputs = added_to_playlist_date_input.strip().split(',')
 # Result options
 skip_num_top_results: int = 0
 
-q = playlists_extended
+#####################
+# Perform filtering #
+#####################
 
-print(q.limit(50).collect())
+# -------------------------------
+# Apply playlist-specific filters
+# -------------------------------
+
+matching_playlists = playlists_extended
+
+if playlist_inputs:
+    matching_playlists = matching_playlists.filter(
+        pl.col('playlist.name').str.contains_any(playlist_inputs, ascii_case_insensitive=True))
+
+if anti_playlist_input:
+    anti_predicate = pl.col('playlist.name').str.contains_any(
+        anti_playlist_inputs, ascii_case_insensitive=True)
+
+    # We want to remove tracks that are in these excluded playlists
+    # from the result, even when they are present in other matching playlists
+    excluded_playlists = playlists_extended.filter(anti_predicate)
+
+    # But as an optimization, we also want to avoid including those playlists in the first place.
+    matching_playlists = matching_playlists.filter(anti_predicate.not_())
+else:
+    excluded_playlists = None
+
+# ----------------------------
+# Apply track-specific filters
+# ----------------------------
+
+matching_tracks = tracks_extended
+
+if artist_inputs:
+    matching_tracks = matching_tracks.filter(
+        pl.col('track.artists.name').str.contains_any(artist_inputs, ascii_case_insensitive=True))
+
+if queer_toggle:
+    matching_tracks = matching_tracks.filter(
+        pl.col('track.artists.is_queer_artist'))
+
+if poc_toggle:
+    matching_tracks = matching_tracks.filter(
+        pl.col('track.artists.is_poc_artist'))
+
+q = matching_tracks
+
+print(q.slice(skip_num_top_results).limit(50).collect())
