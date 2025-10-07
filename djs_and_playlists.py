@@ -12,7 +12,7 @@ def log_query(query_type, params):
         '''sends query logs'''
         supabase.table("WestieMusicDatabase").insert({"query_type": query_type,
                                                       "params": params}).execute()
-    
+
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 supabase = create_client(url, key)
@@ -59,16 +59,16 @@ pattern_bpm_loose_fallback = r'\b(\d{2,3})\s*(?:bpm|BPM)\b' # 117 BPM”
 pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
 #based on Westie DJs https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY
-actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', 'chrisbloecker', '7r53jcujuc31b9bmur1kdk6j8', '11124055499', 
-'1154418581', 'lanyc13', 'idcmp2', 'james93uk', 'jacinthe.r', '1214584555', '216rwad76ay2yufv6wdksnbvi', 'lutynka', 
-'1185428002', 'ichikoo', '1181723092', '1229065119', '11164785980', 'rafalzonk', '11170824661', '1114726702', 'sepgod', 
-'blitzemp', '1195256212', 'vincentmoi54', 'saf2ousfteo2zwin3ysb71uc4', 'gj39mpctu2splzc3yjov5ph80', 'stoune', '1136143824', 
-'225x7krl3utkpzg34gw3lhycy', 'timo-2000-de', 'aennabanaenas', '21nse7ljtz2chhqdqi7onh4zi', 'armand1989', '1167150164', 
-'1121756047', 'tourflo', 'drjessdc', 'califf_wcs', 'kthiran', '1136143824', '11156835879', 'ahammar', 'foo7pbdux9qf50en3fnl1hnqk', 
-'vgvttofujh6h2qhz1dllwipgw', 'rhoades.elaine', '11149778648', '11168063242', '1262866465', '1227130632', 
-'31ww73dlraaawzixnk5xic7zn5d4', '1112522347', 'kfal92', 'hasskt', '21n5wwkfegd4ssz2xjaunjcja', '1160072156', 'siverin', 
-'31crk5spdq5bwf2niasjvmazkcee', '31cadxxcjjyxtogwamke25v5ljaq', '31px4eoamsjrpiptxvptk2mc3yx4', '1112824750', '12134184020', 
-'21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng', 
+actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', 'chrisbloecker', '7r53jcujuc31b9bmur1kdk6j8', '11124055499',
+'1154418581', 'lanyc13', 'idcmp2', 'james93uk', 'jacinthe.r', '1214584555', '216rwad76ay2yufv6wdksnbvi', 'lutynka',
+'1185428002', 'ichikoo', '1181723092', '1229065119', '11164785980', 'rafalzonk', '11170824661', '1114726702', 'sepgod',
+'blitzemp', '1195256212', 'vincentmoi54', 'saf2ousfteo2zwin3ysb71uc4', 'gj39mpctu2splzc3yjov5ph80', 'stoune', '1136143824',
+'225x7krl3utkpzg34gw3lhycy', 'timo-2000-de', 'aennabanaenas', '21nse7ljtz2chhqdqi7onh4zi', 'armand1989', '1167150164',
+'1121756047', 'tourflo', 'drjessdc', 'califf_wcs', 'kthiran', '1136143824', '11156835879', 'ahammar', 'foo7pbdux9qf50en3fnl1hnqk',
+'vgvttofujh6h2qhz1dllwipgw', 'rhoades.elaine', '11149778648', '11168063242', '1262866465', '1227130632',
+'31ww73dlraaawzixnk5xic7zn5d4', '1112522347', 'kfal92', 'hasskt', '21n5wwkfegd4ssz2xjaunjcja', '1160072156', 'siverin',
+'31crk5spdq5bwf2niasjvmazkcee', '31cadxxcjjyxtogwamke25v5ljaq', '31px4eoamsjrpiptxvptk2mc3yx4', '1112824750', '12134184020',
+'21xjgpvredrh5mms5eg4nllya', '31ecz63iftaszwketoy7pjxyhk74', '31qqbghffeq6punchuj7yoqs3vfy?si=25fac0caa6cb4077', 'djkarcheng',
 'djmotionwcs', 'silentsoliloquy24', 'thethas', 'tom.esca', 'valdho', '11149862781']
 
 #based on https://www.reddit.com/r/popheads/comments/108klvf/a_comprehensive_list_of_lgbtq_pop_music_acts/
@@ -79,132 +79,132 @@ actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', '
 
 # https://docs.google.com/spreadsheets/d/1-elrLd_3tX4QTLQjj4EmPxRSzXHcxs6tZp5Y5fRFalc/edit?usp=sharing
 poc_artists = [name.lower() for name in [
-'27Delly', 'ABIR', 'AFROJACK', 'ALTÉGO', 'AWA', 'Aaradhna', 'Aaries', 'Aaron Frazer', 'Aaron Neville', 'Abhi The Nomad', 
-'Adi Oasis', 'Ady Suleiman', 'Al Green', 'Alex Newell', 'Alexander Oscar', 'Alextbh', 'Alicia Keys', 'Alvin Garrett', 'Amanda Yang', 
-'Amber Mark', 'Anderson .Paak', 'Angela Johnson', 'Anthony Ramos', 'Appleby', 'Aretha Franklin', 'Arlene Zelina', 
-'Arthur Adams', 'Ashanti', 'Ashley DuBose', 'Ashley Mehta', 'B.B. King', 'B.o.B', 'BABYMONSTER', 'BAYNK', 
-'BLACKPINK', 'BTS', 'Beau Diako', 'Ben&Ben', 'Beyoncé', 'Black Eyed Peas', 'Black Pumas', 
-'Blithe', 'Bluey Robinson', "Blush'ko", 'Blxst', 'Boyz II Men', 'Brandon Beal', 'Brandy', 'Brother Yusef', 
-'Bruno Mars', 'Bryce Vine', 'Bryson Tiller', 'Burna Boy', 'CHUNG HA', 'CLAY', 'Caleborate', 'Calimossa', 
-'Camila Cabello', 'Carlos Santana', 'Carneyval', 'Cat Burns', 'Charlie Wilson', 'Chiiild', 'Chris Thomas King', 
-'Christian Scott aTunde Adjuah', 'Ciara', 'Cleo Sol', 'Col3trane', 'Corinne Bailey Rae', 'Cruel Santino', 
-'D-Hack', 'D-Nice', 'D.O.E.', 'DJ Khaled', 'DaBaby', 'Dane Amar', 'Darius', 'Darius Coleman', 'Davido', 'Delilah Montagu',  
-'Dhibu Ninan Thomas', 'Doechii', 'Doja Cat', 'Don Toliver', 'Dru Hill', 'Duckwrth', 'Durand Bernarr', 
-'Durand Jones & The Indications', 'EZI', 'Ella Mai', 'Emily King', 'Emotional Oranges', 
-'Empire Cast', 'Enrique Iglesias', 'Eric Benét', 'Eric Bibb', 'Eric Nam', 'Erykah Badu', 'Eryn Allen Kane', 'Etta James', 'Everett Bradley', 
-'FHAT', 'FKJ', 'Faouzia', 'Fenton Robinson', 'Floyd Fuji', 'Foxy Brown', 
-'Frank Ocean', 'Funk Wav', 'GIMS', 'Gary Clark Jr.', 'Gen Hoshino', 'Gerald Levert', 'Ginuwine', 'Griff', 
-'H.E.R.', 'HARLOE', 'HONNE', 'Hailee Steinfeld', 'Hanz', 'Hayley Kiyoko', 'Hil St. Soul', 'Hollie Carmen', 'Hongjoong of ATEEZ', 
-'IDRIS', 'Ife Kehinde', 'India.Arie', 'Isaac Dunbar', 'Izzy Bizu', 'J. Brown', 'JAIE', 'JAY-Z', 'Ja Rule', 'Janet Jackson', 
-'Jany Green', 'Jared Brady', 'Jarreau Vandal', 'Jasmine Thompson', 'Jason Derulo', 'Jay Sean', 'Jay Wile', 'Jay-Way', 'Jeezy', 
-'Jereena Montemayor', 'Jessica Domingo', 'Jhameel', 'John Legend', 'Jon Batiste', 'Jon Mero', 'Jonita Gandhi', 
-'Jordin Sparks', 'Jorja Smith', 'Josh Tobias', 'Joy Crookes', 'Joy Oladokun', 'Justine Skye', 'KAMAUU', 
-'KAYTRANADA', 'KWAYE', 'Kaiya', 'Kamakshi Khanna', 'Kane Brown', 'Kapil Kapilan', "Keb' Mo'", 'Kendrick Lamar', 'Kent Jones', 'Keri Hilson', 
-'Kevin Michael', 'Khalid', 'KiNG MALA', 'Kiana Ledé', 'Kim Petras', 'Kina Grannis', 'King George', 'Kodak Black', 'Koffee Brown', 
-'Kyshona', "L'Impératrice", 'LIE NING', 'LU KALA', 'LaMorris Williams', 'Latasha Lee', 'Latto', 
-'Lauren Jauregui', 'Ledisi', 'Leon Bridges', 'Lianne La Havas', 'Lil Halima', 'Lil Jon', 'Little Mix', 
-'Lizzo', 'Lori Jenaire', 'Lucky Daye', 'Ludacris', 'Luke James', 'Lyn Lapid', 'MICHELLE', 'MILCK', 'MONTMARTRE', 
-'Mabel', 'Mahalia', 'Maisie Peters', 'Maiya Sykes', 'Majid Jordan', 'Mali Music', 
-'Mapei', 'Mariah Carey', 'Mario', 'Marwin', 'Masego', 'Maxwell', 'Maze & Frankie Beverly', 'Mega', 'Megan Thee Stallion', 
-'Meridian', 'Metropole Orkest', 'Midas Hutch', 'Miguel', 'Musiq Soulchild', 'NEZZA', 'NNAVY', 'Nahko And Medicine For The People', 
-'Navy', 'Nayer', 'Ne-Yo', 'Nelly', 'Nico & Vinz', 'Noah Slee', 'Normani', 'Now United', 'NuChoyce', 'Nylo', 'Olivia Dean', 
-'Otis Kane', 'Otis Redding', 'P.Keys', 'P3GI-13', 'PJ Morton', 'Parson James', 'Patrik Jean', 'Paulo Londra', 'Pentatonix', 
-'Pharrell Williams', 'Phon', 'Phony Ppl', 'Pink Sweat$', 'Pitbull', 'Playboi Carti', 'Prince', 'Q', 
-'Q-Tip', 'Queen D', 'Queen Latifah', 'R.LUM.R', 'Raiche', 'Raleigh Ritchie', 'Ray Dalton', 'Revel Day', 'Rita Ora', 'Ruth B.', 'RuthAnne', 
-'Ruthie Foster', 'SERA', 'SOLOMON', 'SZA', 'Sadie', 'Saffire-The Uppity Blues Women', 
-'Saint Joshua', 'Samm Henshaw', 'Sampha', 'Sandro Cavazza', 'Scary Pockets', 'Sean Paul', 'Sebastian Yatra', 'Selena Gomez', 
-'Seori', 'Sickick', 'Silk Sonic', 'Smokey James & the Avalanche', 'Snoh Aalegra', 'Snoop Dogg', 'Social House', 'Solange', 
-'Sophia Bromberg', 'Soul For Real', 'Stromae', 'Sunshine Anderson', 'Superfruit', 'Swae Lee', 'T-Pain', 'TAEYEON', 
-'THE ANXIETY', 'TLC', 'Tai Verdes', 'Takara', 'Tamia', 'Tank', 'Tank and The Bangas', 'Tash Sultana', 'Taste of Pluto',  
-'Tems', 'Tessa Violet', 'The Acoustic Room', 'The Marías', 'The Notorious B.I.G.', 'The Weeknd', 'Thirdstory', 
-'Timbaland', 'Tinashe', 'Todrick Hall', 'Tove Lo', 'Trey Songz', 'Trinix', 'Ty Dolla $ign', 'Tyler Cole', 
-'UNO Stereo', 'USHER', 'Uncle Maximilien', 'Unlike Pluto', 'VanJess', 'Victor Franco', 'Vory', 'Véyah', 'WAYNE SNOW', 'WILLOW', 
-'WOOSUNG', 'Wafia', 'Will Smith', 'William Singe', 'Wiz Khalifa', 'Wizkid', 'Xavier Omär', 'YAØ', 'YongYong', 'Young Cocoa', 'Young Thug', 
+'27Delly', 'ABIR', 'AFROJACK', 'ALTÉGO', 'AWA', 'Aaradhna', 'Aaries', 'Aaron Frazer', 'Aaron Neville', 'Abhi The Nomad',
+'Adi Oasis', 'Ady Suleiman', 'Al Green', 'Alex Newell', 'Alexander Oscar', 'Alextbh', 'Alicia Keys', 'Alvin Garrett', 'Amanda Yang',
+'Amber Mark', 'Anderson .Paak', 'Angela Johnson', 'Anthony Ramos', 'Appleby', 'Aretha Franklin', 'Arlene Zelina',
+'Arthur Adams', 'Ashanti', 'Ashley DuBose', 'Ashley Mehta', 'B.B. King', 'B.o.B', 'BABYMONSTER', 'BAYNK',
+'BLACKPINK', 'BTS', 'Beau Diako', 'Ben&Ben', 'Beyoncé', 'Black Eyed Peas', 'Black Pumas',
+'Blithe', 'Bluey Robinson', "Blush'ko", 'Blxst', 'Boyz II Men', 'Brandon Beal', 'Brandy', 'Brother Yusef',
+'Bruno Mars', 'Bryce Vine', 'Bryson Tiller', 'Burna Boy', 'CHUNG HA', 'CLAY', 'Caleborate', 'Calimossa',
+'Camila Cabello', 'Carlos Santana', 'Carneyval', 'Cat Burns', 'Charlie Wilson', 'Chiiild', 'Chris Thomas King',
+'Christian Scott aTunde Adjuah', 'Ciara', 'Cleo Sol', 'Col3trane', 'Corinne Bailey Rae', 'Cruel Santino',
+'D-Hack', 'D-Nice', 'D.O.E.', 'DJ Khaled', 'DaBaby', 'Dane Amar', 'Darius', 'Darius Coleman', 'Davido', 'Delilah Montagu',
+'Dhibu Ninan Thomas', 'Doechii', 'Doja Cat', 'Don Toliver', 'Dru Hill', 'Duckwrth', 'Durand Bernarr',
+'Durand Jones & The Indications', 'EZI', 'Ella Mai', 'Emily King', 'Emotional Oranges',
+'Empire Cast', 'Enrique Iglesias', 'Eric Benét', 'Eric Bibb', 'Eric Nam', 'Erykah Badu', 'Eryn Allen Kane', 'Etta James', 'Everett Bradley',
+'FHAT', 'FKJ', 'Faouzia', 'Fenton Robinson', 'Floyd Fuji', 'Foxy Brown',
+'Frank Ocean', 'Funk Wav', 'GIMS', 'Gary Clark Jr.', 'Gen Hoshino', 'Gerald Levert', 'Ginuwine', 'Griff',
+'H.E.R.', 'HARLOE', 'HONNE', 'Hailee Steinfeld', 'Hanz', 'Hayley Kiyoko', 'Hil St. Soul', 'Hollie Carmen', 'Hongjoong of ATEEZ',
+'IDRIS', 'Ife Kehinde', 'India.Arie', 'Isaac Dunbar', 'Izzy Bizu', 'J. Brown', 'JAIE', 'JAY-Z', 'Ja Rule', 'Janet Jackson',
+'Jany Green', 'Jared Brady', 'Jarreau Vandal', 'Jasmine Thompson', 'Jason Derulo', 'Jay Sean', 'Jay Wile', 'Jay-Way', 'Jeezy',
+'Jereena Montemayor', 'Jessica Domingo', 'Jhameel', 'John Legend', 'Jon Batiste', 'Jon Mero', 'Jonita Gandhi',
+'Jordin Sparks', 'Jorja Smith', 'Josh Tobias', 'Joy Crookes', 'Joy Oladokun', 'Justine Skye', 'KAMAUU',
+'KAYTRANADA', 'KWAYE', 'Kaiya', 'Kamakshi Khanna', 'Kane Brown', 'Kapil Kapilan', "Keb' Mo'", 'Kendrick Lamar', 'Kent Jones', 'Keri Hilson',
+'Kevin Michael', 'Khalid', 'KiNG MALA', 'Kiana Ledé', 'Kim Petras', 'Kina Grannis', 'King George', 'Kodak Black', 'Koffee Brown',
+'Kyshona', "L'Impératrice", 'LIE NING', 'LU KALA', 'LaMorris Williams', 'Latasha Lee', 'Latto',
+'Lauren Jauregui', 'Ledisi', 'Leon Bridges', 'Lianne La Havas', 'Lil Halima', 'Lil Jon', 'Little Mix',
+'Lizzo', 'Lori Jenaire', 'Lucky Daye', 'Ludacris', 'Luke James', 'Lyn Lapid', 'MICHELLE', 'MILCK', 'MONTMARTRE',
+'Mabel', 'Mahalia', 'Maisie Peters', 'Maiya Sykes', 'Majid Jordan', 'Mali Music',
+'Mapei', 'Mariah Carey', 'Mario', 'Marwin', 'Masego', 'Maxwell', 'Maze & Frankie Beverly', 'Mega', 'Megan Thee Stallion',
+'Meridian', 'Metropole Orkest', 'Midas Hutch', 'Miguel', 'Musiq Soulchild', 'NEZZA', 'NNAVY', 'Nahko And Medicine For The People',
+'Navy', 'Nayer', 'Ne-Yo', 'Nelly', 'Nico & Vinz', 'Noah Slee', 'Normani', 'Now United', 'NuChoyce', 'Nylo', 'Olivia Dean',
+'Otis Kane', 'Otis Redding', 'P.Keys', 'P3GI-13', 'PJ Morton', 'Parson James', 'Patrik Jean', 'Paulo Londra', 'Pentatonix',
+'Pharrell Williams', 'Phon', 'Phony Ppl', 'Pink Sweat$', 'Pitbull', 'Playboi Carti', 'Prince', 'Q',
+'Q-Tip', 'Queen D', 'Queen Latifah', 'R.LUM.R', 'Raiche', 'Raleigh Ritchie', 'Ray Dalton', 'Revel Day', 'Rita Ora', 'Ruth B.', 'RuthAnne',
+'Ruthie Foster', 'SERA', 'SOLOMON', 'SZA', 'Sadie', 'Saffire-The Uppity Blues Women',
+'Saint Joshua', 'Samm Henshaw', 'Sampha', 'Sandro Cavazza', 'Scary Pockets', 'Sean Paul', 'Sebastian Yatra', 'Selena Gomez',
+'Seori', 'Sickick', 'Silk Sonic', 'Smokey James & the Avalanche', 'Snoh Aalegra', 'Snoop Dogg', 'Social House', 'Solange',
+'Sophia Bromberg', 'Soul For Real', 'Stromae', 'Sunshine Anderson', 'Superfruit', 'Swae Lee', 'T-Pain', 'TAEYEON',
+'THE ANXIETY', 'TLC', 'Tai Verdes', 'Takara', 'Tamia', 'Tank', 'Tank and The Bangas', 'Tash Sultana', 'Taste of Pluto',
+'Tems', 'Tessa Violet', 'The Acoustic Room', 'The Marías', 'The Notorious B.I.G.', 'The Weeknd', 'Thirdstory',
+'Timbaland', 'Tinashe', 'Todrick Hall', 'Tove Lo', 'Trey Songz', 'Trinix', 'Ty Dolla $ign', 'Tyler Cole',
+'UNO Stereo', 'USHER', 'Uncle Maximilien', 'Unlike Pluto', 'VanJess', 'Victor Franco', 'Vory', 'Véyah', 'WAYNE SNOW', 'WILLOW',
+'WOOSUNG', 'Wafia', 'Will Smith', 'William Singe', 'Wiz Khalifa', 'Wizkid', 'Xavier Omär', 'YAØ', 'YongYong', 'Young Cocoa', 'Young Thug',
 'Yuna', 'ZAYN', 'Zacari', 'Zach Ezzy', 'Zaeden', 'eaJ', 'emawk', 'keshi', 'lost spaces', 'morgxn', 'mxmtoon', '张天枢',
 'Amber Navran', 'Buddy', 'Chika', 'Duckie', 'Duckie Thot', 'Leikeli47', 'Nao', 'Ravyn Lenae', 'Tierra Whack', 'Tobe Nwigwe',
-"Big Mama Thornton", "Son House", "Skip James", "Lightnin' Hopkins", "Junior Kimbrough", "R.L. Burnside", "Mississippi Fred McDowell", 
-"Big Bill Broonzy", "Memphis Minnie", "Rev. Gary Davis", "Blind Lemon Jefferson", "Blind Willie Johnson", "Blind Willie McTell", 
-"Taj Mahal", "Corey Harris", "Otis Rush", "Buddy Guy", "Lurrie Bell", "Albert King", "Freddie King", "Little Milton", "Johnny Copeland", 
-"Luther Allison", "Robert Cray", "Lucky Peterson", "Clarence 'Gatemouth' Brown", "Big Jack Johnson", "Shannon Curfman", "Joanna Connor", 
-"Toronzo Cannon", "Shemekia Copeland", "Eric Gales", 'Christone "Kingfish" Ingram', "Shemekia Copeland", "Eric Gales", 
-"Gary Clark Jr.", "Fantastic Negrito", "Joe Louis Walker", "Selwyn Birchwood", "Adia Victoria", "Buffalo Nichols", "Jackie Venson", 
-"Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox", "Shemekia Copeland", "Eric Gales", 
+"Big Mama Thornton", "Son House", "Skip James", "Lightnin' Hopkins", "Junior Kimbrough", "R.L. Burnside", "Mississippi Fred McDowell",
+"Big Bill Broonzy", "Memphis Minnie", "Rev. Gary Davis", "Blind Lemon Jefferson", "Blind Willie Johnson", "Blind Willie McTell",
+"Taj Mahal", "Corey Harris", "Otis Rush", "Buddy Guy", "Lurrie Bell", "Albert King", "Freddie King", "Little Milton", "Johnny Copeland",
+"Luther Allison", "Robert Cray", "Lucky Peterson", "Clarence 'Gatemouth' Brown", "Big Jack Johnson", "Shannon Curfman", "Joanna Connor",
+"Toronzo Cannon", "Shemekia Copeland", "Eric Gales", 'Christone "Kingfish" Ingram', "Shemekia Copeland", "Eric Gales",
+"Gary Clark Jr.", "Fantastic Negrito", "Joe Louis Walker", "Selwyn Birchwood", "Adia Victoria", "Buffalo Nichols", "Jackie Venson",
+"Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox", "Shemekia Copeland", "Eric Gales",
 "Toronzo Cannon", "Gary Clark Jr.", "Fantastic Negrito", "Joe Louis Walker", "Selwyn Birchwood", "Adia Victoria", "Buffalo Nichols",
-"Jackie Venson", "Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox", 'Temani', 'Ambré', 'Tyla', 
-'Libianca', 'Thuy', 'Thuy My', 'Arin Ray', 'Cautious Clay', 'Baby Rose', 'Bree Runway', 'Lola Brooke', 'Dope Lemon', 'Ebenezer', 
-'Fousheé', 'GIVĒON', 'Jozzy', 'Marzz', 'Tone Stith', 'Nao Yoshioka', 'PinkPantheress', 'RINI', 'Sinead Harnett', 'Toian', 'Umi Copper', 
-'Zyah Belle', 'Rayana Jay', 'Shaé Universe', 'Amaria', 'Mikhala Jené', 'Destiny Rogers', 'Tamera', 'Sinego', 'Lila Iké', 'Elaine', 
-'Jada Kingdom', 'Ayra Starr', 'Bloody Civilian', 'Omah Lay', 'Fireboy DML', 'CKay', 'Reminisce', 'Joeboy', 'Asake', 'Bella Shmurda', 
+"Jackie Venson", "Jontavious Willis", "Sugaray Rayford", "Mr. Sipp", "Vanessa Collier", "Marquise Knox", 'Temani', 'Ambré', 'Tyla',
+'Libianca', 'Thuy', 'Thuy My', 'Arin Ray', 'Cautious Clay', 'Baby Rose', 'Bree Runway', 'Lola Brooke', 'Dope Lemon', 'Ebenezer',
+'Fousheé', 'GIVĒON', 'Jozzy', 'Marzz', 'Tone Stith', 'Nao Yoshioka', 'PinkPantheress', 'RINI', 'Sinead Harnett', 'Toian', 'Umi Copper',
+'Zyah Belle', 'Rayana Jay', 'Shaé Universe', 'Amaria', 'Mikhala Jené', 'Destiny Rogers', 'Tamera', 'Sinego', 'Lila Iké', 'Elaine',
+'Jada Kingdom', 'Ayra Starr', 'Bloody Civilian', 'Omah Lay', 'Fireboy DML', 'CKay', 'Reminisce', 'Joeboy', 'Asake', 'Bella Shmurda',
 'Adekunle Gold',
  ]]
 
 queer_artists = [name.lower() for name in [
-'070 Shake', '100 gecs', 'ADONXS', 'AKVMA', 'Abdu Ali', 'Adam Lambert', 'Adeem the Artist', 'Adore Delano', 'Adrianne Lenker', 
-'Against Me!', 'Akeos', 'Akira Complex', 'Alabama Shakes', 'Alex Chapman', 'Alex the Astronaut', 'Alexandra Stan', 'Amaarae', 
-'Amaryllis', 'Ambré', 'Amorphous', 'Amos Milburn', 'Ana Frango Elétrico', 'Andrew Bayer', 'Andy Bey', 'Angel Haze', 'Angel Olsen', 
-'Angel Olson', 'Anitta', 'Anne-Marie', 'Anohni', 'Anthony Green', 'Anthony Lexa', 'Arca', 'Ariel Zetina', 'Arlo Parks', 
-'Army of Lovers', 'Arthur Russell', 'Ashley Frangipane', 'Ashnikko', 'Aurora', 'Azealia Banks', 'BROCKHAMPTON', 'Baby Queen', 
-'Baby Tate', 'Bambie Thug', 'Barry Manilow', 'Bartees Strange', 'Basement Pony', 'Bauhaus', 'Ben Abraham', 'Ben Platt', 'Ben Webster', 
-'Benjamin Britten', 'Benson Boone', 'Bentley Robles', 'Bessie Smith', 'Beth Ditto', 'Betty Who', 'Big Freedia', 'Big Joanie', 
-'Big Joe Turner', 'Big Mama Thornton', 'Big Thief', 'Billie Eilish', 'Billie Holiday', 'Billy Porter', 'Billy Strayhorn', 'Billy Wright', 
-'Black Belt Eagle Scout', 'Black Dresses', 'Blue Rojo', 'Bonnie Fraser', 'Boy George', 'Boygenius', 'Boyish', 'Brandi Carlile', 
-'Brayton Bowman', 'Bright Light Bright Lights', 'Bronze Avery', 'Brooke Candy', 'Brooke Eden', 'Bunk Johnson', 'Buzzcocks', 'Cain Culto', 
-'Cakes Da Killa', 'Caleb de Casper', 'Calum Scott', 'Car Seat Headrest', 'Car seat headrest', 'Cardi B', 'Carole Pope', 'Cat Burns', 
-'Cazwell', 'Cecil Taylor', 'Chandler Leighton', 'Chappell Roan', 'Charli xcx', 'Chika', 'Christine & The Queens', 'Christine and the Queens', 
-'Clairo', 'Claud', 'Clementaum', 'Cloudy June', 'Clozee', 'Cobrah', 'Coco & Breezy', 'Coco & Clair Clair', 'Coil', 'Conan Gray', 
-'Conchita Wurst', 'Convexity', 'Cooza', 'Coudy June', 'Count Basie', 'Courtney Barnett', 'Cub Sport', 'Cuee', 'DJ Aron', 'DJ Sprinkles', 
-'Dai Burger', 'Dan Haseltine', 'Dani Demand', 'Dapper Dan Midas', 'David Archuleta', 'David Bowie', 'Davy Boi', 'Daya', 'Declan McKenna', 
-'Demi Lovato', 'Dena DeRose', 'Derrick Carter', 'Desire Marea', 'Destin Conrad', 'Detox', 'Devon Cole', 'Devonté Hynes', 'Diana King', 
-'Dizzy Fae', 'Dizzy Gillespie', 'Doechii', 'Doja Cat', 'Don Pullen', 'Donnie McClurkin', 'Dorian Electra', 'DossyX', 'Dounia', 
-'Dove Cameron', 'Dreamer Isioma', 'Drebae', 'Dua Saleh', 'Ducky', 'Duncan Laurence', 'Durand Bernarr', 'Dusty Springfield', 
-'Eartheater', 'Ejicle', 'Ekko Astral', 'Electrosexual', 'Eli & Fur', 'Elton John', 'Emeline', 'Emily Jeffri', 'Emlyn', 'Empress Of', 
-'Erasure', 'Eris Drew', 'Ethel Cain', 'Ethel Waters', 'Euphoric Nationacloudyskye', 'Evann Mcintosh', 'Evil', 'Ezra Furman', 'FAYBUL', 
-'Faith Nolan', 'Farius', 'Felix Jaehn', 'Fever Ray', 'Fletcher', 'Former Hero', 'Frances Forever', 'Frank Ocean', 'Frankie Jaxon', 
-'Frankie Knuckles', 'Fraxiom', 'Fred Hersch', 'Freddie Mercury', 'G Flip', 'GRiZ', 'Garbage', 'Gary Burton', 'Gaustad', 'Geo Jordan', 
-'George Michael', 'Gerard Way', 'Girl in Red', 'Girli', 'Gladys Bentley', 'Glass Beach', 'Gorgon City', 'Grace Gaustad', 'Grant Knoche', 
-'Green Day', 'Greta Van Fleet', 'Greyson Chance', 'HEIDI', 'Halsey', 'Hamed Sinno', 'Hannah Holland', 'Hayley Kiyoko', 'Heems', 
-'Hercules & Love Affair', 'Hey, Baby', 'Holland', 'Home Is Where', 'Honey Dijon', 'Hop Along', 'Hope Tala', 'Horse McDonald', 
-'Horse Meat Disco', 'IAMJakeHill', 'IDLES', 'ILoveMakonnen', 'IamJakeHill', 'Iman Jordan', 'India Jordan', 'Iniko', 'Isaac Dunbar', 
-'Isaiah Rashad', 'Izzy Heltai', 'J. Worra', 'JORDY', 'Jaboukie', 'Jade LeMac', 'Jake Shears', 'Jake Zyrus', 'Jalmaan', 'James Cleveland', 
-'James Nielsen', 'Jamie Barton', 'Jamila Woods', 'Janelle Monáe', 'Janis Joplin', 'Japanese Breakfast', 'Jason Mraz', 'Jazmin Bean', 
-'Jennifer Knapp', 'Jeremy Pope', 'Jess Glynne', 'Jessica 6', 'Jiae', 'Jill Sobule', 'Jodie Harsh', 'Joe Talbot', 'John Barrowman', 'John Grant', 
-'John-Allison Weiss', 'Johnny Mathis', 'Josette Maskin', 'Joy Oladokun', 'Judas Priest', 'Julien Baker', 'July Jones', 'Junglepussy', 
-'Just B', 'Just Her', 'JustB', 'K Flay', 'KATSEYE', 'KD Lang', 'Kali Uchis', 'Kalifa', 'Kamaiyah', 'Kandy', 'Karin Ann', 'Katie Gavin', 
-'Katy Perry', 'Kaytranada', 'Keanan', 'Kehlani', 'Keiynan Lonsdale', 'Kele Okereke', 'Kelechi', 'Kelela', 'Keo Nozari', 'Kesha', 'Kevin Abstract', 
-'Kevin Terry', 'Kidd Kenn', 'Kiddy Smile', 'Kim Ann FoxmaMCMLXXXV', 'Kim Petras', 'King Mala', 'King Princess', 'Kittens', 'Klaus Nomi', 'Kučka', 
-'Kwaye', 'Kyle Dion', 'L Devine', 'LMA', 'Lady Gaga', 'Lagoona Bloo', 'Lambrini Girls', 'Langston Hughes', 'Larry Gusshee', 'Laura Jane Grace', 
-'Lauren Jauregui', 'Lava La Rue', 'Le Tigre', 'Leave It On The Floor', 'Left At London', 'Leikeli47', 'Leith Ross', 'Lelowhatsgood', 'Leo Kalyan', 
-'Leonard Bernstein', 'Lil Aaron', 'Lil Darkie', 'Lil Lotus', 'Lil Nas X', 'Lil Peep', 'Limp Wrist', 'Lionesses', 'Little Richard', 'Lou Reed', 
-'Lucii', 'Lucy Dacus', 'Lucy Spraggan', 'Luke Evans', 'Lushious Massacr', 'Lynn Gunn (of PVRIS)', 'Lyon Hart', 'Lzzy Hale (of Halestorm)', 'MADGRRL', 
-'MINOE', 'MNEK', 'MUNA', 'Ma Rainey', 'Mabiland', 'Mad Tsai', 'Madeleine Peyroux', 'Madison Beer', 'Madison Rose', 'Maggie Lindemann', 'Mahawam', 
-'Mal Blum', 'Mannequin Pussy', 'Marc Almond', 'Maria Becerra', 'Marko Bošnjak', 'Mary Lambert', 'Matt Fishel', 'Maude Latour', 'Mavi Phoenix', 
-'Max Bemis', 'Maya Jane Coles', 'Meet Me @ The Altar', 'Megan Thee Stallion', 'Mel4Ever', 'Melanie Martinez', 'Meshell Ndegeocello', 
-'Mia Wray', 'Michael Medrano', 'Michael Tippett', 'Michaela Jai', 'Michelle', 'Mickey Darling', 'Midnight Pool Party', 'Mika', 'Mike Q', 
-'Mike Servito', 'Mila Jam', 'Miley Cyrus', 'Minute Taker', 'Mista Strange', 'Mitomoro', 'Mitski', 'Mo Heart', 'Molly Grace', 'Monifah', 
-'Moore Kismet', 'MoreOver', 'Morgxn', 'Moses Sumney', 'Mothica', 'Mrshll', 'Ms.Boogie', 'Mxmtoon', 'Mykki Blanco', 'Måneskin', 'NOFX', 'NSYNC', 
-'Naeem', 'Nakhane', 'Nakura', 'Naomi McPherson', 'Neko Case', 'NoSo', 'Noah Davis', 'Noahfinnce', 'Nxdia', 'Octo Octa', "Olivia O'Brien", 
-'Olly Alexander', 'Olly Alexander (Years & Years)', 'Olly Alexander (of Years & Years)', 'Omar Apollo', 'Oncill', 'Or:la', 'Orion Sun', 
-'Orville Peck', 'Oscar Peterson', 'Oscar and the Wolf', 'O’Hooley & Tidow', 'PVRIS', 'PWR BTTM', 'Pabllo Vittar', 'Paisley Fields', 
-'Panic! At The Disco', 'Park Hye Jin', 'Passion Pit', 'Peach PRC', 'Peaches', 'Pentatonix', 'Perfume Genius', 'Pet Shop Boys', 'Pete Wentz', 
-'Peter Thomas', 'Phoebe Bridgers', 'Pinkshift', 'Prince', 'Princess Nokia', 'Purple Crush', 'Qaadir Howard', 'Qrion', 'Queen', 'RANI', 'REM', 
-'REZZ', 'Raveena', 'Ray Boltz', 'Ray Laurel', 'Raye', 'Rebecca Black', 'Remi Wolf', 'Renee Rapp', 'Reneé Rapp', 'Resistance Revival Chorus', 'Rezz', 
-'Rhea Raj', 'Ria Mae', 'Ricky Martin', 'Rina Sawayama', 'Rita Ora', 'Rob Gasser', 'Rob Halford', 'Rob.B', 'Robert Alfons', 'Rodney Chrome', 
-'Rostam', 'Roxen', 'Royal & The Serpent', 'Royal and the Serpent', 'RuPaul', 'Ruby Waters', 'Ryan Beatty', 'SHERELLE', 'SOPHIE', 'STYKS', 
-'Saara Aalto', 'Sam Feldt', 'Sam Smith', 'Sasami', 'Saucy Santana', 'Saul Williams', 'Scene Queen', 'Scott Matthew', 'Semler', 'Sera Hyndulla', 
-'Serpentwithfeet', 'Shamir', 'She/Her/Hers', 'Shura', 'Shygirl', 'Sia', 'Siena Liggins', "Sippin' T", 'Sister Rosetta Tharpe', 'Six: The Musical', 
-'Skin', 'Skybreak', 'Slayyyter', 'Sleater-Kinney', 'Snow Tha Product', 'Sophie', 'Special Interest', 'Spencer Brown', 'St. Vincent', 
-'Steve Grand', 'Steve Lacy', 'Sufjan Stevens', 'Superfruit', 'SuperfruitMiley Cyrus', 'Syd', 'Sylvester', 'Synymata', 'Syzy', 'TJ Osborne', 
-'TT The Artist', 'Tash Sultana', 'Tawnted', 'Taylor Bennett', 'Tears for the Dying', 'Teddy Swims', 'Tegan & Sara', 'Tegan and Sara', 'The Aces', 
-"The B-52's", 'The Blessed Madonna', "The Judy's", 'The Last Artful, Dodgr', 'The Last Dinner Party', 'The Magnetic Fields', 'The Muslims', 
-'The Smiths', 'The Stooges', 'The Velvet Underground', 'The Who', 'Thorgy Thor', 'Tiger Goods', 'Tinashe', 'Todrick Hall', 'Tokischa', 'Tonex', 
-'Tove Styrke', 'Towa Bird', 'Tracy Chapman', 'Trixie Mattel', 'Troye Sivan', 'Tsatsamis', 'Tygapaw', 'Tyler Carter', 'Tyler Glenn', 
-'Tyler, The Creator', 'VINCINT', 'VOLANT', 'Vain', 'Varien', 'Varuen', 'Vaultboy', 'Vicky Beeching', 'Vicky Vox', 'Victoria Monet', 'Victoria Monét', 
-'Village People', 'Villano Antillano', 'Volant', 'Voltra', 'WILLOW', 'Wafia', 'Water Spirit', 'Wax Wings', 'Wham!', 'Whitney Houston', 'Will Young', 
-'Willam', 'William Matthews', 'Wonho', 'Woodkid', 'Worthy', 'Wrabel', 'Wreckno', 'Xana', 'Xiu Xiu', 'YULTRON', 'Yeule', 'Yungblud', 'Yves Tumor', 
-'Zebra Katz', 'Zolita', 'adam daylight', 'aishii', 'bears in trees', 'blackwinterwells', 'brakence', 'd0llywood1', 'dltzk', 'dsg', 'food house', 
-'girl in red', 'glaive', 'grape milk', 'gupi', 'gyrofield', 'jasmine.4.t', 'k. d. lang', 'kiraku', 'montykeates', 'quinn', 'sakuraburst', 
+'070 Shake', '100 gecs', 'ADONXS', 'AKVMA', 'Abdu Ali', 'Adam Lambert', 'Adeem the Artist', 'Adore Delano', 'Adrianne Lenker',
+'Against Me!', 'Akeos', 'Akira Complex', 'Alabama Shakes', 'Alex Chapman', 'Alex the Astronaut', 'Alexandra Stan', 'Amaarae',
+'Amaryllis', 'Ambré', 'Amorphous', 'Amos Milburn', 'Ana Frango Elétrico', 'Andrew Bayer', 'Andy Bey', 'Angel Haze', 'Angel Olsen',
+'Angel Olson', 'Anitta', 'Anne-Marie', 'Anohni', 'Anthony Green', 'Anthony Lexa', 'Arca', 'Ariel Zetina', 'Arlo Parks',
+'Army of Lovers', 'Arthur Russell', 'Ashley Frangipane', 'Ashnikko', 'Aurora', 'Azealia Banks', 'BROCKHAMPTON', 'Baby Queen',
+'Baby Tate', 'Bambie Thug', 'Barry Manilow', 'Bartees Strange', 'Basement Pony', 'Bauhaus', 'Ben Abraham', 'Ben Platt', 'Ben Webster',
+'Benjamin Britten', 'Benson Boone', 'Bentley Robles', 'Bessie Smith', 'Beth Ditto', 'Betty Who', 'Big Freedia', 'Big Joanie',
+'Big Joe Turner', 'Big Mama Thornton', 'Big Thief', 'Billie Eilish', 'Billie Holiday', 'Billy Porter', 'Billy Strayhorn', 'Billy Wright',
+'Black Belt Eagle Scout', 'Black Dresses', 'Blue Rojo', 'Bonnie Fraser', 'Boy George', 'Boygenius', 'Boyish', 'Brandi Carlile',
+'Brayton Bowman', 'Bright Light Bright Lights', 'Bronze Avery', 'Brooke Candy', 'Brooke Eden', 'Bunk Johnson', 'Buzzcocks', 'Cain Culto',
+'Cakes Da Killa', 'Caleb de Casper', 'Calum Scott', 'Car Seat Headrest', 'Car seat headrest', 'Cardi B', 'Carole Pope', 'Cat Burns',
+'Cazwell', 'Cecil Taylor', 'Chandler Leighton', 'Chappell Roan', 'Charli xcx', 'Chika', 'Christine & The Queens', 'Christine and the Queens',
+'Clairo', 'Claud', 'Clementaum', 'Cloudy June', 'Clozee', 'Cobrah', 'Coco & Breezy', 'Coco & Clair Clair', 'Coil', 'Conan Gray',
+'Conchita Wurst', 'Convexity', 'Cooza', 'Coudy June', 'Count Basie', 'Courtney Barnett', 'Cub Sport', 'Cuee', 'DJ Aron', 'DJ Sprinkles',
+'Dai Burger', 'Dan Haseltine', 'Dani Demand', 'Dapper Dan Midas', 'David Archuleta', 'David Bowie', 'Davy Boi', 'Daya', 'Declan McKenna',
+'Demi Lovato', 'Dena DeRose', 'Derrick Carter', 'Desire Marea', 'Destin Conrad', 'Detox', 'Devon Cole', 'Devonté Hynes', 'Diana King',
+'Dizzy Fae', 'Dizzy Gillespie', 'Doechii', 'Doja Cat', 'Don Pullen', 'Donnie McClurkin', 'Dorian Electra', 'DossyX', 'Dounia',
+'Dove Cameron', 'Dreamer Isioma', 'Drebae', 'Dua Saleh', 'Ducky', 'Duncan Laurence', 'Durand Bernarr', 'Dusty Springfield',
+'Eartheater', 'Ejicle', 'Ekko Astral', 'Electrosexual', 'Eli & Fur', 'Elton John', 'Emeline', 'Emily Jeffri', 'Emlyn', 'Empress Of',
+'Erasure', 'Eris Drew', 'Ethel Cain', 'Ethel Waters', 'Euphoric Nationacloudyskye', 'Evann Mcintosh', 'Evil', 'Ezra Furman', 'FAYBUL',
+'Faith Nolan', 'Farius', 'Felix Jaehn', 'Fever Ray', 'Fletcher', 'Former Hero', 'Frances Forever', 'Frank Ocean', 'Frankie Jaxon',
+'Frankie Knuckles', 'Fraxiom', 'Fred Hersch', 'Freddie Mercury', 'G Flip', 'GRiZ', 'Garbage', 'Gary Burton', 'Gaustad', 'Geo Jordan',
+'George Michael', 'Gerard Way', 'Girl in Red', 'Girli', 'Gladys Bentley', 'Glass Beach', 'Gorgon City', 'Grace Gaustad', 'Grant Knoche',
+'Green Day', 'Greta Van Fleet', 'Greyson Chance', 'HEIDI', 'Halsey', 'Hamed Sinno', 'Hannah Holland', 'Hayley Kiyoko', 'Heems',
+'Hercules & Love Affair', 'Hey, Baby', 'Holland', 'Home Is Where', 'Honey Dijon', 'Hop Along', 'Hope Tala', 'Horse McDonald',
+'Horse Meat Disco', 'IAMJakeHill', 'IDLES', 'ILoveMakonnen', 'IamJakeHill', 'Iman Jordan', 'India Jordan', 'Iniko', 'Isaac Dunbar',
+'Isaiah Rashad', 'Izzy Heltai', 'J. Worra', 'JORDY', 'Jaboukie', 'Jade LeMac', 'Jake Shears', 'Jake Zyrus', 'Jalmaan', 'James Cleveland',
+'James Nielsen', 'Jamie Barton', 'Jamila Woods', 'Janelle Monáe', 'Janis Joplin', 'Japanese Breakfast', 'Jason Mraz', 'Jazmin Bean',
+'Jennifer Knapp', 'Jeremy Pope', 'Jess Glynne', 'Jessica 6', 'Jiae', 'Jill Sobule', 'Jodie Harsh', 'Joe Talbot', 'John Barrowman', 'John Grant',
+'John-Allison Weiss', 'Johnny Mathis', 'Josette Maskin', 'Joy Oladokun', 'Judas Priest', 'Julien Baker', 'July Jones', 'Junglepussy',
+'Just B', 'Just Her', 'JustB', 'K Flay', 'KATSEYE', 'KD Lang', 'Kali Uchis', 'Kalifa', 'Kamaiyah', 'Kandy', 'Karin Ann', 'Katie Gavin',
+'Katy Perry', 'Kaytranada', 'Keanan', 'Kehlani', 'Keiynan Lonsdale', 'Kele Okereke', 'Kelechi', 'Kelela', 'Keo Nozari', 'Kesha', 'Kevin Abstract',
+'Kevin Terry', 'Kidd Kenn', 'Kiddy Smile', 'Kim Ann FoxmaMCMLXXXV', 'Kim Petras', 'King Mala', 'King Princess', 'Kittens', 'Klaus Nomi', 'Kučka',
+'Kwaye', 'Kyle Dion', 'L Devine', 'LMA', 'Lady Gaga', 'Lagoona Bloo', 'Lambrini Girls', 'Langston Hughes', 'Larry Gusshee', 'Laura Jane Grace',
+'Lauren Jauregui', 'Lava La Rue', 'Le Tigre', 'Leave It On The Floor', 'Left At London', 'Leikeli47', 'Leith Ross', 'Lelowhatsgood', 'Leo Kalyan',
+'Leonard Bernstein', 'Lil Aaron', 'Lil Darkie', 'Lil Lotus', 'Lil Nas X', 'Lil Peep', 'Limp Wrist', 'Lionesses', 'Little Richard', 'Lou Reed',
+'Lucii', 'Lucy Dacus', 'Lucy Spraggan', 'Luke Evans', 'Lushious Massacr', 'Lynn Gunn (of PVRIS)', 'Lyon Hart', 'Lzzy Hale (of Halestorm)', 'MADGRRL',
+'MINOE', 'MNEK', 'MUNA', 'Ma Rainey', 'Mabiland', 'Mad Tsai', 'Madeleine Peyroux', 'Madison Beer', 'Madison Rose', 'Maggie Lindemann', 'Mahawam',
+'Mal Blum', 'Mannequin Pussy', 'Marc Almond', 'Maria Becerra', 'Marko Bošnjak', 'Mary Lambert', 'Matt Fishel', 'Maude Latour', 'Mavi Phoenix',
+'Max Bemis', 'Maya Jane Coles', 'Meet Me @ The Altar', 'Megan Thee Stallion', 'Mel4Ever', 'Melanie Martinez', 'Meshell Ndegeocello',
+'Mia Wray', 'Michael Medrano', 'Michael Tippett', 'Michaela Jai', 'Michelle', 'Mickey Darling', 'Midnight Pool Party', 'Mika', 'Mike Q',
+'Mike Servito', 'Mila Jam', 'Miley Cyrus', 'Minute Taker', 'Mista Strange', 'Mitomoro', 'Mitski', 'Mo Heart', 'Molly Grace', 'Monifah',
+'Moore Kismet', 'MoreOver', 'Morgxn', 'Moses Sumney', 'Mothica', 'Mrshll', 'Ms.Boogie', 'Mxmtoon', 'Mykki Blanco', 'Måneskin', 'NOFX', 'NSYNC',
+'Naeem', 'Nakhane', 'Nakura', 'Naomi McPherson', 'Neko Case', 'NoSo', 'Noah Davis', 'Noahfinnce', 'Nxdia', 'Octo Octa', "Olivia O'Brien",
+'Olly Alexander', 'Olly Alexander (Years & Years)', 'Olly Alexander (of Years & Years)', 'Omar Apollo', 'Oncill', 'Or:la', 'Orion Sun',
+'Orville Peck', 'Oscar Peterson', 'Oscar and the Wolf', 'O’Hooley & Tidow', 'PVRIS', 'PWR BTTM', 'Pabllo Vittar', 'Paisley Fields',
+'Panic! At The Disco', 'Park Hye Jin', 'Passion Pit', 'Peach PRC', 'Peaches', 'Pentatonix', 'Perfume Genius', 'Pet Shop Boys', 'Pete Wentz',
+'Peter Thomas', 'Phoebe Bridgers', 'Pinkshift', 'Prince', 'Princess Nokia', 'Purple Crush', 'Qaadir Howard', 'Qrion', 'Queen', 'RANI', 'REM',
+'REZZ', 'Raveena', 'Ray Boltz', 'Ray Laurel', 'Raye', 'Rebecca Black', 'Remi Wolf', 'Renee Rapp', 'Reneé Rapp', 'Resistance Revival Chorus', 'Rezz',
+'Rhea Raj', 'Ria Mae', 'Ricky Martin', 'Rina Sawayama', 'Rita Ora', 'Rob Gasser', 'Rob Halford', 'Rob.B', 'Robert Alfons', 'Rodney Chrome',
+'Rostam', 'Roxen', 'Royal & The Serpent', 'Royal and the Serpent', 'RuPaul', 'Ruby Waters', 'Ryan Beatty', 'SHERELLE', 'SOPHIE', 'STYKS',
+'Saara Aalto', 'Sam Feldt', 'Sam Smith', 'Sasami', 'Saucy Santana', 'Saul Williams', 'Scene Queen', 'Scott Matthew', 'Semler', 'Sera Hyndulla',
+'Serpentwithfeet', 'Shamir', 'She/Her/Hers', 'Shura', 'Shygirl', 'Sia', 'Siena Liggins', "Sippin' T", 'Sister Rosetta Tharpe', 'Six: The Musical',
+'Skin', 'Skybreak', 'Slayyyter', 'Sleater-Kinney', 'Snow Tha Product', 'Sophie', 'Special Interest', 'Spencer Brown', 'St. Vincent',
+'Steve Grand', 'Steve Lacy', 'Sufjan Stevens', 'Superfruit', 'SuperfruitMiley Cyrus', 'Syd', 'Sylvester', 'Synymata', 'Syzy', 'TJ Osborne',
+'TT The Artist', 'Tash Sultana', 'Tawnted', 'Taylor Bennett', 'Tears for the Dying', 'Teddy Swims', 'Tegan & Sara', 'Tegan and Sara', 'The Aces',
+"The B-52's", 'The Blessed Madonna', "The Judy's", 'The Last Artful, Dodgr', 'The Last Dinner Party', 'The Magnetic Fields', 'The Muslims',
+'The Smiths', 'The Stooges', 'The Velvet Underground', 'The Who', 'Thorgy Thor', 'Tiger Goods', 'Tinashe', 'Todrick Hall', 'Tokischa', 'Tonex',
+'Tove Styrke', 'Towa Bird', 'Tracy Chapman', 'Trixie Mattel', 'Troye Sivan', 'Tsatsamis', 'Tygapaw', 'Tyler Carter', 'Tyler Glenn',
+'Tyler, The Creator', 'VINCINT', 'VOLANT', 'Vain', 'Varien', 'Varuen', 'Vaultboy', 'Vicky Beeching', 'Vicky Vox', 'Victoria Monet', 'Victoria Monét',
+'Village People', 'Villano Antillano', 'Volant', 'Voltra', 'WILLOW', 'Wafia', 'Water Spirit', 'Wax Wings', 'Wham!', 'Whitney Houston', 'Will Young',
+'Willam', 'William Matthews', 'Wonho', 'Woodkid', 'Worthy', 'Wrabel', 'Wreckno', 'Xana', 'Xiu Xiu', 'YULTRON', 'Yeule', 'Yungblud', 'Yves Tumor',
+'Zebra Katz', 'Zolita', 'adam daylight', 'aishii', 'bears in trees', 'blackwinterwells', 'brakence', 'd0llywood1', 'dltzk', 'dsg', 'food house',
+'girl in red', 'glaive', 'grape milk', 'gupi', 'gyrofield', 'jasmine.4.t', 'k. d. lang', 'kiraku', 'montykeates', 'quinn', 'sakuraburst',
 'scrdycat', 'serpentwithfeet', 'umru', 'underscores', 'voxkai', 'webcage', 'xaviersobased', 'Gossip',
-'Adult Mom', 'Foxy Dads', 'Now, Now', 'Pronoun', 'Sad13', 'Sir Babygirl', 'Vanessa Carlton', 
+'Adult Mom', 'Foxy Dads', 'Now, Now', 'Pronoun', 'Sad13', 'Sir Babygirl', 'Vanessa Carlton',
 'ieuan', 'felix vespestad', 'FHAT', 'TWINKIDS', 'Emily Burns', 'Carlos Vara', 'Leland', 'REYNA', 'Sam Bluer'
 ]]
 
@@ -264,7 +264,7 @@ def load_playlist_data():
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/user/'), 'owner.id')),
                     region = pl.col('location').str.split(' - ').list.get(0, null_on_oob=True),
                     country = pl.col('location').str.split(' - ').list.get(1, null_on_oob=True),)
-      
+
       #gets the counts of djs, playlists, and geographic regions a song is found in
       .with_columns(dj_count = pl.n_unique('owner.display_name').over(['track.id', 'track.name']).cast(pl.UInt16),
                     playlist_count = pl.n_unique('playlist_name').over(['track.id', 'track.name']).cast(pl.UInt16),
@@ -278,13 +278,13 @@ def load_playlist_data():
                                   .list.join(', '),
                     song_position_in_playlist = pl.concat_str(pl.col('song_number'), pl.lit('/'), pl.col('tracks.total'), ignore_nulls=True),
                     actual_social_set = pl.when(pl.col('extracted_date').list.len().gt(0)
-                                               | pl.col('playlist_name').str.contains_any(['social', 'party', 'soir'], 
+                                               | pl.col('playlist_name').str.contains_any(['social', 'party', 'soir'],
                                                                                  ascii_case_insensitive=True))
                                          .then(True)
                                          .otherwise(False),
                     actual_wcs_dj = pl.when(pl.col('owner.id').str.contains_any(actual_wcs_djs, ascii_case_insensitive=True)
-                                            | pl.col('owner.display_name').cast(pl.String).eq('Connie Wang') 
-                                            | pl.col('owner.display_name').cast(pl.String).eq('Koichi Tsunoda') 
+                                            | pl.col('owner.display_name').cast(pl.String).eq('Connie Wang')
+                                            | pl.col('owner.display_name').cast(pl.String).eq('Koichi Tsunoda')
                                             )
                                       .then(True)
                                       .otherwise(False),
@@ -296,14 +296,14 @@ def load_playlist_data():
                                      .otherwise(False),
                     )
       .with_columns(
-        #       apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True)) 
+        #       apprx_song_position_in_playlist = pl.when((pl.col('actual_social_set').eq(True))
         #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 33))
         #                                                 .then(pl.lit('beginning'))
-        #                                                 .when((pl.col('actual_social_set').eq(True)) 
-        #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33) 
+        #                                                 .when((pl.col('actual_social_set').eq(True))
+        #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 33)
         #                                                       & ((pl.col('song_number') * 100 / pl.col('tracks.total')) <= 66))
         #                                                 .then(pl.lit('middle'))
-        #                                                 .when((pl.col('actual_social_set').eq(True)) 
+        #                                                 .when((pl.col('actual_social_set').eq(True))
         #                                                         & ((pl.col('song_number') * 100 / pl.col('tracks.total')) > 66))
         #                                                 .then(pl.lit('end')),
                     geographic_region_count = pl.when(pl.col('regions').str.len_bytes() != 0)
@@ -314,11 +314,11 @@ def load_playlist_data():
       #memory tricks
       .with_columns(pl.col('song_number', 'tracks.total').cast(pl.UInt16),
                     pl.col('geographic_region_count').cast(pl.Int8),
-                    pl.col(['song_url', 'track.id', 'track.name', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist', 
+                    pl.col(['song_url', 'track.id', 'track.name', 'playlist_url', 'playlist_id', 'owner_url', 'song_position_in_playlist',
                             'track.artists.name',
                         #     'apprx_song_position_in_playlist',
                             'location','region', 'country', 'playlist_name', 'owner.display_name',
-                            'owner.id', 
+                            'owner.id',
                             ]).cast(pl.Categorical())
                     )
 )
@@ -329,9 +329,9 @@ def wcs_specific(df_):
   return (df_.lazy()
           .filter(pl.col('actual_social_set').eq(True)
                   |pl.col('actual_wcs_dj').eq(True)
-                  |pl.col('playlist_name').cast(pl.String).str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine', 
-                                                            'practice', 'practise', 'westie', 'party', 'beginner', 
-                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp', 
+                  |pl.col('playlist_name').cast(pl.String).str.contains_any(['wcs', 'social', 'party', 'soirée', 'west', 'routine',
+                                                            'practice', 'practise', 'westie', 'party', 'beginner',
+                                                            'bpm', 'swing', 'novice', 'intermediate', 'comp',
                                                             'musicality', 'timing', 'pro show'], ascii_case_insensitive=True))
       )
 
@@ -365,7 +365,7 @@ def load_stats():
                         .iter_rows()
                         )
         songs_count, artists_count, playlists_count, djs_count = list(stats_counts)[0]
-        
+
         return songs_count, artists_count, playlists_count, djs_count
 
 df = load_playlist_data()
@@ -398,7 +398,7 @@ st.write(f"{djs_count:,}   Westies/DJs\n\n")
 
 
 
-st.link_button("Help fill in country info!", 
+st.link_button("Help fill in country info!",
                    url='https://docs.google.com/spreadsheets/d/1YQaWwtIy9bqSNTXR9GrEy86Ix51cvon9zzHVh7sBi0A/edit?usp=sharing')
 
 # st.markdown(f"#### ")
@@ -433,7 +433,7 @@ def sample_of_raw_data():
         return (df
                 # .with_columns(pl.col('track.artists.name').cast(pl.String))
                 .join(pl.scan_parquet('data_song_bpm.parquet')
-                      .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical)), 
+                      .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical)),
                       how='left', on=['track.name', 'track.artists.name'])
                 # .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
                 ._fetch(100000).sample(500)
@@ -444,7 +444,7 @@ data_view_toggle = st.toggle("📊 Raw data")
 
 if data_view_toggle:
         # num_records = st.slider("How many records?", 1, 1000, step=50)
-        st.dataframe(sample_of_raw_data, 
+        st.dataframe(sample_of_raw_data,
                  column_config={"song_url": st.column_config.LinkColumn(),
                                 "playlist_url": st.column_config.LinkColumn(),
                                 "owner_url": st.column_config.LinkColumn()})
@@ -504,20 +504,20 @@ def top_songs():
                 .join((pl.scan_parquet('data_song_bpm.parquet')
                        .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
                        ), how='left', on=['track.name', 'track.artists.name'])
-                
+
                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
-                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm', 
+                .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm',
                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
-                #      'apprx_song_position_in_playlist', 
+                #      'apprx_song_position_in_playlist',
                      'notes', 'note_source',
                         #connies notes
                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-                .with_columns(pl.col('playlist_name', 'owner.display_name', 
-                                #      'apprx_song_position_in_playlist', 
+                .with_columns(pl.col('playlist_name', 'owner.display_name',
+                                #      'apprx_song_position_in_playlist',
                                      'track.artists.name', 'country',
                                         #connies notes
-                                        'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                        'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty',
                                         'Familiarity', 'Transition type', 'poc_artist',
                                         ).list.unique().list.drop_nulls().list.head(50),
                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
@@ -535,7 +535,7 @@ top_songs = top_songs()
 
 top_songs_toggle = st.toggle("Top 500 WCS songs!")
 if top_songs_toggle:
-        st.dataframe(top_songs.drop('matching_playlist_count'), 
+        st.dataframe(top_songs.drop('matching_playlist_count'),
                      column_config={"song_url": st.column_config.LinkColumn()}
                      )
 
@@ -552,7 +552,7 @@ if song_locator_toggle:
                 queer_toggle = st.checkbox("🏳️‍🌈")
                 poc_toggle = st.checkbox("POC")
                 st.markdown("[Add/correct POC artists](https://docs.google.com/spreadsheets/d/1-elrLd_3tX4QTLQjj4EmPxRSzXHcxs6tZp5Y5fRFalc/edit?usp=sharing)")
-                
+
         with song_col2:
                 countries_selectbox = st.multiselect("Country:", countries)
                 added_2_playlist_date = st.text_input("Added to playlist date (yyyy-mm-dd):").split(',')
@@ -561,12 +561,12 @@ if song_locator_toggle:
                 num_results = st.number_input("Skip the top __ results", value=0, min_value=0, step=250)
                 # num_results = st.slider("Skip the top __ results", 0, 111000, step=500)
                 bpm_slider = st.slider("Search BPM:", 0, 150, (0, 150))
-        
+
         if not countries_selectbox:
                 countries_2_filter = countries
         if countries_selectbox:
-                countries_2_filter = countries_selectbox                
-        
+                countries_2_filter = countries_selectbox
+
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
                 bpm_low = st.number_input("Playlist low: ", value=90, min_value=0, step=2)
@@ -574,18 +574,18 @@ if song_locator_toggle:
                 bpm_med = st.number_input("Playlist med: ", value=95, min_value=0, step=2)
         with col3:
                 bpm_high = st.number_input("Playlist high: ", value=100, min_value=0, step=2)
-                
-                
+
+
         if queer_toggle:
                 only_fabulous_people = queer_artists
         if not queer_toggle:
                 only_fabulous_people = ['']
-                
+
         if poc_toggle:
                 only_poc_people = poc_artists
         if not poc_toggle:
                 only_poc_people = ['']
-        
+
         # if ''.join(anti_playlist_input).strip() == '':
         if anti_playlist_input == ['']:
                 anti_playlist_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
@@ -594,13 +594,13 @@ if song_locator_toggle:
         #     ''.join(countries_selectbox) + ''.join(added_2_playlist_date) + ''.join(track_release_date)
         #     ).strip() == 'this_is_a_bogus_value_to_hopefully_not_break_things' and num_results == 0 and not queer_toggle and bpm_slider[0]==0 and bpm_slider[1]==150:
         #         # st.text('preloaded')
-        #         st.dataframe(top_songs, 
+        #         st.dataframe(top_songs,
         #                          column_config={"song_url": st.column_config.LinkColumn()}
         #                     )
 
         # else:
         if st.button("Search songs", type="primary"):
-                
+
                 log_query("Search songs", {'song_input': song_input,
                                            'artist_name': artist_name,
                                            'dj_input': dj_input,
@@ -615,18 +615,18 @@ if song_locator_toggle:
                                            'bpm_slider': bpm_slider,
                                         }
                           )
-                
+
                 #get all playlists a song is in
                 anti_df = (df
                            .group_by('track.id')
                            .agg('playlist_name')
                            .explode('playlist_name')
-                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, 
+                           .filter(pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input,
                                                                                             ascii_case_insensitive=True))
                            .select('track.id')
-                           
+
                            )
-                
+
                 song_search_df = (
                         df
                         # .pipe(just_a_peek)
@@ -640,14 +640,14 @@ if song_locator_toggle:
                         .join((pl.scan_parquet('data_song_bpm.parquet')
                                .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
                                ), how='left', on=['track.name', 'track.artists.name'])
-                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM'))) 
+                        .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
                         .with_columns(pl.col('bpm').fill_null(0.0),) #otherwise the None's won't appear in the filter for bpm
                         .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(only_fabulous_people, ascii_case_insensitive=True),
                                 pl.col('track.artists.name').cast(pl.String).str.contains_any(only_poc_people, ascii_case_insensitive=True),
-                                
+
                                 # ~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input, ascii_case_insensitive=True), #courtesy of Tobias N.
                                 # pl.unique('playlist_name').over() #has to be diff df such as anti join
-                                
+
                                 (pl.col('bpm').ge(bpm_slider[0]) & pl.col('bpm').le(bpm_slider[1])),
                                 pl.col('country').cast(pl.String).fill_null('').str.contains('|'.join(countries_2_filter)), #courtesy of Franzi M.
                                 pl.col('track.name').cast(pl.String).str.contains_any(song_input, ascii_case_insensitive=True),
@@ -655,25 +655,25 @@ if song_locator_toggle:
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 #   | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                                  | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),                                                                                    
+                                  | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
                                 pl.col('added_at').dt.to_string().str.contains_any(added_2_playlist_date, ascii_case_insensitive=True), #courtesy of Franzi M.
                                 pl.col('track.album.release_date').dt.to_string().str.contains_any(track_release_date, ascii_case_insensitive=True), #courtesy of James B.
                                 )
                         .group_by('track.name', 'song_url', 'playlist_count', 'dj_count', )
-                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 
-                             'bpm', 'queer_artist', 'playlist_name', 'track.artists.name', 
+                        .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'),
+                             'bpm', 'queer_artist', 'playlist_name', 'track.artists.name',
                              'owner.display_name', 'country', 'poc_artist',
-                                # 'apprx_song_position_in_playlist', 
-                                # 'notes', 'note_source', 
+                                # 'apprx_song_position_in_playlist',
+                                # 'notes', 'note_source',
                                 ##connie's notes
                                 # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type'
-                                )                        
-                        .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(), 
+                                )
+                        .with_columns(pl.col('playlist_name').list.unique().list.drop_nulls().list.sort(),
                                       pl.col('owner.display_name', 'bpm', 'queer_artist',
-                                                # 'apprx_song_position_in_playlist', 
+                                                # 'apprx_song_position_in_playlist',
                                                 'track.artists.name', 'country',
                                                 ##connie's notes
-                                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 
+                                                # 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty',
                                                 # 'Familiarity', 'Transition type'
                                                 'poc_artist',
                                                 )
@@ -695,24 +695,24 @@ if song_locator_toggle:
                         .with_columns(pl.col('bpm').list.get(0, null_on_oob=True).fill_null(0).cast(pl.Int32()),
                                       pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
                                       pl.col("poc_artist").list.any(),
-                                      )                                                
+                                      )
                         .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm',
                                 pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'hit_terms', 'bpm'))
-                        .sort([pl.col('hit_terms').list.len(), 
+                        .sort([pl.col('hit_terms').list.len(),
                                 'matching_playlist_count', 'playlist_count', 'dj_count'], descending=True)
                         # .pipe(just_a_peek)
                         .with_row_index(offset=1)
                         .slice(num_results)
                         )
-                
+
                 results_df = (song_search_df
                              .with_columns(pl.col('playlist_name').list.head(50))
                              .head(1000).collect(engine="streaming"))
-                st.dataframe(results_df, 
+                st.dataframe(results_df,
                         column_config={"song_url": st.column_config.LinkColumn()})
-                
-                
-                
+
+
+
                 # playlists_text = ' '.join(song_search_df
                 #                         .select(pl.col('playlist_name').cast(pl.List(pl.String)))
                 #                         .explode('playlist_name')
@@ -723,53 +723,53 @@ if song_locator_toggle:
                 #                         ['playlist_name']
                 #                         .to_list()
                 #                         )
-                
+
                 # # Generate the WordCloud
                 # if playlists_text:
                 #         st.text('Playlist names also included')
-                #         w = wordcloud.WordCloud(width=1800, 
-                #                         height=800, 
-                #                         background_color="white", 
-                #                         # stopwords=set(STOPWORDS), 
+                #         w = wordcloud.WordCloud(width=1800,
+                #                         height=800,
+                #                         background_color="white",
+                #                         # stopwords=set(STOPWORDS),
                 #                         min_font_size=10).generate(playlists_text)
                 #         fig, ax = plt.subplots()
                 #         ax.imshow(w)
                 #         ax.axis('off')
                 #         st.pyplot(fig)
-                
-                
+
+
                 #creates a playlist based on the results
                 # if st.button("Generate a playlist?", type="primary"):
                 #         bpm_high = st.slider("BPM-high:", 85, 130, 101)
                 #         bpm_med = st.slider("BPM-med:", 80, 100, 95)
                 #         bpm_low = st.slider("BPM-low:", 85, 130, 88)
                 #         how_many_songs = st.slider("Playlist length:", 3, 60, 18)
-                
+
                 st.text("Pretend you're Koichi with a ↗️↘️ playlist:")
-                
+
                 #no Koichis were harmed in the making of this shtity playlist, offended? possibly, but not harmed.
                 pl_1 = (results_df
                         .filter(pl.col('bpm').gt(bpm_med) & pl.col('bpm').le(bpm_high))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
                         #This gives them the order when combined with the other tracks
-                        .with_columns((pl.col('order') * 4) - 3 , 
+                        .with_columns((pl.col('order') * 4) - 3 ,
                                       level = pl.lit('high'))
                         .head(100)
-                        #this shuffles that order so the songs aren't strictly high - low bpm 
+                        #this shuffles that order so the songs aren't strictly high - low bpm
                         # .with_columns(pl.col('order').shuffle())
                         )
-                
+
                 pl_2 = (results_df
                         .filter(pl.col('bpm').gt(bpm_low) & pl.col('bpm').le(bpm_med))
                         .sort('bpm', descending=True)
                         .with_row_index('order', offset=1)
-                        .with_columns(pl.col('order') * 2, 
+                        .with_columns(pl.col('order') * 2,
                                       level = pl.lit('medium'))
                         .head(200)
                         # .with_columns(pl.col('order').shuffle())
                         )
-                
+
                 pl_3 = (results_df
                         .filter(pl.col('bpm').le(bpm_low) & pl.col('bpm').gt(0))
                         .sort('bpm', descending=True)
@@ -779,17 +779,17 @@ if song_locator_toggle:
                         .head(100)
                         # .with_columns(pl.col('order').shuffle())
                         )
-                
+
                 st.dataframe((pl.concat([pl_1, pl_2, pl_3])
-                              .select('index', 'level', 'bpm',  
+                              .select('index', 'level', 'bpm',
                                       pl.all().exclude('index', 'bpm', 'level'))
                               .sort('order')
                               .drop('order')
-                              ), 
+                              ),
                 column_config={"song_url": st.column_config.LinkColumn()})
 
                 # # 1 2 3 2 1 2 3 2 1
-                
+
                 ##attempt at better playlist generation
                 # # Tag levels based on BPM
                 # results_df2 = (results_df
@@ -807,7 +807,7 @@ if song_locator_toggle:
 
                 # # Build playlist
                 # playlist_parts = []
-                
+
                 # for i in range(0,50):
                 #         try:
                 #                 # Step 1: High song (start)
@@ -838,20 +838,20 @@ if song_locator_toggle:
 
                 # # Display
                 # st.dataframe((playlist_df
-                #               .select('index', 'level', 'bpm',  
+                #               .select('index', 'level', 'bpm',
                 #                       pl.all().exclude('index', 'bpm', 'level'))
                 #               .drop('order')
                 #               ),
                 # column_config={"song_url": st.column_config.LinkColumn("Song")}
                 # )
-                
-                
-                
-                
-                
-        
+
+
+
+
+
+
         st.markdown(f"#### ")
-        
+
 
 
 
@@ -899,14 +899,14 @@ if playlist_locator_toggle:
         with playlist_col2:
                 dj_input = st.text_input("DJ name:").lower().split(',')
                 anti_playlist_input2 = st.text_input("Not in playlist name: ").lower().split(',')
-        
+
         if anti_playlist_input2 == ['']:
                 anti_playlist_input2 = ['this_is_a_bogus_value_to_hopefully_not_break_things']
-                
-                
+
+
         # if any(val for val in [playlist_input, song_input, dj_input]):
         if st.button("Search playlists", type="primary"):
-                
+
                 log_query("Search playlists", {'song_input': song_input,
                                            'song_input': song_input,
                                            'dj_input': dj_input,
@@ -914,23 +914,23 @@ if playlist_locator_toggle:
                                            'anti_playlist_input': anti_playlist_input2,
                                         }
                           )
-                
+
                 st.dataframe(df
                         .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
                                 pl.col('playlist_name').cast(pl.String).str.contains_any(playlist_input, ascii_case_insensitive=True),
                                 pl.col('track.name').cast(pl.String).str.contains_any(song_input, ascii_case_insensitive=True),
-                                
+
                                 (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
                                 | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
-                                
+
                                 # pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
                                 )
                         .group_by('playlist_name', 'playlist_url')
-                        .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'), 
+                        .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'),
                              pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
                         .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                        .head(500).collect(streaming=True), 
+                        .head(500).collect(streaming=True),
                         column_config={"playlist_url": st.column_config.LinkColumn()}
                         )
         st.markdown(f"#### ")
@@ -974,7 +974,7 @@ def djs_data():
                 .agg(pl.n_unique('track.name').alias('song_count'),
                      pl.n_unique('track.artists.name').alias('artist_count'),
                      pl.n_unique('playlist_name').alias('playlist_count'),
-                     'playlist_name', 
+                     'playlist_name',
                      )
                 .with_columns(pl.col('playlist_name')
                               .list.unique()
@@ -1001,18 +1001,18 @@ if search_dj_toggle:
                 # dj_id = id_input.lower().split(',')
         with dj_col2:
                 dj_playlist_input = st.text_input("DJ playlist name:").lower().split(',')
-        
+
         if (dj_input == ['']) and (dj_playlist_input == ['']):
-                st.dataframe(djs_data, 
+                st.dataframe(djs_data,
                  column_config={"owner_url": st.column_config.LinkColumn()})
-        
+
         # else:
         if st.button("Search djs", type="primary"):
-                
+
                 log_query("Search djs", {'dj_input': dj_input,
                                            'dj_playlist_input': dj_playlist_input,
                                         })
-                
+
                 dj_search_df = (df
                         .filter((pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
                                 # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
@@ -1023,7 +1023,7 @@ if search_dj_toggle:
                         .agg(pl.n_unique('track.name').alias('song_count'),
                              pl.n_unique('track.artists.name').alias('artist_count'),
                              pl.n_unique('playlist_name').alias('playlist_count'),
-                             'playlist_name', 
+                             'playlist_name',
                              )
                         .with_columns(pl.col('playlist_name')
                                 .list.eval(pl.when(pl.element()
@@ -1039,9 +1039,9 @@ if search_dj_toggle:
                         .head(100)
                         .collect(streaming=True)
                         )
-                st.dataframe(dj_search_df, 
+                st.dataframe(dj_search_df,
                              column_config={"owner_url": st.column_config.LinkColumn()})
-        
+
                 total_djs_from_search = dj_search_df.select(pl.n_unique('owner.display_name'))['owner.display_name'][0]
         # elif dj_id:
                 if total_djs_from_search > 0 and total_djs_from_search <= 10: #so it doesn't have to process if nothing
@@ -1063,35 +1063,35 @@ if search_dj_toggle:
                                         .select('track.name', 'owner.display_name', 'dj_count', 'playlist_count', 'song_url')
                                         )
 
-                        
-                        
+
+
                         # st.text(f"Music unique to _{', '.join(dj_input)}_")
-                        # st.dataframe(djs_music.join(others_music, 
-                        #                         how='anti', 
-                        #                         on=['track.name', pl.col('owner.display_name').cast(pl.String), 
+                        # st.dataframe(djs_music.join(others_music,
+                        #                         how='anti',
+                        #                         on=['track.name', pl.col('owner.display_name').cast(pl.String),
                         #                                 'dj_count', 'playlist_count', 'song_url'])
                         #         .group_by(pl.all().exclude('playlist_name'))
                         #         .agg('playlist_name')
                         #         .sort('playlist_count', descending=True)
                         #         .filter(pl.col('dj_count').eq(1))
                         #         .head(100)
-                        #         .collect(streaming=True), 
+                        #         .collect(streaming=True),
                         #         column_config={"song_url": st.column_config.LinkColumn()})
-                        
-                        
-                        
+
+
+
                         # st.text(f"Popular music _{', '.join(dj_input)}_ doesn't play")
-                        # st.dataframe(others_music.join(djs_music, how='anti', 
-                        #                 on=['track.name', 'dj_count', 
+                        # st.dataframe(others_music.join(djs_music, how='anti',
+                        #                 on=['track.name', 'dj_count',
                         #                 'playlist_count', 'song_url'])
                         #         .group_by(pl.all().exclude('owner.display_name'))
                         #         .agg('owner.display_name')
                         #         .with_columns(pl.col('owner.display_name').list.head(50))
                         #         .sort('dj_count', 'playlist_count', descending=True)
                         #         .head(200)
-                        #         .collect(streaming=True), 
+                        #         .collect(streaming=True),
                         #         column_config={"song_url": st.column_config.LinkColumn()})
-                
+
 
         st.markdown(f"#### Compare DJs:")
         # dj_list = sorted(df
@@ -1103,20 +1103,20 @@ if search_dj_toggle:
         #                  ['owner.display_name']
         #                  .to_list()
         #                  )
-        
+
         # st.dataframe(df
         #                 .group_by('owner.display_name')
-        #                 .agg(song_count = pl.n_unique('track.name'), 
-        #                         playlist_count = pl.n_unique('playlist_name'), 
+        #                 .agg(song_count = pl.n_unique('track.name'),
+        #                         playlist_count = pl.n_unique('playlist_name'),
         #                         dj_count = pl.n_unique('owner.display_name'),
         #                         )
         #                 .sort('owner.display_name')
         #                 .collect(streaming=True)
         #         )
-        
-        
-        
-        
+
+
+
+
         # djs_selectbox = st.multiselect("Compare these DJ's music:", dj_list)
         compare_1, compare_2 = st.columns(2)
         with compare_1:
@@ -1125,11 +1125,11 @@ if search_dj_toggle:
                 dj_compare_2 = st.text_input("DJ/user 2 to compare:").lower()
 
         if st.button("Compare DJs/users", type="primary"):
-                
+
                 log_query("Search djs", {'dj_compare_1': dj_compare_1,
                                            'dj_compare_2': dj_compare_2,
                                         })
-                
+
                 st.dataframe(df
                         .filter(pl.col('owner.display_name').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
                                 | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_1)
@@ -1137,8 +1137,8 @@ if search_dj_toggle:
                                 | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_2)
                                 )
                         .group_by('owner.display_name')
-                        .agg(song_count = pl.n_unique('track.name'), 
-                             playlist_count = pl.n_unique('playlist_name'), 
+                        .agg(song_count = pl.n_unique('track.name'),
+                             playlist_count = pl.n_unique('playlist_name'),
                             )
                         .sort('owner.display_name')
                         .collect(streaming=True)
@@ -1156,18 +1156,18 @@ if search_dj_toggle:
                                         | pl.col('owner.id').cast(pl.String).str.to_lowercase().eq(dj_compare_2))
                                 .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                                 )
-                
+
                 st.text(f"Music {dj_compare_1} has, but {dj_compare_2} doesn't.")
                 st.dataframe(dj_1_df
-                              .join(dj_2_df, 
-                                        how='anti', 
+                              .join(dj_2_df,
+                                        how='anti',
                                         on=['track.name', 'song_url']
                                         )
                                 .unique()
                                 .sort('dj_count', descending=True)
                                 .head(500).collect(streaming=True) ,
                                 column_config={"song_url": st.column_config.LinkColumn()})
-                
+
         st.markdown(f"#### ")
 
 
@@ -1205,8 +1205,8 @@ if search_dj_toggle:
 def region_data():
     return (df
                  .group_by('region')
-                 .agg(song_count = pl.n_unique('track.name'), 
-                      playlist_count = pl.n_unique('playlist_name'), 
+                 .agg(song_count = pl.n_unique('track.name'),
+                      playlist_count = pl.n_unique('playlist_name'),
                       dj_count = pl.n_unique('owner.display_name'),
                       djs = pl.col('owner.display_name'),
                       )
@@ -1219,8 +1219,8 @@ def region_data():
 def country_data():
         return (df
                  .group_by('country')
-                 .agg(song_count = pl.n_unique('track.name'), 
-                      playlist_count = pl.n_unique('playlist_name'), 
+                 .agg(song_count = pl.n_unique('track.name'),
+                      playlist_count = pl.n_unique('playlist_name'),
                       dj_count = pl.n_unique('owner.display_name'),
                       djs = pl.col('owner.display_name'),
                       )
@@ -1236,7 +1236,7 @@ geo_region_toggle = st.toggle("Geographic Insights 🌎")
 if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
     st.text(f"Disclaimer: Insights are based on available data and educated guesses - which may not be accurate or representative of reality.")
-    
+
     st.dataframe(region_data())
     st.dataframe(country_data())
     regions = ['Select One', 'Europe', 'North America', 'MENA', 'Oceania', 'Asia']
@@ -1245,7 +1245,7 @@ if geo_region_toggle:
 
     if region_selectbox != 'Select One':
         st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
-        
+
         region_df = (pl.scan_parquet('data_unique_per_region.parquet')
                 #  .pipe(wcs_specific)
                 .filter(pl.col('region').cast(pl.String) == region_selectbox,
@@ -1257,8 +1257,8 @@ if geo_region_toggle:
                 # .unique()
                 .sort('playlist_count', 'dj_count', descending=True)
                 )
-        
-        st.dataframe(region_df.head(1000).collect(streaming=True), 
+
+        st.dataframe(region_df.head(1000).collect(streaming=True),
                         column_config={"song_url": st.column_config.LinkColumn()})
 
 
@@ -1270,30 +1270,30 @@ if geo_region_toggle:
         #         country_compare_1 = st.text_input("Country 1:").lower()
         # with country_2:
         #         country_compare_2 = st.text_input("Country 2:").lower()
-    
+
     if st.button("Compare countries", type="primary"):
-            
+
         log_query("Comparing Countries' music", {'countries_selectbox': countries_selectbox,
                                         })
-        
+
         countries_df = df.filter(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox),
-                                pl.col('dj_count').gt(3), 
+                                pl.col('dj_count').gt(3),
                                 pl.col('playlist_count').gt(3))
 
         country_1_df = (countries_df
                         .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[0]))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
-        
+
         country_2_df = (countries_df
                         .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[1]))
                         .select('track.name', 'song_url', 'dj_count', 'playlist_count')
                         )
-        
+
         # st.dataframe(country_1_df._fetch(10000))
         st.text(f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
-        st.dataframe(country_1_df.join(country_2_df, 
-                                        how='anti', 
+        st.dataframe(country_1_df.join(country_2_df,
+                                        how='anti',
                                         on=['track.name', 'song_url']
                                         )
                         .unique()
@@ -1346,13 +1346,13 @@ if geo_region_toggle:
 songs_together_toggle = st.toggle("Songs most played together")
 
 if songs_together_toggle:
-        
+
         song_combo_col1, song_combo_col2 = st.columns(2)
         with song_combo_col1:
                 song_input = st.text_input("Song Name/ID:")
         with song_combo_col2:
                 artist_name_input = st.text_input("Song artist name:").lower()
-                
+
         song_input_prepped = song_input.lower()
 
         # st.dataframe(df
@@ -1360,7 +1360,7 @@ if songs_together_toggle:
         #                 )
         #         .unique()
         #         .sort('playlist_url', 'song_number')
-                
+
         #         .with_columns(pair1 = pl.when(pl.col('song_number').shift(-1) > pl.col('song_number'))
         #                                 .then(pl.concat_str(pl.col('track.name'), pl.lit(': '), pl.col('track.id'), pl.lit(' --- '),
         #                                                         pl.col('track.name').shift(-1), pl.lit(': '), pl.col('track.id').shift(-1),
@@ -1372,13 +1372,13 @@ if songs_together_toggle:
         #                         )
         #         .with_columns(pair = pl.concat_list('pair1', 'pair2'))
         #         .explode('pair')
-        #         .select('pair', 'playlist_name', 'owner.display_name', 
+        #         .select('pair', 'playlist_name', 'owner.display_name',
         #                 )
         #         .drop_nulls()
         #         .unique()
         #         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
         #         .group_by('pair')
-        #         .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name', 
+        #         .agg(pl.n_unique('playlist_name').alias('times_played_together'), 'playlist_name', 'owner.display_name',
         #                 )
         #         .with_columns(pl.col('playlist_name').list.unique(),
         #                         pl.col('owner.display_name').list.unique())
@@ -1390,22 +1390,22 @@ if songs_together_toggle:
         #                 )
         #         .with_columns(pl.col('pair').str.split(' --- '))
         #         .sort('times_played_together',
-        #                 pl.col('owner.display_name').list.len(), 
+        #                 pl.col('owner.display_name').list.len(),
         #                 descending=True)
-        #         .head(100).collect(streaming=True), 
+        #         .head(100).collect(streaming=True),
         #          column_config={"playlist_url": st.column_config.LinkColumn()}
         #         )
-    
-    
-    
+
+
+
         if st.button("Search songs played together", type="primary"):
         # if (song_input_prepped + artist_name_input).strip() != '':
                 st.markdown(f"#### Most common songs to play after _{song_input}_:")
                 st.dataframe(df
                         .filter(pl.col('actual_social_set')==True,
                                 )
-                        .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 
-                                'owner.display_name', 'track.artists.name', 
+                        .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url',
+                                'owner.display_name', 'track.artists.name',
                                 )
                         .unique()
                         .sort('playlist_name', 'song_number')
@@ -1426,7 +1426,7 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'),
                              'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
@@ -1437,16 +1437,16 @@ if songs_together_toggle:
                                 pl.col('track.artists.name').cast(pl.List(pl.String)).list.join(', ').str.to_lowercase().str.contains(artist_name_input))
                         .with_columns(pl.col('pair').str.split(' --- '))
                         .sort('times_played_together',
-                                pl.col('owner.display_name').list.len(), 
+                                pl.col('owner.display_name').list.len(),
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(streaming=True),
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
-    
-    
-    
+
+
+
                 st.markdown(f"#### Most common songs to play before _{song_input}_:")
-        
+
                 st.dataframe(df
                              .filter(pl.col('actual_social_set')==True)
                         .select('song_number', 'track.name', 'playlist_name', 'track.id', 'song_url', 'owner.display_name', 'track.artists.name')
@@ -1469,7 +1469,7 @@ if songs_together_toggle:
                         .unique()
                         .with_columns(pl.col('pair').str.split(' --- ').list.sort().list.join(' --- '))
                         .group_by('pair')
-                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'), 
+                        .agg(pl.n_unique('playlist_name').cast(pl.UInt8).alias('times_played_together'),
                              'playlist_name', 'owner.display_name', 'track.artists.name', 'track.name', 'song_url')
                         .with_columns(pl.col('playlist_name').list.unique(),
                                         pl.col('owner.display_name').list.unique())
@@ -1480,9 +1480,9 @@ if songs_together_toggle:
                                 pl.col('track.artists.name').cast(pl.List(pl.String)).list.join(', ').str.to_lowercase().str.contains(artist_name_input))
                         .with_columns(pl.col('pair').str.split(' --- '))
                         .sort('times_played_together',
-                                pl.col('owner.display_name').list.len(), 
+                                pl.col('owner.display_name').list.len(),
                                 descending=True)
-                        .head(100).collect(streaming=True), 
+                        .head(100).collect(streaming=True),
                         column_config={"song_url": st.column_config.LinkColumn()}
                         )
         st.link_button("Andreas' connected-songs visualization!",
@@ -1532,26 +1532,26 @@ if songs_together_toggle:
 
 lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
-                
+
         st.write(f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
         lyrics_col1, lyrics_col2 = st.columns(2)
         with lyrics_col1:
                 song_input = st.text_input("Song:")
                 lyrics_input = st.text_input("In lyrics:").lower().split(',')
-                
+
         with lyrics_col2:
                 artist_input = st.text_input("Artist:")
                 anti_lyrics_input = st.text_input("Not in lyrics:").lower().split(',')
-        
+
         if anti_lyrics_input == ['']:
                 anti_lyrics_input = ['this_is_a_bogus_value_to_hopefully_not_break_things']
-        
+
         if st.button("Search lyrics", type="primary"):
                 st.dataframe(
                 df_lyrics.with_columns(pl.col(['song', 'artist']).cast(pl.Categorical))
                 .join(df.select('song_url', 'playlist_count', 'dj_count',
-                                song = pl.col('track.name'), 
-                                artist = pl.col('track.artists.name')).unique(), 
+                                song = pl.col('track.name'),
+                                artist = pl.col('track.artists.name')).unique(),
                         how='left', on=['song', 'artist'])
                 .filter(~pl.col('lyrics').str.contains_any(anti_lyrics_input, ascii_case_insensitive=True),
                         pl.col('lyrics').str.contains_any(lyrics_input, ascii_case_insensitive=True),
@@ -1564,7 +1564,7 @@ if lyrics_toggle:
                                                 .list.eval(pl.element().str.to_lowercase())
                                                 .list.unique(),
                         )
-                
+
                 .group_by(pl.all().exclude('song_url', 'playlist_count', 'dj_count',)) #otherwise there will be multiple rows for each song variation
                 .agg('song_url', 'playlist_count', 'dj_count',)
                 .with_columns(pl.col('song_url').list.get(0), #otherwise multiple urls will be smashed together
@@ -1575,7 +1575,7 @@ if lyrics_toggle:
                 .unique()
                 .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True, nulls_last=True)
                 .head(100)
-                .collect(streaming=True), 
+                .collect(streaming=True),
                         column_config={"song_url": st.column_config.LinkColumn()}
                 )
 
@@ -1626,7 +1626,7 @@ st.link_button('💃⏱️ Dance Metronome',
                url='https://loewclan.de/metronome/')
 st.link_button('Weekenders Events Calendar',
                'https://weekenders.dance/')
-st.link_button('Leave feedback/suggestions!/Report issues/bugs', 
+st.link_button('Leave feedback/suggestions!/Report issues/bugs',
                    url='https://forms.gle/19mALUpmM9Z5XCA28')
 
 
@@ -1635,7 +1635,7 @@ st.link_button('Leave feedback/suggestions!/Report issues/bugs',
 
 
 
-st.markdown("""#### 
+st.markdown("""####
 ### Westie Music Database FAQ
 #### How can I help?
 * Make lots of playlists with descriptive names! The more the better!
@@ -1673,7 +1673,7 @@ st.markdown("""####
 * Correct, not all music is WCS specific, but I filter out the bulk of it (Tango/Salsa/Etc.), and the music that's left rises to the top due to the amount of westies adding it to their playlists. Eg. If we all listen to non-westible show tunes, those songs might rise to the top, but we also have the # of playlists to sort by - Chunks, might appear in multiple playlists per spotify profile, but Defying Gravity would be in fewer.
 
 #### I'm not a DJ and don't have a lot of playlists, can I be included?/why am I included?
-* Please click the feedback form link and add your profile link and location so I can include you! 
+* Please click the feedback form link and add your profile link and location so I can include you!
 * The wonderful thing about aggregation on this scale is that even your 1 or 2 wcs playlists will still help!
 * Some people have many playlists, well labeled, and others have a single "WCS" playlist with 1400 songs! All are helpful in their own way!
 
@@ -1682,7 +1682,7 @@ st.markdown("""####
 
 #### It broke ☹️
 * The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
-* Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️ 
+* Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️
 * It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
 #### Errors:
