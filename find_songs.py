@@ -82,12 +82,27 @@ if mode == 'live' or mode == 'write':
     if mode == 'write':
         tracks.sink_parquet('data_playlist_songs.parquet')
 
+    countries_df = (
+        playlists_extended.select(
+            pl.col('playlist.country').alias('country').cast(pl.String))
+        .unique()
+        .drop_nulls()
+        .sort('country')
+        .collect(streaming=True))
+
+    # Write pre-processed country data to file
+    if mode == 'write':
+        countries_df.write_parquet('data_countries.parquet')
+
 elif mode == 'load':
     # Load the pre-generated data from the Parquet files
     playlists_extended = playlists = pl.scan_parquet(
         'data_playlist_metadata.parquet')
     playlist_tracks = pl.scan_parquet('data_playlist_songs.parquet')
     tracks_extended = tracks = pl.scan_parquet('data_song_metadata.parquet')
+    countries_df = pl.read_parquet('data_countries.parquet')
+
+countries = countries_df['country'].to_list()
 
 q = playlists_extended
 
