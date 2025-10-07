@@ -4,21 +4,10 @@ import matplotlib.pyplot as plt
 import polars as pl
 import psutil
 
-from supabase import create_client
-import os
-
 from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
+from utils.logging import log_query
 from utils.playlist_classifiers import extract_dates_from_name
 
-
-def log_query(query_type, params):
-        '''sends query logs'''
-        supabase.table("WestieMusicDatabase").insert({"query_type": query_type,
-                                                        "params": params}).execute()
-
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY")
-supabase = create_client(url, key)
 
 # avail_threads = pl.threadpool_size()
 
