@@ -88,7 +88,7 @@ if mode == 'live' or mode == 'write':
         .unique()
         .drop_nulls()
         .sort('country')
-        .collect(streaming=True))
+        .collect(engine='streaming'))
 
     # Write pre-processed country data to file
     if mode == 'write':
