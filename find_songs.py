@@ -1,10 +1,14 @@
 import polars as pl
 import polars.selectors as cs
+import sys
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
 
-mode = 'load'
+if len(sys.argv) >= 2:
+    mode = sys.argv[1] or 'load'
+else:
+    mode = 'load'
 
 # Handle different caching modes
 if mode == 'live' or mode == 'write':
