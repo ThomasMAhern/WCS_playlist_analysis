@@ -39,8 +39,32 @@ playlists_extended = playlists.with_columns(
     _is_wcs_dj.alias('owner.is_wcs_dj'),
 ).select(cs.all() - cs.by_name('playlist.location'))
 
+# Write pre-processed playlist data to file
+playlists_extended.collect().write_parquet('data_playlist_metadata.parquet')
+
 q = playlists_extended
 
 print(q.limit(50).collect())
 
-print(q.schema)
+print(source_data.schema)
+
+tracks = source_data.select(
+    pl.col('track.id').alias('track.id'),
+    pl.col('track.name'),
+    pl.col('track.artists.name'),
+    pl.col('track.album.release_date'),
+).unique()
+
+# Write pre-processed track data to file
+tracks.collect().write_parquet('data_song_metadata.parquet')
+
+playlist_tracks = source_data.select(
+    pl.col('playlist_id').alias('playlist.id'),
+    pl.col('track.id').alias('track.id'),
+    # The following metadata is not strictly required
+    pl.col('song_number').alias('playlist_track.number'),
+    pl.col('added_at').alias('playlist_track.added_at'),
+)
+
+# Write pre-processed track <=> playlist membership data to file
+tracks.collect().write_parquet('data_playlist_songs.parquet')
