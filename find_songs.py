@@ -68,9 +68,12 @@ if mode == 'live' or mode == 'write':
     # Remove duplicated tracks (which can happen due to data quality issues)
     # and try to keep only a single copies with complete metadata.
     # TODO: This drops tracks where no copy with complete metadata exists
-    track_info_columns = ['track.name', 'track.artists.name', 'track.album.release_date']
+    track_info_columns = ['track.name',
+                          'track.artists.name',
+                          'track.album.release_date']
 
-    unique_tracks = tracks.filter(pl.all_horizontal(pl.col(track_info_columns).is_not_null())).unique('track.id')
+    unique_tracks = tracks.filter(pl.all_horizontal(
+        pl.col(track_info_columns).is_not_null())).unique('track.id')
 
     # Remove duplicated tracks (which can happen due to data quality issues)
     # and try to merge their metadata where possible
@@ -108,6 +111,16 @@ if mode == 'live' or mode == 'write':
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
         playlist_tracks.sink_parquet('data_playlist_songs.parquet')
+
+    # # Write pre-processed track <=> playlist membership data
+    # # optimized for track => playlist lookup
+    #     playlist_tracks = source_data.select(
+    #     pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
+    #     pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
+    #     # The following metadata is not strictly required
+    #     pl.col('song_number').alias('playlist_track.number'),
+    #     pl.col('added_at').alias('playlist_track.added_at'),
+    # ).sort('playlist.id', 'track.id', 'playlist_track.number').unique()
 
     countries_df = (
         playlists_extended.select(
@@ -153,8 +166,8 @@ artist_inputs: list[str] = list(
 # Playlist-specific filters
 country_input: str = ''
 dj_input: str = ''
-playlist_input: str = 'late night'
-anti_playlist_input: str = ''
+playlist_input: str = 'late night,social'
+anti_playlist_input: str = 'blues'
 
 # Only used for playlist generation
 # playlist_bpm_low: int = 90
@@ -223,6 +236,13 @@ matching_playlists = matching_playlists.select('playlist.id')
 matching_playlist_tracks = matching_playlists.join(
     playlist_tracks, how='inner', on=['playlist.id'])
 
+if anti_playlist_inputs:
+    excluded_playlist_tracks = excluded_playlists.join(
+        playlist_tracks, how='inner', on=['playlist.id'])
+
+    matching_playlist_tracks = matching_playlist_tracks.join(
+        excluded_playlist_tracks, how='anti', on=['track.id'])
+
 # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
 if added_to_playlist_dates:
     matching_playlist_tracks = matching_playlist_tracks.filter(
@@ -265,18 +285,4 @@ if song_release_dates:
 
 q = matching_tracks
 
-print(q.slice(skip_num_top_results))
-
-print(q.slice(skip_num_top_results).limit(50).collect())
-
-print(playlists_extended.limit(10).collect())
-print(playlist_tracks.filter(pl.col('track.id').eq(
-    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
-print(tracks_extended.filter(pl.col('track.id').eq(
-    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
-print(tracks.filter(pl.col('track.id').eq(
-    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
-
-source_data = pl.scan_parquet('data_playlists.parquet')
-print(source_data.filter(pl.col('track.id').eq(
-    '6qOEjO2IUD7PjtpsXawq0d')).limit(10).collect())
+print(q.slice(skip_num_top_results).collect())
