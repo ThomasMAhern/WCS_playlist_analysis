@@ -115,6 +115,44 @@ elif mode == 'load':
 
 countries = countries_df['country'].to_list()
 
+#####################
+# Filter parameters #
+#####################
+
+# Track-specific filters
+song_input: str = ''
+song_bpm_range: tuple[int, int] = (0, 150)
+song_release_date: str = ''
+artist_input: str = ''
+queer_toggle: bool = False
+poc_toggle: bool = True
+
+song_inputs: list[str] = song_input.strip().lower().split(',')
+song_release_dates: list[str] = song_release_date.strip().split(',')
+artist_inputs: list[str] = artist_input.strip().lower().split(',')
+
+# Playlist-specific filters
+country_input: str = ''
+dj_input: str = ''
+playlist_input: str = ''
+anti_playlist_input: str = ''
+
+playlist_bpm_low: int = 90
+playlist_bpm_med: int = 95
+playlist_bpm_high: int = 100
+
+dj_inputs: list[str] = dj_input.strip().lower().split(',')
+playlist_inputs: list[str] = playlist_input.strip().lower().split(',')
+anti_playlist_inputs: list[str] = anti_playlist_input.strip().lower().split(',')
+
+# Playlist-membership specific filters
+added_to_playlist_date_input: str = ''
+
+added_to_playlist_date_inputs = added_to_playlist_date_input.strip().split(',')
+
+# Result options
+skip_num_top_results: int = 0
+
 q = playlists_extended
 
 print(q.limit(50).collect())
