@@ -22,7 +22,7 @@ if mode == 'live' or mode == 'write':
         pl.col('owner.display_name').alias('owner.name'),
         # Only required for extended data below
         pl.col('location').alias('playlist.location'),
-    ).unique()
+    ).sort('playlist.id').unique()
 
     _is_social_set = (
         pl.col('playlist.extracted_date').list.len().gt(0)
@@ -57,7 +57,7 @@ if mode == 'live' or mode == 'write':
         pl.col('track.name'),
         pl.col('track.artists.name'),
         pl.col('track.album.release_date'),
-    ).unique()
+    ).sort('track.id').unique()
 
     tracks_extended = tracks.with_columns(
         pl.col('track.artists.name').str.to_lowercase().is_in(
@@ -76,7 +76,7 @@ if mode == 'live' or mode == 'write':
         # The following metadata is not strictly required
         pl.col('song_number').alias('playlist_track.number'),
         pl.col('added_at').alias('playlist_track.added_at'),
-    )
+    ).sort('playlist_id', 'track_id', 'song_number').unique()
 
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
