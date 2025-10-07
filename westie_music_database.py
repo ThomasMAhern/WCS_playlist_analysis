@@ -4,9 +4,11 @@ import streamlit as st
 import polars as pl
 import psutil
 
-
 from supabase import create_client
 import os
+
+from utils.playlist_classifiers import extract_dates_from_name
+
 
 def log_query(query_type, params):
         '''sends query logs'''
@@ -22,39 +24,6 @@ supabase = create_client(url, key)
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 pl.enable_string_cache() #for Categoricals
 # st.text(f"{avail_threads}")
-
-pattern_yyyy_mm_dd = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
-pattern_yyyy_dd_mm = r'\b(?:19|20)\d{2}[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])\b'
-pattern_dd_mm_yyyy = r'\b(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])[-/.](?:19|20)\d{2}\b'
-pattern_mm_dd_yyyy = r'\b(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:19|20)\d{2}\b'
-
-pattern_yy_mm_dd = r'\b\d{2}[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b'
-pattern_yy_dd_mm = r'\b\d{2}[-/.](?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])\b'
-pattern_dd_mm_yy = r'\b(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])[-/.]\d{2}\b'
-pattern_mm_dd_yy = r'\b(?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])[-/.]\d{2}\b'
-
-pattern_dd_MMM_yyyy = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:19|20)\d{2}\b'
-pattern_MMM_dd_yyyy = r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:19|20)\d{2}\b'
-pattern_yyyy_MMM_dd = r'\b(?:19|20)\d{2}[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:0[1-9]|[12]\d|3[01])\b'
-pattern_yyyy_dd_MMM = r'\b(?:19|20)\d{2}[-/. ]?(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b'
-
-pattern_dd_MMM_yy = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?\d{2}\b'
-pattern_MMM_dd_yy = r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:0[1-9]|[12]\d|3[01])[-/. ]?\d{2}\b'
-pattern_yy_MMM_dd = r'\b\d{2}[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/. ]?(?:0[1-9]|[12]\d|3[01])\b'
-pattern_yy_dd_MMM = r'\b\d{2}[-/. ]?(?:0[1-9]|[12]\d|3[01])[-/. ]?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b'
-
-pattern_mm_yy = r'\b(?:0[1-9]|1[0-2])[-/. ]\d{2}\b'
-pattern_dd_mm = r'\b(?:0[1-9]|[12]\d|3[01])[-/. ](?:0[1-9]|1[0-2])\b'
-pattern_yy_mm = r'\b\d{2}[-/. ](?:0[1-9]|1[0-2])\b'
-pattern_mm_dd = r'\b(?:0[1-9]|1[0-2])[-/. ](?:0[1-9]|[12]\d|3[01])\b'
-
-pattern_bpm_range = r'(\d{2,3})\s*[-–]\s*(\d{2,3})\s*(?:bpm|BPM)?' #70 – 79bpm
-pattern_bpm_appx = r'[~≈]\s*(\d{2,3})\s*(?:bpm|BPM)?' #~100bpm
-pattern_bpm_relational = r'[<>]=?\s*(\d{2,3})\s*(?:bpm|BPM)?' #>120 BPM
-pattern_bpm_mention = r'(?:bpm|BPM)[^\d]{0,5}(\d{2,3})' #bpm 105
-pattern_bpm_loose_fallback = r'\b(\d{2,3})\s*(?:bpm|BPM)\b' # 117 BPM”
-
-pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
 #based on Westie DJs https://docs.google.com/spreadsheets/d/1zP8LYR9s33vzCGAv90N1tQfQ4JbNZgorvUNnvh1PeJY
 actual_wcs_djs = ['12149954698', '1128646211', 'alicia.writing', '1141617915', 'chrisbloecker', '7r53jcujuc31b9bmur1kdk6j8', '11124055499',
@@ -227,33 +196,7 @@ def load_playlist_data():
         return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
       .rename({'name':'playlist_name'})
       #makes a new column filled with a date - this is good indicator if there was a set played
-      .with_columns(extracted_date = pl.concat_list(pl.col('playlist_name').str.extract_all(pattern_yyyy_mm_dd),
-                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_dd_mm),
-                                                pl.col('playlist_name').str.extract_all(pattern_dd_mm_yyyy),
-                                                pl.col('playlist_name').str.extract_all(pattern_mm_dd_yyyy),
-
-                                                pl.col('playlist_name').str.extract_all(pattern_yy_mm_dd),
-                                                pl.col('playlist_name').str.extract_all(pattern_yy_dd_mm),
-                                                pl.col('playlist_name').str.extract_all(pattern_dd_mm_yy),
-                                                pl.col('playlist_name').str.extract_all(pattern_mm_dd_yy),
-
-                                                pl.col('playlist_name').str.extract_all(pattern_dd_MMM_yyyy),
-                                                pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yyyy),
-                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_MMM_dd),
-                                                pl.col('playlist_name').str.extract_all(pattern_yyyy_dd_MMM),
-
-                                                pl.col('playlist_name').str.extract_all(pattern_dd_MMM_yy),
-                                                pl.col('playlist_name').str.extract_all(pattern_yy_MMM_dd),
-                                                # pl.col('playlist_name').str.extract_all(pattern_MMM_dd_yy), #matches on Jul 2024 as a date :(
-                                                # pl.col('playlist_name').str.extract_all(pattern_yy_dd_MMM),  #matches on 2024 Jul as a date :(
-
-                                                # pl.col('playlist_name').str.extract_all(pattern_mm_yy),
-                                                # pl.col('playlist_name').str.extract_all(pattern_dd_mm),
-                                                # pl.col('playlist_name').str.extract_all(pattern_yy_mm),
-                                                # pl.col('playlist_name').str.extract_all(pattern_mm_dd),
-                                                )
-                                        .list.unique()
-                                        .cast(pl.List(pl.Categorical)),
+      .with_columns(extracted_date = extract_dates_from_name(pl.col('playlist_name')).cast(pl.List(pl.Categorical)),
                     song_url = pl.when(pl.col('track.id').is_not_null())
                                  .then(pl.concat_str(pl.lit('https://open.spotify.com/track/'), 'track.id')),
                     playlist_url = pl.when(pl.col('playlist_id').is_not_null())
