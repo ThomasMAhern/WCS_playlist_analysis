@@ -127,9 +127,9 @@ artist_input: str = ''
 queer_toggle: bool = False
 poc_toggle: bool = True
 
-song_inputs: list[str] = song_input.strip().lower().split(',')
-song_release_dates: list[str] = song_release_date.strip().split(',')
-artist_inputs: list[str] = artist_input.strip().lower().split(',')
+song_inputs: list[str] = list(filter(bool, song_input.strip().lower().split(',')))
+song_release_dates: list[str] = list(filter(bool, song_release_date.strip().split(',')))
+artist_inputs: list[str] = list(filter(bool, artist_input.strip().lower().split(',')))
 
 # Playlist-specific filters
 country_input: str = ''
@@ -142,15 +142,17 @@ anti_playlist_input: str = ''
 # playlist_bpm_med: int = 95
 # playlist_bpm_high: int = 100
 
-dj_inputs: list[str] = dj_input.strip().lower().split(',')
-playlist_inputs: list[str] = playlist_input.strip().lower().split(',')
-anti_playlist_inputs: list[str] = anti_playlist_input\
-    .strip().lower().split(',')
+dj_inputs: list[str] = list(filter(bool, dj_input.strip().lower().split(',')))
+playlist_inputs: list[str] = list(
+    filter(bool, playlist_input.strip().lower().split(',')))
+anti_playlist_inputs: list[str] = list(filter(bool, anti_playlist_input
+                                              .strip().lower().split(',')))
 
 # Playlist-membership specific filters
 added_to_playlist_date_input: str = ''
 
-added_to_playlist_dates = added_to_playlist_date_input.strip().split(',')
+added_to_playlist_dates = list(
+    filter(bool, added_to_playlist_date_input.strip().split(',')))
 
 # Result options
 skip_num_top_results: int = 0
@@ -243,5 +245,7 @@ if song_release_dates:
             song_release_dates, ascii_case_insensitive=True))
 
 q = matching_tracks
+
+print(q.slice(skip_num_top_results))
 
 print(q.slice(skip_num_top_results).limit(50).collect())
