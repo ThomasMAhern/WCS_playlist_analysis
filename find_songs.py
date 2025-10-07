@@ -1,8 +1,8 @@
 import polars as pl
 import polars.selectors as cs
 
+from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
-from utils.additional_data import actual_wcs_djs
 
 mode = 'load'
 
@@ -55,9 +55,16 @@ if mode == 'live' or mode == 'write':
         pl.col('track.album.release_date'),
     ).unique()
 
+    tracks_extended = tracks.with_columns(
+        pl.col('track.artists.name').str.to_lowercase().is_in(
+            queer_artists).alias("track.artists.is_queer_artist"),
+        pl.col('track.artists.name').str.to_lowercase().is_in(
+            poc_artists).alias("track.artists.is_poc_artist"),
+    )
+
     # Write pre-processed track data to file
     if mode == 'write':
-        tracks.collect().write_parquet('data_song_metadata.parquet')
+        tracks_extended.collect().write_parquet('data_song_metadata.parquet')
 
     playlist_tracks = source_data.select(
         pl.col('playlist_id').alias('playlist.id'),
@@ -76,7 +83,7 @@ elif mode == 'load':
     playlists_extended = playlists = pl.scan_parquet(
         'data_playlist_metadata.parquet')
     playlist_tracks = pl.scan_parquet('data_playlist_songs.parquet')
-    tracks = pl.scan_parquet('data_song_metadata.parquet')
+    tracks_extended = tracks = pl.scan_parquet('data_song_metadata.parquet')
 
 q = playlists_extended
 
