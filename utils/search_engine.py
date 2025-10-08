@@ -12,13 +12,22 @@ def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
     return countries_dataframe['country'].to_list()
 
 
-def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = True) -> Callable[[pl.Expr], pl.Expr] | None:
+def create_text_filter(filter_expression: str | list[str] | None, ascii_case_insensitive: bool = True) -> Callable[[pl.Expr], pl.Expr] | None:
     """Parse a filter expression for a text column."""
-    if ascii_case_insensitive:
-        values = list(
-            filter(bool, filter_expression.strip().lower().split(',')))
+    if filter_expression is None:
+        return None
+
+    if isinstance(filter_expression, list):
+        if ascii_case_insensitive:
+            values = [item.lower() for item in filter_expression if item]
+        else:
+            values = list(filter(bool, filter_expression))
     else:
-        values = list(filter(bool, filter_expression.strip().split(',')))
+        if ascii_case_insensitive:
+            values = list(
+                filter(bool, filter_expression.strip().lower().split(',')))
+        else:
+            values = list(filter(bool, filter_expression.strip().split(',')))
 
     if not values:
         return None
@@ -99,7 +108,7 @@ class SearchEngine:
             #
             # Playlist-specific filters
             #
-            country: str = '',
+            country: str | list[str] = '',
             dj_name: str = '',
             dj_name_exclude: str = '',
             playlist_include: str = '',
@@ -208,9 +217,12 @@ class SearchEngine:
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
-            .select('track.id', 'playlist.name', 'owner.name')\
+            .select('track.id', 'playlist.id', 'playlist.name', 'owner.id', 'owner.name')\
             .group_by('track.id')\
-            .agg(pl.col('playlist.name').unique().sort(), pl.col('owner.name').unique().sort())
+            .agg(pl.col('playlist.id').unique().sort(),
+                 pl.col('playlist.name').unique().sort(),
+                 pl.col('owner.id').unique().sort(),
+                 pl.col('owner.name').unique().sort())
 
         # ----------------------------
         # Apply track-specific filters

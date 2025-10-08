@@ -672,7 +672,8 @@ if playlist_locator_toggle:
 
 @st.cache_data
 def djs_data():
-    return load_search_engine().get_dj_stats(playlist_limit=30, dj_limit=2000).collect(streaming=True)
+    return load_search_engine().get_dj_stats(playlist_limit=30, dj_limit=2000).collect(engine='streaming')
+
 
 # Courtesy of Lino V.
 search_dj_toggle = st.toggle("DJ insights 🎧")
@@ -795,37 +796,38 @@ if search_dj_toggle:
     st.markdown(f"#### ")
 
 
+# TODO: The region/country statistics calculation has not yet been optimized,
+#       and may even crash on lower-end systems that do not have large amounts of RAM.
 @st.cache_data
 def region_data():
-    return (df
+    return (search_engine.find_songs()
+            .with_columns(pl.col('track.region').alias('region'))
+            .explode('region')
             .group_by('region')
-            .agg(song_count=pl.n_unique('track.name'),
-                 playlist_count=pl.n_unique('playlist_name'),
-                 dj_count=pl.n_unique('owner.display_name'),
-                 djs=pl.col('owner.display_name'),
-                 )
+            .agg(song_count=pl.n_unique('track.id'),
+                 playlist_count=pl.n_unique('playlist.id'),
+                 dj_count=pl.n_unique('owner.name'),
+                 djs=pl.col('owner.name'))
             .with_columns(pl.col('djs').list.unique().list.head(30))
             .sort('region')
-            .collect(streaming=True)
-            )
+            .collect(streaming=True))
 
 
 @st.cache_data
 def country_data():
-    return (df
+    return (search_engine.find_songs()
+            .with_columns(pl.col('track.country').alias('country'))
             .group_by('country')
-            .agg(song_count=pl.n_unique('track.name'),
-                 playlist_count=pl.n_unique('playlist_name'),
-                 dj_count=pl.n_unique('owner.display_name'),
-                 djs=pl.col('owner.display_name'),
-                 )
+            .agg(song_count=pl.n_unique('track.id'),
+                 playlist_count=pl.n_unique('playlist.id'),
+                 dj_count=pl.n_unique('owner.name'),
+                 djs=pl.col('owner.name'))
             .with_columns(pl.col('djs').list.unique().list.head(30))
             .sort('country')
-            .collect(streaming=True)
-            )
+            .collect(streaming=True))
 
 
-# courtesy of Lino V
+# Courtesy of Lino V.
 geo_region_toggle = st.toggle("Geographic Insights 🌎")
 if geo_region_toggle:
     st.markdown(f"\n\n\n#### Region-Specific Music:")
@@ -859,44 +861,40 @@ if geo_region_toggle:
 
     st.markdown(f"#### Comparing Countries' music:")
     countries_selectbox = st.multiselect(
-        "Compare these countries' music:", countries)
-    # country_1, country_2 = st.columns(2)
-    # with country_1:
-    #         country_compare_1 = st.text_input("Country 1:").lower()
-    # with country_2:
-    #         country_compare_2 = st.text_input("Country 2:").lower()
+        "Compare these countries' music:",
+        countries,
+        max_selections=2,
+    )
 
     if st.button("Compare countries", type="primary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True
-        log_query("Comparing Countries' music", {'countries_selectbox': countries_selectbox,
-                                                 })
+        log_query("Comparing Countries' music", {
+                  'countries_selectbox': countries_selectbox})
 
-        countries_df = df.filter(pl.col('country').cast(pl.String).str.contains_any(countries_selectbox),
-                                 pl.col('dj_count').gt(3),
-                                 pl.col('playlist_count').gt(3))
+        countries_df = search_engine.find_songs(country=countries_selectbox).filter(
+            pl.col('dj_count').gt(3),
+            pl.col('playlist_count').gt(3)
+        )
 
         country_1_df = (countries_df
                         .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[0]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                        )
+                        .select('track.name', 'song_url', 'dj_count', 'playlist_count'))
 
         country_2_df = (countries_df
                         .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[1]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count')
-                        )
+                        .select('track.name', 'song_url', 'dj_count', 'playlist_count'))
 
         # st.dataframe(country_1_df._fetch(10000))
         st.text(
             f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
         st.dataframe(country_1_df.join(country_2_df,
                                        how='anti',
-                                       on=['track.name', 'song_url']
-                                       )
+                                       on=['track.name', 'track.url'])
                      .unique()
                      .sort('dj_count', descending=True)
                      .head(300).collect(streaming=True),
                      # ._fetch(10000),
-                     column_config={"song_url": st.column_config.LinkColumn()})
+                     column_config={"track.url": st.column_config.LinkColumn()})
         st.session_state["processing"] = False
         st.markdown(f"#### ")
 
