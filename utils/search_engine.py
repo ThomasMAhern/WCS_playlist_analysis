@@ -211,4 +211,6 @@ class SearchEngine:
             matching_tracks = matching_tracks.filter(
                 match_song_release_date(pl.col('track.album.release_date')))
 
-        return matching_tracks.slice(skip_num_top_results, limit or None)
+        return matching_tracks\
+            .with_columns(pl.col('track.bpm').fill_null(0.0))\
+            .slice(skip_num_top_results, limit or None)
