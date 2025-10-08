@@ -3,6 +3,7 @@ import sys
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
+from utils.search_engine import COUNTRY_DATA_FILE, PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_DATA_FILE, SearchEngine
 
 if len(sys.argv) >= 2:
     mode = sys.argv[1] or 'load'
@@ -56,7 +57,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed playlist data to file
     if mode == 'write':
-        playlists_extended.sink_parquet('data_playlist_metadata.parquet')
+        playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
 
     tracks = source_data.select(
         pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
@@ -103,7 +104,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed track data to file
     if mode == 'write':
-        tracks_extended.sink_parquet('data_song_metadata.parquet')
+        tracks_extended.sink_parquet(TRACK_DATA_FILE)
 
     playlist_tracks = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
@@ -115,7 +116,7 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
-        playlist_tracks.sink_parquet('data_playlist_songs.parquet')
+        playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
 
     # # Write pre-processed track <=> playlist membership data
     # # optimized for track => playlist lookup
@@ -137,166 +138,37 @@ if mode == 'live' or mode == 'write':
 
     # Write pre-processed country data to file
     if mode == 'write':
-        countries_df.write_parquet('data_countries.parquet')
+        countries_df.write_parquet(COUNTRY_DATA_FILE)
+
+    search_engine = SearchEngine()
+    search_engine.set_data(
+        playlists=playlists_extended,
+        playlist_tracks=playlist_tracks,
+        tracks=tracks_extended,
+        countries=countries_df,
+    )
+
 
 elif mode == 'load':
-    # Load the pre-generated data from the Parquet files
-    playlists_extended = playlists = pl.scan_parquet(
-        'data_playlist_metadata.parquet')
-    playlist_tracks = pl.scan_parquet('data_playlist_songs.parquet')
-    tracks_extended = tracks = pl.scan_parquet('data_song_metadata.parquet')
-    countries_df = pl.read_parquet('data_countries.parquet')
+    search_engine = SearchEngine()
+    search_engine.load_data()
 
-countries = countries_df['country'].to_list()
-
-#####################
-# Filter parameters #
-#####################
-
-# Track-specific filters
-song_input: str = ''
-song_bpm_range: tuple[int, int] = (0, 150)
-song_release_date: str = ''
-artist_input: str = ''
-queer_toggle: bool = False
-poc_toggle: bool = False
-
-song_inputs: list[str] = list(
-    filter(bool, song_input.strip().lower().split(',')))
-song_release_dates: list[str] = list(
-    filter(bool, song_release_date.strip().split(',')))
-artist_inputs: list[str] = list(
-    filter(bool, artist_input.strip().lower().split(',')))
-
-# Playlist-specific filters
-country_input: str = ''
-dj_input: str = ''
-playlist_input: str = ''
-anti_playlist_input: str = ''
-
-# Only used for playlist generation
-# playlist_bpm_low: int = 90
-# playlist_bpm_med: int = 95
-# playlist_bpm_high: int = 100
-
-dj_inputs: list[str] = list(filter(bool, dj_input.strip().lower().split(',')))
-playlist_inputs: list[str] = list(
-    filter(bool, playlist_input.strip().lower().split(',')))
-anti_playlist_inputs: list[str] = list(filter(bool, anti_playlist_input
-                                              .strip().lower().split(',')))
-
-# Playlist-membership specific filters
-added_to_playlist_date_input: str = ''
-
-added_to_playlist_dates = list(
-    filter(bool, added_to_playlist_date_input.strip().split(',')))
-
-# Result options
-skip_num_top_results: int = 0
-
-#####################
-# Perform filtering #
-#####################
-
-# -------------------------------
-# Apply playlist-specific filters
-# -------------------------------
-
-matching_playlists = playlists_extended
-
-if playlist_inputs:
-    matching_playlists = matching_playlists.filter(
-        pl.col('playlist.name').str.contains_any(playlist_inputs, ascii_case_insensitive=True))
-
-if country_input:
-    matching_playlists = matching_playlists.filter(
-        pl.col('playlist.country').str.contains_any([country_input], ascii_case_insensitive=True))
-
-if dj_input:
-    matching_playlists = matching_playlists.filter(
-        pl.col('owner.name').cast(pl.String)
-        .str.contains_any(dj_input, ascii_case_insensitive=True)
-        | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
-
-if anti_playlist_input:
-    anti_predicate = pl.col('playlist.name').str.contains_any(
-        anti_playlist_inputs, ascii_case_insensitive=True)
-
-    # We want to remove tracks that are in these excluded playlists
-    # from the result, even when they are present in other matching playlists
-    excluded_playlists = playlists_extended.filter(anti_predicate)\
-        .select('playlist.id')
-
-    # But as an optimization, we also want to avoid including those playlists in the first place.
-    matching_playlists = matching_playlists.filter(anti_predicate.not_())
-else:
-    excluded_playlists = None
-
-# # Remove everything but the strictly necessary information
-# matching_playlists = matching_playlists.select('playlist.id')
-
-# ------------------------------------------
-# Apply playlist-membership-specific filters
-# ------------------------------------------
-
-matching_playlist_tracks = matching_playlists.join(
-    playlist_tracks, how='inner', on=['playlist.id'])
-
-if anti_playlist_inputs:
-    excluded_playlist_tracks = excluded_playlists.join(
-        playlist_tracks, how='inner', on=['playlist.id'])
-
-    matching_playlist_tracks = matching_playlist_tracks.join(
-        excluded_playlist_tracks, how='anti', on=['track.id'])
-
-# Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
-if added_to_playlist_dates:
-    matching_playlist_tracks = matching_playlist_tracks.filter(
-        pl.col('playlist_track.added_at').dt.to_string()
-        .str.contains_any(added_to_playlist_dates, ascii_case_insensitive=True))
-
-# Remove everything but the strictly necessary information
-matching_playlist_tracks = matching_playlist_tracks\
-    .select('track.id', 'playlist.name')\
-    .group_by('track.id')\
-    .agg(pl.col('playlist.name'))
-
-# ----------------------------
-# Apply track-specific filters
-# ----------------------------
-
-matching_tracks = matching_playlist_tracks.join(
-    tracks_extended, how='inner', on=['track.id'])
-
-if song_inputs:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.name').str.contains_any(song_inputs, ascii_case_insensitive=True))
-
-if artist_inputs:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.artists.name').str.contains_any(artist_inputs, ascii_case_insensitive=True))
-
-if queer_toggle:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.artists.is_queer_artist'))
-
-if poc_toggle:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.artists.is_poc_artist'))
-
-if song_bpm_range:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.bpm').is_null()
-        | (pl.col('track.bpm').ge(song_bpm_range[0])
-           & pl.col('track.bpm').le(song_bpm_range[1])))
-
-# Courtesy of James B. (for the release_date filter suggestion)
-if song_release_dates:
-    matching_tracks = matching_tracks.filter(
-        pl.col('track.album.release_date').dt.to_string().str.contains_any(
-            song_release_dates, ascii_case_insensitive=True))
-
-q = matching_tracks.slice(skip_num_top_results)
+q = search_engine.find_songs(
+    # Track-specific filters
+    song_input='',
+    song_bpm_range=(0, 150),
+    song_release_date='',
+    artist_input='',
+    queer_toggle=False,
+    poc_toggle=False,
+    # Playlist-specific filters
+    country_input='',
+    dj_input='',
+    playlist_input='',
+    anti_playlist_input='',
+    # Result options
+    skip_num_top_results=0,
+)
 
 result = q.unique().collect()
 print(result)
