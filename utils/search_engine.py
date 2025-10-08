@@ -25,7 +25,6 @@ def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = Tr
 
     return lambda expr: expr.str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
 
-
 def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] | None:
     """Parse a filter expression for a date column"""
     text_filter = create_text_filter(
@@ -36,6 +35,11 @@ def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] |
 
     return lambda expr: text_filter(expr.dt.to_string())
 
+def count_n_unique(data: pl.LazyFrame, columns: list[str]):
+    """Count the number of unique values in the specified columns."""
+    return list(data.select(pl.n_unique(columns))
+                    .collect(streaming=True)
+                    .iter_rows())[0]
 
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
@@ -58,6 +62,12 @@ class SearchEngine:
         self.playlist_tracks = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)
         self.tracks = pl.scan_parquet(TRACK_DATA_FILE)
         self.countries = extract_countries(pl.read_parquet(COUNTRY_DATA_FILE))
+
+    def get_stats(self) -> tuple[int, int, int, int]:
+        """Compute statistics about the database content."""
+        songs_count, artists_count = count_n_unique(self.tracks, ['track.name', 'track.artists.name'])
+        playlists_count, djs_count = count_n_unique(self.playlists, ['playlist.name', 'owner.name'])
+        return songs_count, artists_count, playlists_count, djs_count
 
     def find_songs(
             self,
@@ -88,6 +98,7 @@ class SearchEngine:
             skip_num_top_results: int = 0,
             limit: int | None = None,
     ) -> pl.LazyFrame:
+        """Returns the songs that match the given query."""
         #####################
         # Filter parameters #
         #####################
