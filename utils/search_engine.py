@@ -74,6 +74,16 @@ class SearchEngine:
             self.playlists, ['playlist.name', 'owner.name'])
         return songs_count, artists_count, playlists_count, djs_count
 
+    def get_dj_stats(
+        self,
+        *,
+        playlist_limit: int | None = 30,
+        dj_limit: int | None = 2000,
+    ) -> pl.LazyFrame:
+        """Get statistics about the different WCS DJs."""
+        # Courtesy of Lino V. (for the DJ stats feature suggestion)
+        return self.find_djs(playlist_limit=playlist_limit, dj_limit=dj_limit)
+
     def find_songs(
             self,
             *,
@@ -91,6 +101,7 @@ class SearchEngine:
             #
             country: str = '',
             dj_name: str = '',
+            dj_name_exclude: str = '',
             playlist_include: str = '',
             playlist_exclude: str = '',
             #
@@ -120,6 +131,7 @@ class SearchEngine:
 
         # Playlist-specific filters
         match_dj_name = create_text_filter(dj_name)
+        match_dj_name_exclude = create_text_filter(dj_name_exclude)
         match_country = create_text_filter(country)
         match_playlist = create_text_filter(playlist_include)
         match_excluded_playlist = create_text_filter(playlist_exclude)
@@ -151,6 +163,11 @@ class SearchEngine:
             matching_playlists = matching_playlists.filter(
                 match_dj_name(pl.col('owner.name').cast(pl.String))
                 | match_dj_name(pl.col('owner.id').cast(pl.String)))
+
+        if match_dj_name_exclude:
+            matching_playlists = matching_playlists.filter(
+                ~match_dj_name_exclude(pl.col('owner.name').cast(pl.String))
+                & ~match_dj_name_exclude(pl.col('owner.id').cast(pl.String)))
 
         # Courtesy of Tobias N. (for the suggestion of the playlist_exclude filter)
         if match_excluded_playlist:
@@ -191,9 +208,9 @@ class SearchEngine:
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
-            .select('track.id', 'playlist.name')\
+            .select('track.id', 'playlist.name', 'owner.name')\
             .group_by('track.id')\
-            .agg(pl.col('playlist.name'))
+            .agg(pl.col('playlist.name').unique().sort(), pl.col('owner.name').unique().sort())
 
         # ----------------------------
         # Apply track-specific filters
@@ -315,4 +332,51 @@ class SearchEngine:
         return matching_playlists.with_columns(
             pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
                 pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url'),
+            pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
         ).slice(0, limit or None)
+
+    def find_djs(
+        self,
+        *,
+        dj_name: str = '',
+        playlist_name: str = '',
+        playlist_limit: int | None = 30,
+        dj_limit: int | None = 100,
+    ) -> pl.LazyFrame:
+        """Returns DJs that match the given query."""
+
+        # Courtesy of Lino V. (for the DJ stats feature suggestion)
+
+        #####################
+        # Filter parameters #
+        #####################
+
+        match_dj_name = create_text_filter(dj_name)
+        match_playlist = create_text_filter(playlist_name)
+
+        #####################
+        # Perform filtering #
+        #####################
+
+        matching_playlists = self.playlists
+
+        if match_playlist:
+            matching_playlists = matching_playlists.filter(
+                match_playlist(pl.col('playlist.name')))
+
+        if match_dj_name:
+            matching_playlists = matching_playlists.filter(
+                match_dj_name(pl.col('owner.name').cast(pl.String))
+                | match_dj_name(pl.col('owner.id').cast(pl.String)))
+
+        return matching_playlists.with_columns(
+            pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
+        ).group_by('owner.name', 'owner.url').agg(
+            pl.n_unique('track.name').alias('song_count'),
+            pl.n_unique('track.artists.name').alias('artist_count'),
+            pl.n_unique('playlist.name').alias('playlist_count'),
+            pl.col('playlist.name').drop_nulls().unique()
+            .sort().slice(0, playlist_limit or None),
+        ).sort('playlist_count', descending=True).slice(0, dj_limit or None)
