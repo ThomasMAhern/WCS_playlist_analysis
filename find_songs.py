@@ -155,17 +155,17 @@ elif mode == 'load':
 
 q = search_engine.find_songs(
     # Track-specific filters
-    song_input='',
+    song_name='',
     song_bpm_range=(0, 150),
     song_release_date='',
-    artist_input='',
-    queer_toggle=False,
-    poc_toggle=False,
+    artist_name='',
+    artist_is_queer=False,
+    artist_is_poc=False,
     # Playlist-specific filters
-    country_input='',
-    dj_input='',
-    playlist_input='',
-    anti_playlist_input='',
+    country='',
+    dj_name='',
+    playlist_include='',
+    playlist_exclude='',
     # Result options
     skip_num_top_results=0,
 )

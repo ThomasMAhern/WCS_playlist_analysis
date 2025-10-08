@@ -39,23 +39,24 @@ class SearchEngine:
             #
             # Track-specific filters
             #
-            song_input: str = '',
+            song_name: str = '',
             song_bpm_range: tuple[int, int] = (0, 150),
             song_release_date: str = '',
-            artist_input: str = '',
-            queer_toggle: bool = False,
-            poc_toggle: bool = False,
+            artist_name: str = '',
+            artist_is_queer: bool = False,
+            artist_is_poc: bool = False,
             #
             # Playlist-specific filters
             #
-            country_input: str = '',
-            dj_input: str = '',
-            playlist_input: str = '',
-            anti_playlist_input: str = '',
+            country: str = '',
+            dj_name: str = '',
+            playlist_include: str = '',
+            playlist_exclude: str = '',
             #
             # Result options
             #
             skip_num_top_results: int = 0,
+            limit: int | None = None,
     ) -> pl.LazyFrame:
         #####################
         # Filter parameters #
@@ -63,11 +64,11 @@ class SearchEngine:
 
         # Track-specific filters
         song_inputs: list[str] = list(
-            filter(bool, song_input.strip().lower().split(',')))
+            filter(bool, song_name.strip().lower().split(',')))
         song_release_dates: list[str] = list(
             filter(bool, song_release_date.strip().split(',')))
         artist_inputs: list[str] = list(
-            filter(bool, artist_input.strip().lower().split(',')))
+            filter(bool, artist_name.strip().lower().split(',')))
 
         # Only used for playlist generation
         # playlist_bpm_low: int = 90
@@ -75,11 +76,11 @@ class SearchEngine:
         # playlist_bpm_high: int = 100
 
         # Playlist-specific filters
-        dj_inputs: list[str] = list(
-            filter(bool, dj_input.strip().lower().split(',')))
+        dj_names: list[str] = list(
+            filter(bool, dj_name.strip().lower().split(',')))
         playlist_inputs: list[str] = list(
-            filter(bool, playlist_input.strip().lower().split(',')))
-        anti_playlist_inputs: list[str] = list(filter(bool, anti_playlist_input
+            filter(bool, playlist_include.strip().lower().split(',')))
+        anti_playlist_inputs: list[str] = list(filter(bool, playlist_exclude
                                                       .strip().lower().split(',')))
 
         # Playlist-membership specific filters
@@ -102,17 +103,17 @@ class SearchEngine:
             matching_playlists = matching_playlists.filter(
                 pl.col('playlist.name').str.contains_any(playlist_inputs, ascii_case_insensitive=True))
 
-        if country_input:
+        if country:
             matching_playlists = matching_playlists.filter(
-                pl.col('playlist.country').str.contains_any([country_input], ascii_case_insensitive=True))
+                pl.col('playlist.country').str.contains_any([country], ascii_case_insensitive=True))
 
-        if dj_input:
+        if dj_name:
             matching_playlists = matching_playlists.filter(
                 pl.col('owner.name').cast(pl.String)
-                .str.contains_any(dj_input, ascii_case_insensitive=True)
-                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True))
+                .str.contains_any(dj_name, ascii_case_insensitive=True)
+                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_name, ascii_case_insensitive=True))
 
-        if anti_playlist_input:
+        if playlist_exclude:
             anti_predicate = pl.col('playlist.name').str.contains_any(
                 anti_playlist_inputs, ascii_case_insensitive=True)
 
@@ -171,11 +172,11 @@ class SearchEngine:
             matching_tracks = matching_tracks.filter(
                 pl.col('track.artists.name').str.contains_any(artist_inputs, ascii_case_insensitive=True))
 
-        if queer_toggle:
+        if artist_is_queer:
             matching_tracks = matching_tracks.filter(
                 pl.col('track.artists.is_queer_artist'))
 
-        if poc_toggle:
+        if artist_is_poc:
             matching_tracks = matching_tracks.filter(
                 pl.col('track.artists.is_poc_artist'))
 
@@ -191,4 +192,4 @@ class SearchEngine:
                 pl.col('track.album.release_date').dt.to_string().str.contains_any(
                     song_release_dates, ascii_case_insensitive=True))
 
-        return matching_tracks.slice(skip_num_top_results)
+        return matching_tracks.slice(skip_num_top_results, limit or None)
