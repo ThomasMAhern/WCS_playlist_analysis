@@ -126,6 +126,7 @@ class SearchEngine:
             matching_playlists = matching_playlists.filter(
                 match_playlist(pl.col('playlist.name')))
 
+        # Courtesy of Franzi M. (for the country filter suggestion)
         if match_country:
             matching_playlists = matching_playlists.filter(
                 match_country(pl.col('playlist.country')))
@@ -135,6 +136,7 @@ class SearchEngine:
                 match_dj_name(pl.col('owner.name').cast(pl.String))
                 | match_dj_name(pl.col('owner.id').cast(pl.String)))
 
+        # Courtesy of Tobias N. (for the suggestion of the playlist_exclude filter)
         if match_excluded_playlist:
             anti_predicate = match_excluded_playlist(pl.col('playlist.name'))
 
