@@ -28,7 +28,7 @@ if mode == 'live' or mode == 'write':
         pl.col('owner.display_name').alias('owner.name'),
         # Only required for extended data below
         pl.col('location').alias('playlist.location'),
-    ).sort('playlist.id').unique()
+    ).sort('playlist.id').unique('playlist.id')
 
     _is_social_set = (
         pl.col('playlist.extracted_date').list.len().gt(0)
@@ -72,8 +72,12 @@ if mode == 'live' or mode == 'write':
                           'track.artists.name',
                           'track.album.release_date']
 
+    all_track_ids = tracks.select('track.id')\
+        .unique('track.id').sort('track.id')
+
     unique_tracks = tracks.filter(pl.all_horizontal(
-        pl.col(track_info_columns).is_not_null())).unique('track.id')
+        pl.col(track_info_columns).is_not_null())
+    ).unique('track.id').join(all_track_ids, how='right', on='track.id')
 
     # Remove duplicated tracks (which can happen due to data quality issues)
     # and try to merge their metadata where possible
@@ -93,7 +97,8 @@ if mode == 'live' or mode == 'write':
         bpm_data.select(
             pl.col('track.name').cast(TRACK_NAME_DTYPE),
             pl.col('track.artists.name').cast(TRACK_ARTIST_DTYPE),
-            pl.col('bpm').cast(TRACK_BPM_DTYPE).alias('track.bpm')),
+            pl.col('bpm').cast(TRACK_BPM_DTYPE).alias('track.bpm')
+        ).unique(['track.name', 'track.artists.name']),
         how='left', on=['track.name', 'track.artists.name'])
 
     # Write pre-processed track data to file
@@ -106,7 +111,7 @@ if mode == 'live' or mode == 'write':
         # The following metadata is not strictly required
         pl.col('song_number').alias('playlist_track.number'),
         pl.col('added_at').alias('playlist_track.added_at'),
-    ).sort('playlist.id', 'track.id', 'playlist_track.number').unique()
+    ).sort('playlist.id', 'track.id', 'playlist_track.number')  # .unique('playlist.id', 'track.id')
 
     # Write pre-processed track <=> playlist membership data to file
     if mode == 'write':
@@ -154,7 +159,7 @@ song_bpm_range: tuple[int, int] = (0, 150)
 song_release_date: str = ''
 artist_input: str = ''
 queer_toggle: bool = False
-poc_toggle: bool = True
+poc_toggle: bool = False
 
 song_inputs: list[str] = list(
     filter(bool, song_input.strip().lower().split(',')))
@@ -166,8 +171,8 @@ artist_inputs: list[str] = list(
 # Playlist-specific filters
 country_input: str = ''
 dj_input: str = ''
-playlist_input: str = 'late night,social'
-anti_playlist_input: str = 'blues'
+playlist_input: str = ''
+anti_playlist_input: str = ''
 
 # Only used for playlist generation
 # playlist_bpm_low: int = 90
@@ -219,15 +224,16 @@ if anti_playlist_input:
 
     # We want to remove tracks that are in these excluded playlists
     # from the result, even when they are present in other matching playlists
-    excluded_playlists = playlists_extended.filter(anti_predicate)
+    excluded_playlists = playlists_extended.filter(anti_predicate)\
+        .select('playlist.id')
 
     # But as an optimization, we also want to avoid including those playlists in the first place.
     matching_playlists = matching_playlists.filter(anti_predicate.not_())
 else:
     excluded_playlists = None
 
-# Remove everything but the strictly necessary information
-matching_playlists = matching_playlists.select('playlist.id')
+# # Remove everything but the strictly necessary information
+# matching_playlists = matching_playlists.select('playlist.id')
 
 # ------------------------------------------
 # Apply playlist-membership-specific filters
@@ -249,9 +255,11 @@ if added_to_playlist_dates:
         pl.col('playlist_track.added_at').dt.to_string()
         .str.contains_any(added_to_playlist_dates, ascii_case_insensitive=True))
 
-
 # Remove everything but the strictly necessary information
-matching_playlist_tracks = matching_playlist_tracks.select('track.id')
+matching_playlist_tracks = matching_playlist_tracks\
+    .select('track.id', 'playlist.name')\
+    .group_by('track.id')\
+    .agg(pl.col('playlist.name'))
 
 # ----------------------------
 # Apply track-specific filters
@@ -259,6 +267,10 @@ matching_playlist_tracks = matching_playlist_tracks.select('track.id')
 
 matching_tracks = matching_playlist_tracks.join(
     tracks_extended, how='inner', on=['track.id'])
+
+if song_inputs:
+    matching_tracks = matching_tracks.filter(
+        pl.col('track.name').str.contains_any(song_inputs, ascii_case_insensitive=True))
 
 if artist_inputs:
     matching_tracks = matching_tracks.filter(
@@ -274,8 +286,9 @@ if poc_toggle:
 
 if song_bpm_range:
     matching_tracks = matching_tracks.filter(
-        pl.col('track.bpm').ge(song_bpm_range[0])
-        & pl.col('track.bpm').le(song_bpm_range[1]))
+        pl.col('track.bpm').is_null()
+        | (pl.col('track.bpm').ge(song_bpm_range[0])
+           & pl.col('track.bpm').le(song_bpm_range[1])))
 
 # Courtesy of James B. (for the release_date filter suggestion)
 if song_release_dates:
@@ -283,6 +296,12 @@ if song_release_dates:
         pl.col('track.album.release_date').dt.to_string().str.contains_any(
             song_release_dates, ascii_case_insensitive=True))
 
-q = matching_tracks
+q = matching_tracks.slice(skip_num_top_results)
 
-print(q.slice(skip_num_top_results).collect())
+result = q.unique().collect()
+print(result)
+
+# result.with_columns(pl.col('playlist.name').list.sort(
+# ).list.join(',')).write_csv('output.csv')
+# pl.scan_csv('output.csv').select('track.name', 'track.artists.name', 'track.id').sort(
+#     'track.name', 'track.artists.name', 'track.id').sink_csv('output.processed.csv')
