@@ -69,7 +69,7 @@ if mode == 'live' or mode == 'write':
         pl.col('owner.display_name').alias('owner.name'),
     ).group_by('track.id').agg(
         pl.col('track.name').drop_nulls().first(),
-        pl.col('track.artists.name').drop_nulls().first(),
+        pl.col('track.artists.name').drop_nulls().unique().alias('track.artists'),
         pl.col('track.album.release_date').drop_nulls().first(),
         pl.col('track.location').sort().unique(),
         pl.col('track.region').sort().unique(),
@@ -79,10 +79,11 @@ if mode == 'live' or mode == 'write':
     ).sort('track.id').unique()
 
     tracks_extended = tracks.with_columns(
-        pl.col('track.artists.name').str.to_lowercase().is_in(
-            queer_artists).alias("track.artists.is_queer_artist"),
-        pl.col('track.artists.name').str.to_lowercase().is_in(
-            poc_artists).alias("track.artists.is_poc_artist"),
+        pl.col('track.artists').list.join(', ').alias('track.artists.name'),
+        pl.col('track.artists').list.eval(pl.element().str.to_lowercase().is_in(
+            queer_artists)).list.any().alias("track.artists.is_queer_artist"),
+        pl.col('track.artists').list.eval(pl.element().str.to_lowercase().is_in(
+            poc_artists)).list.any().alias("track.artists.is_poc_artist"),
     ).join(
         bpm_data.select(
             pl.col('track.name').cast(TRACK_NAME_DTYPE),
