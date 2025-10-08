@@ -55,41 +55,30 @@ if mode == 'live' or mode == 'write':
         _is_wcs_dj.alias('owner.is_wcs_dj'),
     ).drop('playlist.location')
 
-    # Write pre-processed playlist data to file
-    if mode == 'write':
-        playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
-
     tracks = source_data.select(
         pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
         pl.col('track.name').cast(TRACK_NAME_DTYPE),
         pl.col('track.artists.name').cast(TRACK_ARTIST_DTYPE),
         pl.col('track.album.release_date').cast(pl.Date),
+        pl.col('location').alias('track.location'),
+        pl.col('location').str.split(' - ').list.get(
+            0, null_on_oob=True).cast(pl.Categorical).alias('track.region'),
+        pl.col('location').str.split(' - ').list.get(
+            1, null_on_oob=True).cast(pl.Categorical).alias('track.country'),
+        pl.col('playlist_id').alias('playlist.id'),
+        pl.col('owner.display_name').alias('owner.name'),
+    ).group_by('track.id').agg(
+        pl.col('track.name').drop_nulls().first(),
+        pl.col('track.artists.name').drop_nulls().first(),
+        pl.col('track.album.release_date').drop_nulls().first(),
+        pl.col('track.location').sort().unique(),
+        pl.col('track.region').sort().unique(),
+        pl.col('track.country').sort().unique(),
+        pl.col('playlist.id').n_unique().alias('playlist_count'),
+        pl.col('owner.name').n_unique().alias('dj_count'),
     ).sort('track.id').unique()
 
-    # Remove duplicated tracks (which can happen due to data quality issues)
-    # and try to keep only a single copies with complete metadata.
-    # TODO: This drops tracks where no copy with complete metadata exists
-    track_info_columns = ['track.name',
-                          'track.artists.name',
-                          'track.album.release_date']
-
-    all_track_ids = tracks.select('track.id')\
-        .unique('track.id').sort('track.id')
-
-    unique_tracks = tracks.filter(pl.all_horizontal(
-        pl.col(track_info_columns).is_not_null())
-    ).unique('track.id').join(all_track_ids, how='right', on='track.id')
-
-    # Remove duplicated tracks (which can happen due to data quality issues)
-    # and try to merge their metadata where possible
-    # unique_tracks = tracks.select('track.id').unique()
-    # for col in track_info_columns:
-    #     unique_tracks = unique_tracks.join(
-    #         tracks.select('track.id', col).filter(
-    #             pl.col(col).is_not_null()).unique('track.id'),
-    #         how='left', on=['track.id'])
-
-    tracks_extended = unique_tracks.with_columns(
+    tracks_extended = tracks.with_columns(
         pl.col('track.artists.name').str.to_lowercase().is_in(
             queer_artists).alias("track.artists.is_queer_artist"),
         pl.col('track.artists.name').str.to_lowercase().is_in(
@@ -102,10 +91,6 @@ if mode == 'live' or mode == 'write':
         ).unique(['track.name', 'track.artists.name']),
         how='left', on=['track.name', 'track.artists.name'])
 
-    # Write pre-processed track data to file
-    if mode == 'write':
-        tracks_extended.sink_parquet(TRACK_DATA_FILE)
-
     playlist_tracks = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
         pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
@@ -113,10 +98,6 @@ if mode == 'live' or mode == 'write':
         pl.col('song_number').alias('playlist_track.number'),
         pl.col('added_at').alias('playlist_track.added_at'),
     ).sort('playlist.id', 'track.id', 'playlist_track.number')  # .unique('playlist.id', 'track.id')
-
-    # Write pre-processed track <=> playlist membership data to file
-    if mode == 'write':
-        playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
 
     # # Write pre-processed track <=> playlist membership data
     # # optimized for track => playlist lookup
@@ -136,8 +117,11 @@ if mode == 'live' or mode == 'write':
         .sort('country')
         .collect(engine='streaming'))
 
-    # Write pre-processed country data to file
+    # Write pre-processed data to parquet files
     if mode == 'write':
+        playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
+        tracks_extended.sink_parquet(TRACK_DATA_FILE)
+        playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
         countries_df.write_parquet(COUNTRY_DATA_FILE)
 
     search_engine = SearchEngine()
@@ -164,8 +148,8 @@ q = search_engine.find_songs(
     # Playlist-specific filters
     country='',
     dj_name='',
-    playlist_include='',
-    playlist_exclude='',
+    playlist_include='late night',
+    playlist_exclude='blues',
     # Playlist-membership specific filters
     added_to_playlist_date='',
     # Result options
