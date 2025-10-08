@@ -15,7 +15,8 @@ def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
 def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = True) -> Callable[[pl.Expr], pl.Expr] | None:
     """Parse a filter expression for a text column."""
     if ascii_case_insensitive:
-        values = list(filter(bool, filter_expression.strip().lower().split(',')))
+        values = list(
+            filter(bool, filter_expression.strip().lower().split(',')))
     else:
         values = list(filter(bool, filter_expression.strip().split(',')))
 
@@ -23,6 +24,17 @@ def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = Tr
         return None
 
     return lambda expr: expr.str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
+
+
+def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] | None:
+    """Parse a filter expression for a date column"""
+    text_filter = create_text_filter(
+        filter_expression, ascii_case_insensitive=False)
+
+    if not text_filter:
+        return None
+
+    return lambda expr: text_filter(expr.dt.to_string())
 
 
 class SearchEngine:
@@ -82,8 +94,7 @@ class SearchEngine:
 
         # Track-specific filters
         match_song_name = create_text_filter(song_name)
-        match_song_release_date = create_text_filter(
-            song_release_date, ascii_case_insensitive=False)
+        match_song_release_date = create_date_filter(song_release_date)
         match_artist_name = create_text_filter(artist_name)
 
         # Only used for playlist generation
@@ -98,7 +109,8 @@ class SearchEngine:
         match_excluded_playlist = create_text_filter(playlist_exclude)
 
         # Playlist-membership-specific filters
-        match_added_to_playlist_date = create_text_filter(added_to_playlist_date, ascii_case_insensitive=False)
+        match_added_to_playlist_date = create_date_filter(
+            added_to_playlist_date)
 
         #####################
         # Perform filtering #
@@ -157,7 +169,7 @@ class SearchEngine:
         # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
         if match_added_to_playlist_date:
             matching_playlist_tracks = matching_playlist_tracks.filter(
-               match_added_to_playlist_date(pl.col('playlist_track.added_at').dt.to_string()))
+                match_added_to_playlist_date(pl.col('playlist_track.added_at')))
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
@@ -197,6 +209,6 @@ class SearchEngine:
         # Courtesy of James B. (for the release_date filter suggestion)
         if match_song_release_date:
             matching_tracks = matching_tracks.filter(
-                match_song_release_date(pl.col('track.album.release_date').dt.to_string()))
+                match_song_release_date(pl.col('track.album.release_date')))
 
         return matching_tracks.slice(skip_num_top_results, limit or None)
