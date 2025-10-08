@@ -1,3 +1,4 @@
+from typing import Callable
 import polars as pl
 
 
@@ -9,6 +10,19 @@ COUNTRY_DATA_FILE = 'data_countries.parquet'
 
 def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
     return countries_dataframe['country'].to_list()
+
+
+def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = True) -> Callable[[pl.Expr], pl.Expr] | None:
+    """Parse a filter expression for a text column."""
+    if ascii_case_insensitive:
+        values = list(filter(bool, filter_expression.strip().lower().split(',')))
+    else:
+        values = list(filter(bool, filter_expression.strip().split(',')))
+
+    if not values:
+        return None
+
+    return lambda expr: expr.str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
 
 
 class SearchEngine:
@@ -40,7 +54,7 @@ class SearchEngine:
             # Track-specific filters
             #
             song_name: str = '',
-            song_bpm_range: tuple[int, int] = (0, 150),
+            song_bpm_range: tuple[int, int] | None = None,
             song_release_date: str = '',
             artist_name: str = '',
             artist_is_queer: bool = False,
@@ -53,6 +67,10 @@ class SearchEngine:
             playlist_include: str = '',
             playlist_exclude: str = '',
             #
+            # Playlist-membership specific filters
+            #
+            added_to_playlist_date: str = '',
+            #
             # Result options
             #
             skip_num_top_results: int = 0,
@@ -63,12 +81,10 @@ class SearchEngine:
         #####################
 
         # Track-specific filters
-        song_inputs: list[str] = list(
-            filter(bool, song_name.strip().lower().split(',')))
-        song_release_dates: list[str] = list(
-            filter(bool, song_release_date.strip().split(',')))
-        artist_inputs: list[str] = list(
-            filter(bool, artist_name.strip().lower().split(',')))
+        match_song_name = create_text_filter(song_name)
+        match_song_release_date = create_text_filter(
+            song_release_date, ascii_case_insensitive=False)
+        match_artist_name = create_text_filter(artist_name)
 
         # Only used for playlist generation
         # playlist_bpm_low: int = 90
@@ -76,18 +92,13 @@ class SearchEngine:
         # playlist_bpm_high: int = 100
 
         # Playlist-specific filters
-        dj_names: list[str] = list(
-            filter(bool, dj_name.strip().lower().split(',')))
-        playlist_inputs: list[str] = list(
-            filter(bool, playlist_include.strip().lower().split(',')))
-        anti_playlist_inputs: list[str] = list(filter(bool, playlist_exclude
-                                                      .strip().lower().split(',')))
+        match_dj_name = create_text_filter(dj_name)
+        match_country = create_text_filter(country)
+        match_playlist = create_text_filter(playlist_include)
+        match_excluded_playlist = create_text_filter(playlist_exclude)
 
-        # Playlist-membership specific filters
-        added_to_playlist_date_input: str = ''
-
-        added_to_playlist_dates = list(
-            filter(bool, added_to_playlist_date_input.strip().split(',')))
+        # Playlist-membership-specific filters
+        match_added_to_playlist_date = create_text_filter(added_to_playlist_date, ascii_case_insensitive=False)
 
         #####################
         # Perform filtering #
@@ -99,23 +110,21 @@ class SearchEngine:
 
         matching_playlists = self.playlists
 
-        if playlist_inputs:
+        if match_playlist:
             matching_playlists = matching_playlists.filter(
-                pl.col('playlist.name').str.contains_any(playlist_inputs, ascii_case_insensitive=True))
+                match_playlist(pl.col('playlist.name')))
 
-        if country:
+        if match_country:
             matching_playlists = matching_playlists.filter(
-                pl.col('playlist.country').str.contains_any([country], ascii_case_insensitive=True))
+                match_country(pl.col('playlist.country')))
 
-        if dj_name:
+        if match_dj_name:
             matching_playlists = matching_playlists.filter(
-                pl.col('owner.name').cast(pl.String)
-                .str.contains_any(dj_name, ascii_case_insensitive=True)
-                | pl.col('owner.id').cast(pl.String).str.contains_any(dj_name, ascii_case_insensitive=True))
+                match_dj_name(pl.col('owner.name').cast(pl.String))
+                | match_dj_name(pl.col('owner.id').cast(pl.String)))
 
-        if playlist_exclude:
-            anti_predicate = pl.col('playlist.name').str.contains_any(
-                anti_playlist_inputs, ascii_case_insensitive=True)
+        if match_excluded_playlist:
+            anti_predicate = match_excluded_playlist(pl.col('playlist.name'))
 
             # We want to remove tracks that are in these excluded playlists
             # from the result, even when they are present in other matching playlists
@@ -138,7 +147,7 @@ class SearchEngine:
         matching_playlist_tracks = matching_playlists.join(
             self.playlist_tracks, how='inner', on=['playlist.id'])
 
-        if anti_playlist_inputs:
+        if excluded_playlists is not None:
             excluded_playlist_tracks = excluded_playlists.join(
                 self.playlist_tracks, how='inner', on=['playlist.id'])
 
@@ -146,10 +155,9 @@ class SearchEngine:
                 excluded_playlist_tracks, how='anti', on=['track.id'])
 
         # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
-        if added_to_playlist_dates:
+        if match_added_to_playlist_date:
             matching_playlist_tracks = matching_playlist_tracks.filter(
-                pl.col('playlist_track.added_at').dt.to_string()
-                .str.contains_any(added_to_playlist_dates, ascii_case_insensitive=True))
+               match_added_to_playlist_date(pl.col('playlist_track.added_at').dt.to_string()))
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
@@ -164,13 +172,13 @@ class SearchEngine:
         matching_tracks = matching_playlist_tracks.join(
             self.tracks, how='inner', on=['track.id'])
 
-        if song_inputs:
+        if match_song_name:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.name').str.contains_any(song_inputs, ascii_case_insensitive=True))
+                match_song_name(pl.col('track.name')))
 
-        if artist_inputs:
+        if match_artist_name:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.artists.name').str.contains_any(artist_inputs, ascii_case_insensitive=True))
+                match_artist_name(pl.col('track.artists.name')))
 
         if artist_is_queer:
             matching_tracks = matching_tracks.filter(
@@ -187,9 +195,8 @@ class SearchEngine:
                    & pl.col('track.bpm').le(song_bpm_range[1])))
 
         # Courtesy of James B. (for the release_date filter suggestion)
-        if song_release_dates:
+        if match_song_release_date:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.album.release_date').dt.to_string().str.contains_any(
-                    song_release_dates, ascii_case_insensitive=True))
+                match_song_release_date(pl.col('track.album.release_date').dt.to_string()))
 
         return matching_tracks.slice(skip_num_top_results, limit or None)

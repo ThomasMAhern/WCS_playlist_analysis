@@ -166,6 +166,8 @@ q = search_engine.find_songs(
     dj_name='',
     playlist_include='',
     playlist_exclude='',
+    # Playlist-membership specific filters
+    added_to_playlist_date='',
     # Result options
     skip_num_top_results=0,
 )
