@@ -635,49 +635,37 @@ playlist_locator_toggle = st.toggle("Find a Playlist 💿")
 if playlist_locator_toggle:
     playlist_col1, playlist_col2 = st.columns(2)
     with playlist_col1:
-        song_input = st.text_input("Contains the song:").lower().split(',')
-        playlist_input = st.text_input("Playlist name:").lower().split(',')
+        song_input = st.text_input("Contains the song:")
+        playlist_input = st.text_input("Playlist name:")
     with playlist_col2:
-        dj_input = st.text_input("DJ name:").lower().split(',')
-        anti_playlist_input2 = st.text_input(
-            "Not in playlist name: ").lower().split(',')
-
-    if anti_playlist_input2 == ['']:
-        anti_playlist_input2 = [
-            'this_is_a_bogus_value_to_hopefully_not_break_things']
+        dj_input = st.text_input("DJ name:")
+        anti_playlist_input2 = st.text_input("Not in playlist name: ")
 
     # if any(val for val in [playlist_input, song_input, dj_input]):
     if st.button("Search playlists", type="primary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True
         log_query("Search playlists", {'song_input': song_input,
-                                       'song_input': song_input,
                                        'dj_input': dj_input,
                                        'playlist_input': playlist_input,
                                        'anti_playlist_input': anti_playlist_input2,
                                        }
                   )
 
-        st.dataframe(df
-                     .filter(~pl.col('playlist_name').cast(pl.String).str.contains_any(anti_playlist_input2, ascii_case_insensitive=True),
-                             pl.col('playlist_name').cast(pl.String).str.contains_any(
-                         playlist_input, ascii_case_insensitive=True),
-                         pl.col('track.name').cast(pl.String).str.contains_any(
-                         song_input, ascii_case_insensitive=True),
+        # TODO: Expose additional query parameters in the UI
+        playlist_search_df = search_engine.find_playlists(
+            song_name=song_input,
+            # artist_name=...,
+            # country=...,
+            dj_name=dj_input,
+            playlist_include=playlist_input,
+            playlist_exclude=anti_playlist_input2,
+            limit=500,
+        )
 
-                         (pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)
-                          # | pl.col('dj_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True) #m3u playlists
-                          | pl.col('owner.id').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True)),
-
-                         # pl.col('owner.display_name').cast(pl.String).str.contains_any(dj_input, ascii_case_insensitive=True),
-                     )
-                     .group_by('playlist_name', 'playlist_url')
-                     .agg('owner.display_name', pl.n_unique('track.name').alias('song_count'),
-                          pl.n_unique('track.artists.name').alias('artist_count'), 'track.name')
-                     .with_columns(pl.col('owner.display_name', 'track.name').list.unique().list.sort(),)
-                     .head(500).collect(streaming=True),
+        st.dataframe(playlist_search_df.collect(streaming=True),
                      column_config={
-                         "playlist_url": st.column_config.LinkColumn()}
-                     )
+            "playlist.url": st.column_config.LinkColumn()}
+        )
         st.session_state["processing"] = False
     st.markdown(f"#### ")
 

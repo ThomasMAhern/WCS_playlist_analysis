@@ -160,6 +160,20 @@ q = search_engine.find_songs(
 result = q.unique().collect()
 print(result)
 
+q = search_engine.find_playlists(
+    # Track-specific filters
+    song_name='',
+    artist_name='Charlie Puth',
+    # Playlist-specific filters
+    playlist_include='late night',
+    playlist_exclude='blues',
+    # Result options
+    limit=500,
+)
+
+result = q.unique().collect()
+print(result)
+
 # result.with_columns(pl.col('playlist.name').list.sort(
 # ).list.join(',')).write_csv('output.csv')
 # pl.scan_csv('output.csv').select('track.name', 'track.artists.name', 'track.id').sort(

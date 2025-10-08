@@ -25,6 +25,7 @@ def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = Tr
 
     return lambda expr: expr.str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
 
+
 def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] | None:
     """Parse a filter expression for a date column"""
     text_filter = create_text_filter(
@@ -35,11 +36,13 @@ def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] |
 
     return lambda expr: text_filter(expr.dt.to_string())
 
+
 def count_n_unique(data: pl.LazyFrame, columns: list[str]):
     """Count the number of unique values in the specified columns."""
     return list(data.select(pl.n_unique(columns))
                     .collect(streaming=True)
                     .iter_rows())[0]
+
 
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
@@ -65,8 +68,10 @@ class SearchEngine:
 
     def get_stats(self) -> tuple[int, int, int, int]:
         """Compute statistics about the database content."""
-        songs_count, artists_count = count_n_unique(self.tracks, ['track.name', 'track.artists.name'])
-        playlists_count, djs_count = count_n_unique(self.playlists, ['playlist.name', 'owner.name'])
+        songs_count, artists_count = count_n_unique(
+            self.tracks, ['track.name', 'track.artists.name'])
+        playlists_count, djs_count = count_n_unique(
+            self.playlists, ['playlist.name', 'owner.name'])
         return songs_count, artists_count, playlists_count, djs_count
 
     def find_songs(
@@ -224,6 +229,90 @@ class SearchEngine:
             matching_tracks = matching_tracks.filter(
                 match_song_release_date(pl.col('track.album.release_date')))
 
-        return matching_tracks\
-            .with_columns(pl.col('track.bpm').fill_null(0.0))\
-            .slice(skip_num_top_results, limit or None)
+        return matching_tracks.with_columns(
+            pl.col('track.bpm').fill_null(0.0),
+            pl.when(pl.col('track.id').is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
+        ).slice(skip_num_top_results, limit or None)
+
+    def find_playlists(
+        self,
+        *,
+        song_name: str = '',
+        artist_name: str = '',
+        country: str = '',
+        dj_name: str = '',
+        playlist_include: str = '',
+        playlist_exclude: str = '',
+        limit: int | None = None,
+    ) -> pl.LazyFrame:
+        """Returns the playlists that match the given query."""
+        #####################
+        # Filter parameters #
+        #####################
+
+        # Track-specific filters
+        match_song_name = create_text_filter(song_name)
+        match_artist_name = create_text_filter(artist_name)
+
+        # Playlist-specific filters
+        match_dj_name = create_text_filter(dj_name)
+        match_country = create_text_filter(country)
+        match_playlist = create_text_filter(playlist_include)
+        match_excluded_playlist = create_text_filter(playlist_exclude)
+
+        #####################
+        # Perform filtering #
+        #####################
+
+        # ----------------------------
+        # Apply track-specific filters
+        # ----------------------------
+
+        has_tracks_filter = False
+        matching_tracks = self.tracks
+
+        if match_song_name:
+            has_tracks_filter = True
+            matching_tracks = matching_tracks.filter(
+                match_song_name(pl.col('track.name')))
+
+        if match_artist_name:
+            has_tracks_filter = True
+            matching_tracks = matching_tracks.filter(
+                match_artist_name(pl.col('track.artists.name')))
+
+        # -------------------------------
+        # Apply playlist-specific filters
+        # -------------------------------
+
+        matching_playlists = self.playlists
+
+        if has_tracks_filter:
+            matching_playlists = matching_playlists.join(
+                self.playlist_tracks.join(
+                    matching_tracks, how='semi', on=['track.id']),
+                how='semi', on=['playlist.id'])
+
+        if match_playlist:
+            matching_playlists = matching_playlists.filter(
+                match_playlist(pl.col('playlist.name')))
+
+        # Courtesy of Franzi M. (for the country filter suggestion)
+        if match_country:
+            matching_playlists = matching_playlists.filter(
+                match_country(pl.col('playlist.country')))
+
+        if match_dj_name:
+            matching_playlists = matching_playlists.filter(
+                match_dj_name(pl.col('owner.name').cast(pl.String))
+                | match_dj_name(pl.col('owner.id').cast(pl.String)))
+
+        if match_excluded_playlist:
+            matching_playlists = matching_playlists.filter(
+                match_excluded_playlist(pl.col('playlist.name')).not_())
+
+        return matching_playlists.with_columns(
+            pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url'),
+        ).slice(0, limit or None)
