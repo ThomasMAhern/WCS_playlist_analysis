@@ -1,6 +1,6 @@
 import streamlit as st
 # import wordcloud
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import polars as pl
 import psutil
 
