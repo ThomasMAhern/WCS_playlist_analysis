@@ -23,7 +23,7 @@ def create_text_filter(filter_expression: str, ascii_case_insensitive: bool = Tr
     if not values:
         return None
 
-    return lambda expr: expr.str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
+    return lambda expr: expr.cast(pl.String).str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
 
 
 def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] | None:
@@ -370,11 +370,15 @@ class SearchEngine:
                 match_dj_name(pl.col('owner.name').cast(pl.String))
                 | match_dj_name(pl.col('owner.id').cast(pl.String)))
 
-        return matching_playlists.with_columns(
+        return matching_playlists.join(
+            self.playlist_tracks, how='inner', on=['playlist.id']
+        ).join(
+            self.tracks, how='inner', on=['track.id']
+        ).with_columns(
             pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
                 pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
         ).group_by('owner.name', 'owner.url').agg(
-            pl.n_unique('track.name').alias('song_count'),
+            pl.n_unique('track.id').alias('song_count'),
             pl.n_unique('track.artists.name').alias('artist_count'),
             pl.n_unique('playlist.name').alias('playlist_count'),
             pl.col('playlist.name').drop_nulls().unique()
