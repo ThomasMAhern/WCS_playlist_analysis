@@ -516,7 +516,7 @@ class SearchEngine:
 
     def find_related_songs(
         self,
-        direction: Literal['prev', 'next'],
+        direction: Literal['any', 'prev', 'next'],
         *,
         song_name: str = '',
         artist_name: str = '',
@@ -528,37 +528,47 @@ class SearchEngine:
             raise RuntimeError(
                 'self.tracks_adjacent must be initialized to use related track lookup')
 
-        #####################
-        # Filter parameters #
-        #####################
-
         track_filter = TrackFilter(
             song_name=song_name,
             artist_name=artist_name,
         )
 
-        if direction == 'next':
-            this_song_id = 'pair1.track.id'
-            other_song_id = 'pair2.track.id'
-        elif direction == 'prev':
-            this_song_id = 'pair2.track.id'
-            other_song_id = 'pair1.track.id'
-        else:
-            raise ValueError(f'Invalid value for direction: {direction}')
-
         matching_tracks =\
             track_filter.filter_tracks(
                 self.tracks)
 
-        adjacent_tracks = TrackSet(self.tracks_adjacent.join(
-            matching_tracks.tracks,
-            how='semi',
-            left_on=this_song_id,
-                right_on='track.id'
-        ).select(
-            pl.col(other_song_id).alias('track.id'),
-            pl.col('playlist_count').alias('times_played_together')
-        ).join(self.tracks, how='inner', on='track.id'), is_filtered=True)
+        def find_adjacent_tracks(starting_tracks, direction: Literal['prev', 'next']):
+            if direction == 'next':
+                this_song_id='pair1.track.id'
+                other_song_id='pair2.track.id'
+            elif direction == 'prev':
+                this_song_id='pair2.track.id'
+                other_song_id='pair1.track.id'
+            else:
+                raise ValueError(f'Invalid value for direction: {direction}')
+
+            return self.tracks_adjacent.join(
+                starting_tracks,
+                how='semi',
+                left_on=this_song_id,
+                    right_on='track.id',
+            ).select(
+                pl.col(other_song_id).alias('track.id'),
+                pl.col('playlist_count').alias('times_played_together')
+            )
+
+        if direction == 'any':
+            adjacent_track_ids = pl.concat([
+                find_adjacent_tracks(matching_tracks.tracks, 'prev'),
+                find_adjacent_tracks(matching_tracks.tracks, 'next')
+            ]).group_by('track.id').agg(
+                pl.col('times_played_together').sum(),
+            )
+        else:
+            adjacent_track_ids = find_adjacent_tracks(matching_tracks.tracks, direction)
+
+        adjacent_tracks = TrackSet(adjacent_track_ids.join(
+            self.tracks, how='inner', on='track.id'), is_filtered=True)
 
         return (matching_tracks.with_extra_columns().tracks.limit(100),
                 adjacent_tracks.with_extra_columns()
