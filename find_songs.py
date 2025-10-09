@@ -24,7 +24,7 @@ OWNER_ID_DTYPE = pl.String
 OWNER_NAME_DTYPE = pl.String
 
 # Handle different caching modes
-if mode == 'live' or mode == 'write':
+if mode == 'write':
     # Calculate the derived data at runtime, and optionally write it to a file
     source_data = pl.scan_parquet('data_playlists.parquet')
     bpm_data = pl.scan_parquet('data_song_bpm.parquet')
@@ -133,33 +133,22 @@ if mode == 'live' or mode == 'write':
         .collect(engine='streaming'))
 
     # Write pre-processed data to parquet files
-    if mode == 'write':
-        print(f'Writing {PLAYLIST_DATA_FILE}...')
-        playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
+    print(f'Writing {PLAYLIST_DATA_FILE}...')
+    playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
 
-        print(f'Writing {TRACK_DATA_FILE}...')
-        tracks_extended.sink_parquet(TRACK_DATA_FILE)
+    print(f'Writing {TRACK_DATA_FILE}...')
+    tracks_extended.sink_parquet(TRACK_DATA_FILE)
 
-        print(f'Writing {PLAYLIST_TRACKS_DATA_FILE}...')
-        playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
+    print(f'Writing {PLAYLIST_TRACKS_DATA_FILE}...')
+    playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
 
-        print(f'Writing {COUNTRY_DATA_FILE}...')
-        countries_df.write_parquet(COUNTRY_DATA_FILE)
+    print(f'Writing {COUNTRY_DATA_FILE}...')
+    countries_df.write_parquet(COUNTRY_DATA_FILE)
 
-        print("Done.")
+    print("Done.")
 
-    search_engine = SearchEngine()
-    search_engine.set_data(
-        playlists=playlists_extended,
-        playlist_tracks=playlist_tracks,
-        tracks=tracks_extended,
-        countries=countries_df,
-    )
-
-
-elif mode == 'load':
-    search_engine = SearchEngine()
-    search_engine.load_data()
+search_engine = SearchEngine()
+search_engine.load_data()
 
 q = search_engine.find_songs(
     # Track-specific filters
