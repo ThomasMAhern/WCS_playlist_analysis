@@ -138,11 +138,6 @@ def wcs_specific(df_):
             )
 
 
-@st.cache_resource
-def load_lyrics():
-    return pl.scan_parquet('song_lyrics.parquet')
-
-
 # makes it so streamlit doesn't have to reload for every sesson.
 @st.cache_resource
 def load_notes():
@@ -166,17 +161,10 @@ def load_stats():
 if "processing" not in st.session_state:
     st.session_state["processing"] = False
 
-search_engine = load_search_engine();
-df = load_playlist_data()
-# st.write(f"df is good")
-df_lyrics = load_lyrics()
-# st.write(f"lyrics is good")
+search_engine = load_search_engine()
 df_notes = load_notes()
-# st.write(f"notes is good")
 countries = load_countries()
-# st.write(f"countries is good")
-songs_count, artists_count, playlists_count, djs_count = load_stats()
-# st.write(f"stats is good")
+songs_count, artists_count, playlists_count, djs_count, lyrics_count = load_stats()
 
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
@@ -488,8 +476,6 @@ if song_locator_toggle:
 
         results_df = song_search_df.with_columns(
             pl.col('playlist.name').list.head(30),
-            pl.when(pl.col('track.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url')
         ).with_row_index(offset=1).collect(engine="streaming")
 
         st.dataframe(results_df,
@@ -630,7 +616,7 @@ if song_locator_toggle:
     st.markdown(f"#### ")
 
 
-# courtesy of Vishal S
+# Courtesy of Vishal S.
 playlist_locator_toggle = st.toggle("Find a Playlist 💿")
 if playlist_locator_toggle:
     playlist_col1, playlist_col2 = st.columns(2)
@@ -699,7 +685,7 @@ if search_dj_toggle:
 
         dj_search_df = search_engine.find_djs(
             dj_name=dj_input,
-            playlist_name=dj_playlist_input,
+            playlist_include=dj_playlist_input,
             dj_limit=100,
             playlist_limit=30,
         ).collect(engine='streaming')
@@ -936,16 +922,15 @@ if songs_together_toggle:
 lyrics_toggle = st.toggle("Search lyrics 📋")
 if lyrics_toggle:
 
-    st.write(
-        f"from {df_lyrics.select('artist', 'song').unique().collect(streaming=True).shape[0]:,} songs")
+    st.write(f"from {lyrics_count:,} songs")
     lyrics_col1, lyrics_col2 = st.columns(2)
     with lyrics_col1:
         song_input = st.text_input("Song:")
-        lyrics_input = st.text_input("In lyrics:").lower().split(',')
+        lyrics_input = st.text_input("In lyrics:")
 
     with lyrics_col2:
         artist_input = st.text_input("Artist:")
-        anti_lyrics_input = st.text_input("Not in lyrics:").lower().split(',')
+        anti_lyrics_input = st.text_input("Not in lyrics:")
 
     if anti_lyrics_input == ['']:
         anti_lyrics_input = [
@@ -953,50 +938,39 @@ if lyrics_toggle:
 
     if st.button("Search lyrics", type="primary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True
-        st.dataframe(
-            df_lyrics.with_columns(
-                pl.col(['song', 'artist']).cast(pl.Categorical))
-            .join(df.select('song_url', 'playlist_count', 'dj_count',
-                            song=pl.col('track.name'),
-                            artist=pl.col('track.artists.name')).unique(),
-                  how='left', on=['song', 'artist'])
-            .filter(~pl.col('lyrics').str.contains_any(anti_lyrics_input, ascii_case_insensitive=True),
-                    pl.col('lyrics').str.contains_any(
-                    lyrics_input, ascii_case_insensitive=True),
-                    pl.col('song').cast(pl.String).str.contains_any(
-                    [song_input], ascii_case_insensitive=True),
-                    pl.col('artist').cast(pl.String).str.contains_any(
-                    [artist_input], ascii_case_insensitive=True),
-                    )
-            .with_columns(matched_lyrics=pl.col('lyrics')
-                          .str.to_lowercase()
-                          .str.extract_all('|'.join(lyrics_input))
-                          .list.eval(pl.element().str.to_lowercase())
-                          .list.unique(),
-                          )
 
-            # otherwise there will be multiple rows for each song variation
-            .group_by(pl.all().exclude('song_url', 'playlist_count', 'dj_count',))
-            .agg('song_url', 'playlist_count', 'dj_count',)
-            .with_columns(pl.col('song_url').list.get(0),  # otherwise multiple urls will be smashed together
-                          playlists=pl.col('playlist_count').list.sort(
-                              descending=True).list.get(0),
-                          djs=pl.col('dj_count').list.sort(
-                              descending=True).list.get(0),
-                          )
-            .drop('playlist_count', 'dj_count',)
-            .unique()
-            .sort(pl.col('matched_lyrics').list.len(), 'playlists', 'djs', descending=True, nulls_last=True)
-            .head(100)
-            .collect(streaming=True),
-            column_config={"song_url": st.column_config.LinkColumn()}
-        )
+        st.dataframe(
+            search_engine.find_songs(
+                song_name=song_input,
+                artist_name=artist_input,
+                playlist_in_result=False,
+                playlist_track_in_result=False,
+                lyrics_include=lyrics_input,
+                lyrics_exclude=anti_lyrics_input,
+                lyrics_in_result=True,
+            )
+            # Otherwise there will be multiple rows for each song variation
+            .group_by('track.name', 'track.artists.name')
+            .agg(pl.col('track.url').first(),
+                 pl.col('track.artists').first(),
+                 pl.col('matched_lyrics').first(),
+                 # TODO: Adding up playlist_count may lead to slightly inflated numbers
+                 #       when different instances of a song are include in a single playlist.
+                 pl.col('playlist_count').sum(),
+                 # TODO: The merged dj_count will very likely be too large, since
+                 #       it double-counts DJs if multiple instances of a song are present.
+                 #       The only good way to deal with this is to unify those instances
+                 #       during the pre-processing of the data.
+                 pl.col('dj_count').sum())
+            .sort(pl.col('matched_lyrics').list.len(), descending=True, nulls_last=True),
+            column_config={"track.url": st.column_config.LinkColumn()})
+
         st.session_state["processing"] = False
 
 
 st.markdown("# ")
 st.markdown("# ")
-st.markdown("#### WCS resourses/apps by others:")
+st.markdown("#### WCS resources/apps by others:")
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
 st.link_button('📍 Find a WCS class near you!',
