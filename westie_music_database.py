@@ -145,166 +145,72 @@ st.link_button("Help fill in country info!",
 st.markdown("#### ")
 st.markdown("#### Choose your own adventure!")
 
+# TODO: For general usage, it would be best to pre-compute the "Top Song"
+#       lists at build time
 
 @st.cache_data
 def top_songs():
-    '''creates the standard top songs until user '''
-    return (df
-            # add notes
-            .join((df_notes
-                   # .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-                   ),
-                  how='full',
-                  on=['track.artists.name', 'track.name'])
-            # add bpm
-            .join((pl.scan_parquet('data_song_bpm.parquet')
-                   .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-                   ), how='left', on=['track.name', 'track.artists.name'])
-
-            .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
-            .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
-            .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm',
-                 'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
-                 #      'apprx_song_position_in_playlist',
-                 'notes', 'note_source',
-                 # connies notes
-                 'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-            .with_columns(pl.col('playlist_name', 'owner.display_name',
-                                 #      'apprx_song_position_in_playlist',
-                                 'track.artists.name', 'country',
-                                 # connies notes
-                                 'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty',
-                                 'Familiarity', 'Transition type', 'poc_artist',
-                                 ).list.unique().list.drop_nulls().list.head(30),
-                          pl.col('notes', 'note_source').list.unique(
-            ).list.sort().list.drop_nulls(),
-            )
-            .with_columns(pl.col("queer_artist").list.any(),  # resolves True/False to just True if any True are present
-                          pl.col("poc_artist").list.any(),
-                          )
-            .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
-                    pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
-            .sort('matching_playlist_count', descending=True)
-            .with_row_index(offset=1)
-            .head(100).collect(streaming=True)
-            )
+    """Returns the top songs aggregated over all playlists."""
+    return search_engine.find_songs(
+        sort_by='playlist_count',
+        descending=True,
+        limit=100,
+    ).with_row_index(offset=1).collect(engine='streaming')
 
 
-top_songs = top_songs()
+@st.cache_data
+def top_queer_songs():
+    """Returns the top songs by queer artists aggregated over all playlists."""
+    return search_engine.find_songs(
+        artist_is_queer=True,
+        sort_by='playlist_count',
+        descending=True,
+        limit=100,
+    ).with_row_index(offset=1).collect(engine='streaming')
 
-# @st.cache_data
-# def top_queer_songs():
-#         '''creates the standard top songs until user '''
-#         return (df
-#                 #add notes
-#                  .join((df_notes
-#                         # .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-#                         ),
-#                         how='full',
-#                         on=['track.artists.name', 'track.name'])
-#                 #add bpm
-#                 .join((pl.scan_parquet('data_song_bpm.parquet')
-#                        .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-#                        ), how='left', on=['track.name', 'track.artists.name'])
-#                 .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(queer_artists, ascii_case_insensitive=True),)
-#                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
-#                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
-#                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm',
-#                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
-#                 #      'apprx_song_position_in_playlist',
-#                      'notes', 'note_source',
-#                         #connies notes
-#                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-#                 .with_columns(pl.col('playlist_name', 'owner.display_name',
-#                                 #      'apprx_song_position_in_playlist',
-#                                      'track.artists.name', 'country',
-#                                         #connies notes
-#                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty',
-#                                         'Familiarity', 'Transition type', 'poc_artist',
-#                                         ).list.unique().list.drop_nulls().list.head(30),
-#                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-#                                 )
-#                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
-#                               pl.col("poc_artist").list.any(),
-#                               )
-#                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
-#                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
-#                 .sort('matching_playlist_count', descending=True)
-#                 .with_row_index(offset=1)
-#                 .head(100).collect(streaming=True)
-#                 )
-# top_queer_songs = top_queer_songs()
 
-# @st.cache_data
-# def top_poc_songs():
-#         '''creates the standard top songs until user '''
-#         return (df
-#                 #add notes
-#                  .join((df_notes
-#                         # .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-#                         ),
-#                         how='full',
-#                         on=['track.artists.name', 'track.name'])
-#                 #add bpm
-#                 .join((pl.scan_parquet('data_song_bpm.parquet')
-#                        .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
-#                        ), how='left', on=['track.name', 'track.artists.name'])
-#                 .filter(pl.col('track.artists.name').cast(pl.String).str.contains_any(poc_artists, ascii_case_insensitive=True),)
-#                 .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
-#                 .group_by('track.name', 'song_url', 'playlist_count', 'dj_count')
-#                 .agg(pl.n_unique('playlist_name').alias('matching_playlist_count'), 'queer_artist', 'bpm',
-#                      'playlist_name', 'track.artists.name', 'owner.display_name', 'country', 'poc_artist',
-#                 #      'apprx_song_position_in_playlist',
-#                      'notes', 'note_source',
-#                         #connies notes
-#                         'Starting energy', 'Ending energy', 'BPM', 'Genres', 'Acousticness', 'Difficulty', 'Familiarity', 'Transition type')
-#                 .with_columns(pl.col('playlist_name', 'owner.display_name',
-#                                 #      'apprx_song_position_in_playlist',
-#                                      'track.artists.name', 'country',
-#                                         #connies notes
-#                                         'Starting energy', 'Ending energy', 'queer_artist', 'bpm', 'BPM', 'Genres', 'Acousticness', 'Difficulty',
-#                                         'Familiarity', 'Transition type', 'poc_artist',
-#                                         ).list.unique().list.drop_nulls().list.head(30),
-#                                 pl.col('notes', 'note_source').list.unique().list.sort().list.drop_nulls(),
-#                                 )
-#                 .with_columns(pl.col("queer_artist").list.any(), #resolves True/False to just True if any True are present
-#                               pl.col("poc_artist").list.any(),
-#                               )
-#                 .select('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',
-#                         pl.all().exclude('track.name', 'song_url', 'playlist_count', 'dj_count', 'bpm',))
-#                 .sort('matching_playlist_count', descending=True)
-#                 .with_row_index(offset=1)
-#                 .head(100).collect(streaming=True)
-#                 )
-# top_poc_songs = top_poc_songs()
+@st.cache_data
+def top_poc_songs():
+    """Returns the top songs by POC artists aggregated over all playlists."""
+    return search_engine.find_songs(
+        artist_is_poc=True,
+        sort_by='playlist_count',
+        descending=True,
+        limit=100,
+    ).with_row_index(offset=1).collect(engine='streaming')
 
 
 top_songs_toggle = st.toggle("Top 100 WCS songs!")
 if top_songs_toggle:
+    top_songs = top_songs()
+
     st.link_button('Playlist of the top 100',
                    url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
-    st.dataframe(top_songs.drop('matching_playlist_count'),
-                 column_config={"song_url": st.column_config.LinkColumn()}
-                 )
+    st.dataframe(top_songs.drop('playlist_count'),
+                 column_config={"song_url": st.column_config.LinkColumn()})
 
-# top_queer_songs_toggle = st.toggle("Top 100 🏳️‍🌈 songs!")
-# if top_queer_songs_toggle:
-#         # st.link_button('Playlist of the top 100',
-#         #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
-#         st.dataframe(top_queer_songs.drop('matching_playlist_count'),
-#                      column_config={"song_url": st.column_config.LinkColumn()}
-#                      )
+top_queer_songs_toggle = st.toggle("Top 100 🏳️‍🌈 songs!")
+if top_queer_songs_toggle:
+    top_queer_songs = top_queer_songs()
 
-# top_poc_songs_toggle = st.toggle("Top 100 POC songs!")
-# if top_poc_songs_toggle:
-#         # st.link_button('Playlist of the top 100',
-#         #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
+    # st.link_button('Playlist of the top 100',
+    #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
-#         st.dataframe(top_poc_songs.drop('matching_playlist_count'),
-#                      column_config={"song_url": st.column_config.LinkColumn()}
-#                      )
+    st.dataframe(top_queer_songs.drop('playlist_count'),
+                 column_config={"song_url": st.column_config.LinkColumn()})
+
+
+top_poc_songs_toggle = st.toggle("Top 100 POC songs!")
+if top_poc_songs_toggle:
+    top_poc_songs = top_poc_songs()
+
+    # st.link_button('Playlist of the top 100',
+    #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
+
+    st.dataframe(top_poc_songs.drop('playlist_count'),
+                 column_config={"track.url": st.column_config.LinkColumn()})
 
 
 # Courtesy of Vishal S.

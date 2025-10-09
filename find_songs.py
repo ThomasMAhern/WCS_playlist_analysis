@@ -169,8 +169,12 @@ q = search_engine.find_songs(
     skip_num_top_results=0,
 )
 
-result = q.unique().collect()
-print(result)
+if mode == 'explain':
+    print(q)
+    print(q.explain(optimized=True))
+else:
+    result = q.unique().collect()
+    print(result)
 
 q = search_engine.find_playlists(
     # Track-specific filters
@@ -183,10 +187,27 @@ q = search_engine.find_playlists(
     limit=500,
 )
 
-result = q.unique().collect()
-print(result)
+if mode == 'explain':
+    print(q)
+    print(q.explain(optimized=True))
+else:
+    result = q.unique().collect()
+    print(result)
 
 # result.with_columns(pl.col('playlist.name').list.sort(
 # ).list.join(',')).write_csv('output.csv')
 # pl.scan_csv('output.csv').select('track.name', 'track.artists.name', 'track.id').sort(
 #     'track.name', 'track.artists.name', 'track.id').sink_csv('output.processed.csv')
+
+q = search_engine.find_songs(
+    sort_by='playlist_count',
+    descending=True,
+    limit=100,
+).with_row_index(offset=1)
+
+if mode == 'explain':
+    print(q)
+    print(q.explain(optimized=True))
+else:
+    result = q.select('index', 'playlist_count', 'track.name').collect()
+    print(result)
