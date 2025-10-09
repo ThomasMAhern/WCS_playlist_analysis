@@ -3,7 +3,10 @@ import sys
 
 from utils.search_engine import PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_ADJACENT_DATA_FILE, SearchEngine
 
-mode = sys.argv[1]
+if len(sys.argv) >= 2:
+    mode = sys.argv[1] or 'load'
+else:
+    mode = 'load'
 
 if mode == 'write':
     social_playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)\
