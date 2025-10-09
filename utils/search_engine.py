@@ -1,10 +1,13 @@
-from typing import Callable
+from dataclasses import dataclass
+from typing import Callable, Literal
 import polars as pl
 
+import utils.types.lazyframes as lf
 
 PLAYLIST_DATA_FILE = 'data_playlist_metadata.parquet'
 PLAYLIST_TRACKS_DATA_FILE = 'data_playlist_songs.parquet'
 TRACK_DATA_FILE = 'data_song_metadata.parquet'
+TRACK_ADJACENT_DATA_FILE = 'data_song_adjacent.parquet'
 COUNTRY_DATA_FILE = 'data_countries.parquet'
 
 
@@ -53,19 +56,268 @@ def count_n_unique(data: pl.LazyFrame, columns: list[str]):
                     .iter_rows())[0]
 
 
+@dataclass
+class PlaylistSet:
+    included_playlists: lf.Playlists
+    excluded_playlists: lf.Playlists | None = None
+
+    def with_playlist_url(self):
+        return PlaylistSet(
+            self.included_playlists.with_columns(
+                pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url')),
+            self.excluded_playlists)
+
+    def with_owner_url(self):
+        return PlaylistSet(
+            self.included_playlists.with_columns(
+                pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')),
+            self.excluded_playlists)
+
+    def with_extra_columns(self):
+        return self\
+            .with_playlist_url()\
+            .with_owner_url()
+
+    def filter_playlist_tracks(self, playlist_tracks_to_filter: lf.PlaylistTracks) -> lf.PlaylistTracks:
+        """Filter the specified playlist_tracks_to_filter to only include tracks from matched playlists."""
+
+        matching_playlist_tracks = self.included_playlists.join(
+            playlist_tracks_to_filter, how='inner', on=['playlist.id'])
+
+        if self.excluded_playlists is not None:
+            excluded_playlist_tracks = self.excluded_playlists.join(
+                playlist_tracks_to_filter, how='inner', on=['playlist.id'])
+
+            matching_playlist_tracks = matching_playlist_tracks.join(
+                excluded_playlist_tracks, how='anti', on=['track.id'])
+
+        return matching_playlist_tracks
+
+    def filter_tracks(self, playlist_tracks_to_filter: lf.PlaylistTracks, tracks_to_filter: lf.Tracks) -> lf.Tracks:
+        """Filter the specified tracks_to_filter to only include tracks from matched playlists."""
+        return self.filter_playlist_tracks(playlist_tracks_to_filter).join(
+            tracks_to_filter, how='inner', on=['track.id'])
+
+
+@dataclass
+class PlaylistFilter:
+    """Playlist-specific filters."""
+
+    # User-provided parameters
+    country: str | list[str] = ''
+    dj_name: str = ''
+    dj_name_exclude: str = ''
+    playlist_include: str = ''
+    playlist_exclude: str = ''
+
+    def filter_playlists(self, playlists_to_filter: lf.Playlists) -> PlaylistSet:
+        """Filter the specified playlists_to_filter to only include playlists matching this filter."""
+
+        # Parse filters
+        match_dj_name = create_text_filter(self.dj_name)
+        match_dj_name_exclude = create_text_filter(self.dj_name_exclude)
+        match_country = create_text_filter(self.country)
+        match_playlist = create_text_filter(self.playlist_include)
+        match_excluded_playlist = create_text_filter(self.playlist_exclude)
+
+        # Apply filters to provided data
+        matching_playlists = playlists_to_filter
+
+        if match_playlist:
+            matching_playlists = matching_playlists.filter(
+                match_playlist(pl.col('playlist.name')))
+
+        # Courtesy of Franzi M. (for the country filter suggestion)
+        if match_country:
+            matching_playlists = matching_playlists.filter(
+                match_country(pl.col('playlist.country')))
+
+        if match_dj_name:
+            matching_playlists = matching_playlists.filter(
+                match_dj_name(pl.col('owner.name').cast(pl.String))
+                | match_dj_name(pl.col('owner.id').cast(pl.String)))
+
+        if match_dj_name_exclude:
+            matching_playlists = matching_playlists.filter(
+                ~match_dj_name_exclude(pl.col('owner.name').cast(pl.String))
+                & ~match_dj_name_exclude(pl.col('owner.id').cast(pl.String)))
+
+        # Courtesy of Tobias N. (for the suggestion of the playlist_exclude filter)
+        if match_excluded_playlist:
+            anti_predicate = match_excluded_playlist(pl.col('playlist.name'))
+
+            # We want to remove tracks that are in these excluded playlists
+            # from the result, even when they are present in other matching playlists
+            excluded_playlists = self.playlists.filter(anti_predicate)\
+                .select('playlist.id')
+
+            # But as an optimization, we also want to avoid including those playlists in the first place.
+            matching_playlists = matching_playlists.filter(
+                anti_predicate.not_())
+        else:
+            excluded_playlists = None
+
+        # # Remove everything but the strictly necessary information
+        # matching_playlists = matching_playlists.select('playlist.id')
+
+        return PlaylistSet(matching_playlists, excluded_playlists)
+
+
+@dataclass
+class PlaylistTrackSet:
+    playlist_tracks: lf.PlaylistTracksWithPlaylist
+
+    def filter_tracks(self, tracks_to_filter: lf.Tracks) -> lf.Tracks:
+        """Filter the specified tracks to only include tracks from playlists in this set."""
+
+        matching_tracks = self.playlist_tracks.join(
+            tracks_to_filter, how='inner', on=['track.id'])
+
+        return matching_tracks
+
+
+@dataclass
+class PlaylistTrackFilter:
+    """Playlist-membership-specific filters."""
+
+    # User-provided parameters
+    added_to_playlist_date: str = ''
+
+    def filter_playlist_tracks(self, playlist_tracks_to_filter: lf.PlaylistTracks) -> PlaylistTrackSet:
+        """Filter the specified playlist_tracks_to_filter to only include playlist_tracks matching this filter."""
+
+        # Parse filters
+        match_added_to_playlist_date =\
+            create_date_filter(self.added_to_playlist_date)
+
+        # Apply filters to provided data
+        matching_playlist_tracks = playlist_tracks_to_filter
+
+        # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
+        if match_added_to_playlist_date:
+            matching_playlist_tracks = matching_playlist_tracks.filter(
+                match_added_to_playlist_date(pl.col('playlist_track.added_at')))
+
+        # Remove everything but the strictly necessary information
+        matching_playlist_tracks = matching_playlist_tracks\
+            .select('track.id', 'playlist.id', 'playlist.name', 'owner.id', 'owner.name')\
+            .group_by('track.id')\
+            .agg(pl.col('playlist.id').unique().sort(),
+                 pl.col('playlist.name').unique().sort(),
+                 pl.col('owner.id').unique().sort(),
+                 pl.col('owner.name').unique().sort())
+
+        return PlaylistTrackSet(matching_playlist_tracks)
+
+
+@dataclass
+class TrackSet:
+    tracks: lf.TracksWithPlaylist
+    is_filtered: bool
+
+    def with_extra_columns(self):
+        return TrackSet(self.tracks.with_columns(
+            pl.col('track.bpm').fill_null(0.0),
+            pl.when(pl.col('track.id').is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
+        ), is_filtered=self.is_filtered)
+
+    def filter_playlists(self, playlist_tracks_to_filter: lf.PlaylistTracks, playlists_to_filter: lf.Playlists) -> lf.Playlists:
+        """Filter the specified playlists_to_filter to only include playlists that contain at least one track from this set."""
+
+        matching_playlists = playlists_to_filter.join(
+            playlist_tracks_to_filter.join(
+                self.tracks, how='semi', on=['track.id']),
+            how='semi', on=['playlist.id'])
+
+        return matching_playlists
+
+
+@dataclass
+class TrackFilter:
+    """"Track-specific filters."""
+
+    # User-provided parameters
+    song_name: str = ''
+    song_bpm_range: tuple[int, int] | None = None
+    song_release_date: str = ''
+    artist_name: str = ''
+    artist_is_queer: bool = False
+    artist_is_poc: bool = False
+
+    def filter_tracks(self, tracks_to_filter: lf.Tracks,) -> TrackSet:
+        """Filter the specified tracks_to_filter to only include tracks matching this filter."""
+
+        # Parse filters
+        match_song_name = create_text_filter(self.song_name)
+        match_song_release_date = create_date_filter(self.song_release_date)
+        match_artist_name = create_text_filter(self.artist_name)
+
+        # Apply filters to provided data
+        has_track_filters = False
+        matching_tracks = tracks_to_filter
+
+        if match_song_name:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                match_song_name(pl.col('track.name')))
+
+        if match_artist_name:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                match_artist_name(pl.col('track.artists.name')))
+
+        if self.artist_is_queer:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                pl.col('track.artists.is_queer_artist'))
+
+        if self.artist_is_poc:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                pl.col('track.artists.is_poc_artist'))
+
+        if self.song_bpm_range:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                pl.col('track.bpm').is_null()
+                | (pl.col('track.bpm').ge(self.song_bpm_range[0])
+                   & pl.col('track.bpm').le(self.song_bpm_range[1])))
+
+        # Courtesy of James B. (for the release_date filter suggestion)
+        if match_song_release_date:
+            has_track_filters = True
+            matching_tracks = matching_tracks.filter(
+                match_song_release_date(pl.col('track.album.release_date')))
+
+        return TrackSet(matching_tracks, is_filtered=has_track_filters)
+
+
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
 
     playlists: pl.LazyFrame
     playlist_tracks: pl.LazyFrame
     tracks: pl.LazyFrame
+    tracks_adjacent: pl.LazyFrame | None = None
     countries: list[str]
 
-    def set_data(self, *, playlists: pl.LazyFrame, playlist_tracks: pl.LazyFrame, tracks: pl.LazyFrame, countries: pl.DataFrame):
+    def set_data(
+        self,
+        *,
+        playlists: pl.LazyFrame,
+        playlist_tracks: pl.LazyFrame,
+        tracks: pl.LazyFrame,
+        countries: pl.DataFrame,
+        tracks_adjacent: pl.LazyFrame | None = None,
+    ):
         """Set the source data for the search engine."""
         self.playlists = playlists
         self.playlist_tracks = playlist_tracks
         self.tracks = tracks
+        self.tracks_adjacent = tracks_adjacent
         self.countries = extract_countries(countries)
 
     def load_data(self):
@@ -73,6 +325,7 @@ class SearchEngine:
         self.playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)
         self.playlist_tracks = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)
         self.tracks = pl.scan_parquet(TRACK_DATA_FILE)
+        self.tracks_adjacent = pl.scan_parquet(TRACK_ADJACENT_DATA_FILE)
         self.countries = extract_countries(pl.read_parquet(COUNTRY_DATA_FILE))
 
     def get_stats(self) -> tuple[int, int, int, int]:
@@ -128,141 +381,46 @@ class SearchEngine:
         # Filter parameters #
         #####################
 
-        # Track-specific filters
-        match_song_name = create_text_filter(song_name)
-        match_song_release_date = create_date_filter(song_release_date)
-        match_artist_name = create_text_filter(artist_name)
+        playlist_filter = PlaylistFilter(
+            country=country,
+            dj_name=dj_name,
+            dj_name_exclude=dj_name_exclude,
+            playlist_include=playlist_include,
+            playlist_exclude=playlist_exclude,
+        )
 
-        # Only used for playlist generation
-        # playlist_bpm_low: int = 90
-        # playlist_bpm_med: int = 95
-        # playlist_bpm_high: int = 100
+        playlist_track_filter = PlaylistTrackFilter(
+            added_to_playlist_date=added_to_playlist_date,
+        )
 
-        # Playlist-specific filters
-        match_dj_name = create_text_filter(dj_name)
-        match_dj_name_exclude = create_text_filter(dj_name_exclude)
-        match_country = create_text_filter(country)
-        match_playlist = create_text_filter(playlist_include)
-        match_excluded_playlist = create_text_filter(playlist_exclude)
-
-        # Playlist-membership-specific filters
-        match_added_to_playlist_date = create_date_filter(
-            added_to_playlist_date)
+        track_filter = TrackFilter(
+            song_name=song_name,
+            song_bpm_range=song_bpm_range,
+            song_release_date=song_release_date,
+            artist_name=artist_name,
+            artist_is_queer=artist_is_queer,
+            artist_is_poc=artist_is_poc,
+        )
 
         #####################
         # Perform filtering #
         #####################
 
-        # -------------------------------
-        # Apply playlist-specific filters
-        # -------------------------------
+        matching_playlists =\
+            playlist_filter.filter_playlists(self.playlists)
 
-        matching_playlists = self.playlists
+        matching_playlist_tracks =\
+            playlist_track_filter.filter_playlist_tracks(
+                matching_playlists.filter_playlist_tracks(
+                    self.playlist_tracks))
 
-        if match_playlist:
-            matching_playlists = matching_playlists.filter(
-                match_playlist(pl.col('playlist.name')))
+        matching_tracks =\
+            track_filter.filter_tracks(
+                matching_playlist_tracks.filter_tracks(
+                    self.tracks))
 
-        # Courtesy of Franzi M. (for the country filter suggestion)
-        if match_country:
-            matching_playlists = matching_playlists.filter(
-                match_country(pl.col('playlist.country')))
-
-        if match_dj_name:
-            matching_playlists = matching_playlists.filter(
-                match_dj_name(pl.col('owner.name').cast(pl.String))
-                | match_dj_name(pl.col('owner.id').cast(pl.String)))
-
-        if match_dj_name_exclude:
-            matching_playlists = matching_playlists.filter(
-                ~match_dj_name_exclude(pl.col('owner.name').cast(pl.String))
-                & ~match_dj_name_exclude(pl.col('owner.id').cast(pl.String)))
-
-        # Courtesy of Tobias N. (for the suggestion of the playlist_exclude filter)
-        if match_excluded_playlist:
-            anti_predicate = match_excluded_playlist(pl.col('playlist.name'))
-
-            # We want to remove tracks that are in these excluded playlists
-            # from the result, even when they are present in other matching playlists
-            excluded_playlists = self.playlists.filter(anti_predicate)\
-                .select('playlist.id')
-
-            # But as an optimization, we also want to avoid including those playlists in the first place.
-            matching_playlists = matching_playlists.filter(
-                anti_predicate.not_())
-        else:
-            excluded_playlists = None
-
-        # # Remove everything but the strictly necessary information
-        # matching_playlists = matching_playlists.select('playlist.id')
-
-        # ------------------------------------------
-        # Apply playlist-membership-specific filters
-        # ------------------------------------------
-
-        matching_playlist_tracks = matching_playlists.join(
-            self.playlist_tracks, how='inner', on=['playlist.id'])
-
-        if excluded_playlists is not None:
-            excluded_playlist_tracks = excluded_playlists.join(
-                self.playlist_tracks, how='inner', on=['playlist.id'])
-
-            matching_playlist_tracks = matching_playlist_tracks.join(
-                excluded_playlist_tracks, how='anti', on=['track.id'])
-
-        # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
-        if match_added_to_playlist_date:
-            matching_playlist_tracks = matching_playlist_tracks.filter(
-                match_added_to_playlist_date(pl.col('playlist_track.added_at')))
-
-        # Remove everything but the strictly necessary information
-        matching_playlist_tracks = matching_playlist_tracks\
-            .select('track.id', 'playlist.id', 'playlist.name', 'owner.id', 'owner.name')\
-            .group_by('track.id')\
-            .agg(pl.col('playlist.id').unique().sort(),
-                 pl.col('playlist.name').unique().sort(),
-                 pl.col('owner.id').unique().sort(),
-                 pl.col('owner.name').unique().sort())
-
-        # ----------------------------
-        # Apply track-specific filters
-        # ----------------------------
-
-        matching_tracks = matching_playlist_tracks.join(
-            self.tracks, how='inner', on=['track.id'])
-
-        if match_song_name:
-            matching_tracks = matching_tracks.filter(
-                match_song_name(pl.col('track.name')))
-
-        if match_artist_name:
-            matching_tracks = matching_tracks.filter(
-                match_artist_name(pl.col('track.artists.name')))
-
-        if artist_is_queer:
-            matching_tracks = matching_tracks.filter(
-                pl.col('track.artists.is_queer_artist'))
-
-        if artist_is_poc:
-            matching_tracks = matching_tracks.filter(
-                pl.col('track.artists.is_poc_artist'))
-
-        if song_bpm_range:
-            matching_tracks = matching_tracks.filter(
-                pl.col('track.bpm').is_null()
-                | (pl.col('track.bpm').ge(song_bpm_range[0])
-                   & pl.col('track.bpm').le(song_bpm_range[1])))
-
-        # Courtesy of James B. (for the release_date filter suggestion)
-        if match_song_release_date:
-            matching_tracks = matching_tracks.filter(
-                match_song_release_date(pl.col('track.album.release_date')))
-
-        return matching_tracks.with_columns(
-            pl.col('track.bpm').fill_null(0.0),
-            pl.when(pl.col('track.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
-        ).slice(skip_num_top_results, limit or None)
+        return matching_tracks.with_extra_columns()\
+            .tracks.slice(skip_num_top_results, limit or None)
 
     def find_playlists(
         self,
@@ -276,77 +434,43 @@ class SearchEngine:
         limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the playlists that match the given query."""
+
         #####################
         # Filter parameters #
         #####################
 
-        # Track-specific filters
-        match_song_name = create_text_filter(song_name)
-        match_artist_name = create_text_filter(artist_name)
+        track_filter = TrackFilter(
+            song_name=song_name,
+            artist_name=artist_name,
+        )
 
-        # Playlist-specific filters
-        match_dj_name = create_text_filter(dj_name)
-        match_country = create_text_filter(country)
-        match_playlist = create_text_filter(playlist_include)
-        match_excluded_playlist = create_text_filter(playlist_exclude)
+        playlist_filter = PlaylistFilter(
+            country=country,
+            dj_name=dj_name,
+            playlist_include=playlist_include,
+            playlist_exclude=playlist_exclude,
+        )
 
         #####################
         # Perform filtering #
         #####################
 
-        # ----------------------------
-        # Apply track-specific filters
-        # ----------------------------
+        matching_tracks =\
+            track_filter.filter_tracks(
+                self.tracks)
 
-        has_tracks_filter = False
-        matching_tracks = self.tracks
+        if matching_tracks.is_filtered:
+            matching_playlists =\
+                playlist_filter.filter_playlists(
+                    matching_tracks.filter_playlists(
+                        self.playlist_tracks, self.playlists))
+        else:
+            matching_playlists = \
+                playlist_filter.filter_playlists(
+                    self.playlists)
 
-        if match_song_name:
-            has_tracks_filter = True
-            matching_tracks = matching_tracks.filter(
-                match_song_name(pl.col('track.name')))
-
-        if match_artist_name:
-            has_tracks_filter = True
-            matching_tracks = matching_tracks.filter(
-                match_artist_name(pl.col('track.artists.name')))
-
-        # -------------------------------
-        # Apply playlist-specific filters
-        # -------------------------------
-
-        matching_playlists = self.playlists
-
-        if has_tracks_filter:
-            matching_playlists = matching_playlists.join(
-                self.playlist_tracks.join(
-                    matching_tracks, how='semi', on=['track.id']),
-                how='semi', on=['playlist.id'])
-
-        if match_playlist:
-            matching_playlists = matching_playlists.filter(
-                match_playlist(pl.col('playlist.name')))
-
-        # Courtesy of Franzi M. (for the country filter suggestion)
-        if match_country:
-            matching_playlists = matching_playlists.filter(
-                match_country(pl.col('playlist.country')))
-
-        if match_dj_name:
-            matching_playlists = matching_playlists.filter(
-                match_dj_name(pl.col('owner.name').cast(pl.String))
-                | match_dj_name(pl.col('owner.id').cast(pl.String)))
-
-        if match_excluded_playlist:
-            matching_playlists = matching_playlists.filter(
-                match_excluded_playlist(pl.col('playlist.name')).not_())
-
-        return matching_playlists.with_columns(
-            pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url'),
-            pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
-        ).slice(0, limit or None)
+        return matching_playlists.with_extra_columns()\
+            .included_playlists.slice(0, limit or None)
 
     def find_djs(
         self,
@@ -364,35 +488,28 @@ class SearchEngine:
         # Filter parameters #
         #####################
 
-        match_dj_name = create_text_filter(dj_name)
-        match_playlist = create_text_filter(playlist_name)
+        playlist_filter = PlaylistFilter(
+            dj_name=dj_name,
+            playlist_name=playlist_name,
+        )
 
         #####################
         # Perform filtering #
         #####################
 
-        matching_playlists = self.playlists
+        matching_playlists =\
+            playlist_filter.filter_playlists(
+                self.playlists)
 
-        if match_playlist:
-            matching_playlists = matching_playlists.filter(
-                match_playlist(pl.col('playlist.name')))
-
-        if match_dj_name:
-            matching_playlists = matching_playlists.filter(
-                match_dj_name(pl.col('owner.name').cast(pl.String))
-                | match_dj_name(pl.col('owner.id').cast(pl.String)))
-
-        return matching_playlists.join(
-            self.playlist_tracks, how='inner', on=['playlist.id']
-        ).join(
-            self.tracks, how='inner', on=['track.id']
-        ).with_columns(
-            pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
-        ).group_by('owner.name', 'owner.url').agg(
-            pl.n_unique('track.id').alias('song_count'),
-            pl.n_unique('track.artists.name').alias('artist_count'),
-            pl.n_unique('playlist.name').alias('playlist_count'),
-            pl.col('playlist.name').drop_nulls().unique()
-            .sort().slice(0, playlist_limit or None),
-        ).sort('playlist_count', descending=True).slice(0, dj_limit or None)
+        return matching_playlists\
+            .filter_tracks(self.playlist_tracks, self.tracks)\
+            .group_by('owner.name', 'owner.id').agg(
+                pl.n_unique('track.id').alias('song_count'),
+                pl.n_unique('track.artists.name').alias('artist_count'),
+                pl.n_unique('playlist.name').alias('playlist_count'),
+                pl.col('playlist.name').drop_nulls().unique()
+                .sort().slice(0, playlist_limit or None),
+            ).with_columns(
+                pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
+            ).sort('playlist_count', descending=True).slice(0, dj_limit or None).collect()
