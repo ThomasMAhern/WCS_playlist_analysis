@@ -508,7 +508,7 @@ if search_dj_toggle:
 
         dj_search_df = search_engine.find_djs(
             dj_name=dj_input,
-            playlist_include=dj_playlist_input,
+            playlist_name=dj_playlist_input,
             dj_limit=100,
             playlist_limit=30,
         ).collect(engine='streaming')

@@ -575,11 +575,12 @@ class CombinedFilter:
     lyrics_in_result: bool = True
 
     def get_optimal_filter_order(self) -> list[FilterOrTableName]:
-        # if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
-        if False:
+        if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
             return [
+                'track_lyrics',
                 'tracks',
                 'playlist_tracks',
+                'playlists',
             ]
 
         default_order: list[FilterOrTableName] = [
@@ -905,16 +906,17 @@ class SearchEngine:
 
         return matching_playlists\
             .filter_tracks(PlaylistTrackSet(self.data.playlist_tracks, False), TrackSet(self.data.tracks, False))\
-            .tracks.group_by('owner.name', 'owner.id').agg(
-                pl.n_unique('track.id').alias('song_count'),
-                pl.n_unique('track.artists.name').alias('artist_count'),
-                pl.n_unique('playlist.name').alias('playlist_count'),
-                pl.col('playlist.name').drop_nulls().unique()
-                .sort().slice(0, playlist_limit or None),
-            ).with_columns(
+            .tracks.group_by('owner.name', 'owner.id')\
+            .agg(pl.n_unique('track.id').alias('song_count'),
+                 pl.n_unique('track.artists.name').alias('artist_count'),
+                 pl.n_unique('playlist.name').alias('playlist_count'),
+                 pl.col('playlist.name').drop_nulls().unique()
+                 .sort().slice(0, playlist_limit or None))\
+            .with_columns(
                 pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
-                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')
-            ).sort('playlist_count', descending=True).slice(0, dj_limit or None).collect()
+                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url'))\
+            .sort('playlist_count', descending=True)\
+            .slice(0, dj_limit or None)
 
     def find_related_songs(
         self,
