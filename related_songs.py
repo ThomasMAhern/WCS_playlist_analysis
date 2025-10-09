@@ -23,6 +23,7 @@ if mode == 'write':
         .select(pl.col('track.id').list.get(0).alias('pair1.track.id'),
                 pl.col('track.id').list.get(1).alias('pair2.track.id'),
                 pl.col('playlist_count'))\
+        .filter(~pl.col('pair1.track.id').eq(pl.col('pair2.track.id')))\
         .sort(['pair1.track.id', 'pair2.track.id'])
     # .sort('playlist_count', descending=True)
 
