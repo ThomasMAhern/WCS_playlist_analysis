@@ -87,14 +87,16 @@ class PlaylistSet:
             self.included_playlists.with_columns(
                 pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
                     pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url')),
-            self.excluded_playlists)
+            self.excluded_playlists,
+            is_filtered=self.is_filtered)
 
     def with_owner_url(self):
         return PlaylistSet(
             self.included_playlists.with_columns(
                 pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
                     pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')),
-            self.excluded_playlists)
+            self.excluded_playlists,
+            is_filtered=self.is_filtered)
 
     def with_extra_columns(self):
         return self\
@@ -137,6 +139,15 @@ class PlaylistFilter:
     dj_name_exclude: str = ''
     playlist_include: str = ''
     playlist_exclude: str = ''
+
+    @property
+    def has_filters(self) -> bool:
+        """Returns whether any playlist filters are defined."""
+        return bool(create_text_filter(self.dj_name)
+                    or create_text_filter(self.dj_name_exclude)
+                    or create_text_filter(self.country)
+                    or create_text_filter(self.playlist_include)
+                    or create_text_filter(self.playlist_exclude))
 
     def filter_playlists(self, playlists_to_filter: lf.Playlists) -> PlaylistSet:
         """Filter the specified playlists_to_filter to only include playlists matching this filter."""
@@ -182,7 +193,7 @@ class PlaylistFilter:
 
             # We want to remove tracks that are in these excluded playlists
             # from the result, even when they are present in other matching playlists
-            excluded_playlists = self.playlists.filter(anti_predicate)\
+            excluded_playlists = playlists_to_filter.filter(anti_predicate)\
                 .select('playlist.id')
 
             # But as an optimization, we also want to avoid including those playlists in the first place.
@@ -222,6 +233,11 @@ class PlaylistTrackFilter:
 
     # User-provided parameters
     added_to_playlist_date: str = ''
+
+    @property
+    def has_filters(self) -> bool:
+        """Returns whether any playlist_track filters are defined."""
+        return bool(create_date_filter(self.added_to_playlist_date))
 
     def filter_playlist_tracks(self, playlist_tracks_to_filter: lf.PlaylistTracks) -> PlaylistTrackSet:
         """Filter the specified playlist_tracks_to_filter to only include playlist_tracks matching this filter."""
@@ -290,6 +306,15 @@ class TrackFilter:
     artist_name: str = ''
     artist_is_queer: bool = False
     artist_is_poc: bool = False
+
+    @property
+    def has_filters(self) -> bool:
+        """Returns whether any track filters are defined."""
+        return bool(create_text_filter(self.song_name)
+                    or create_date_filter(self.song_release_date)
+                    or create_text_filter(self.artist_name)
+                    or self.artist_is_queer
+                    or self.artist_is_poc)
 
     def filter_tracks(self, tracks_to_filter: lf.Tracks,) -> TrackSet:
         """Filter the specified tracks_to_filter to only include tracks matching this filter."""
@@ -366,6 +391,12 @@ class TrackLyricsFilter:
     lyrics_exclude: str = ''
     lyrics_limit: int | None = None
 
+    @property
+    def has_filters(self) -> bool:
+        """Returns whether any lyrics filters are defined."""
+        return bool(create_text_filter(self.lyrics_include)
+                    or create_text_filter(self.lyrics_exclude))
+
     def filter_lyrics(self, lyrics_to_filter: lf.TrackLyrics, *, include_matched_lyrics: bool = False) -> TrackLyricsSet:
         """Filter the specified lyrics_to_filter to only include lyrics matching this filter."""
 
@@ -401,8 +432,9 @@ class TrackLyricsFilter:
         return TrackLyricsSet(matching_track_lyrics, is_filtered=has_lyrics_filters)
 
 
-class SearchEngine:
-    """Encapsulates the logic of filtering for specific songs, playlists etc."""
+@dataclass(kw_only=True)
+class CombinedData:
+    """Holder for the different underlying data sources."""
 
     playlists: lf.Playlists
     playlist_tracks: lf.PlaylistTracks
@@ -411,8 +443,8 @@ class SearchEngine:
     track_lyrics: lf.TrackLyrics | None = None
     countries: list[str]
 
-    def set_data(
-        self,
+    @staticmethod
+    def create(
         *,
         playlists: lf.Playlists,
         playlist_tracks: lf.PlaylistTracks,
@@ -422,30 +454,86 @@ class SearchEngine:
         track_lyrics: pl.LazyFrame | None = None,
     ):
         """Set the source data for the search engine."""
-        self.playlists = playlists
-        self.playlist_tracks = playlist_tracks
-        self.tracks = tracks
-        self.tracks_adjacent = tracks_adjacent
-        self.track_lyrics = track_lyrics
-        self.countries = extract_countries(countries)
+        return CombinedData(
+            playlists=playlists,
+            playlist_tracks=playlist_tracks,
+            tracks=tracks,
+            tracks_adjacent=tracks_adjacent,
+            track_lyrics=track_lyrics,
+            countries=extract_countries(countries),
+        )
+
+    @staticmethod
+    def load_from_files():
+        """Load the pre-generated data from the Parquet files."""
+        return CombinedData(
+            playlists=pl.scan_parquet(PLAYLIST_DATA_FILE),
+            playlist_tracks=pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE),
+            tracks=pl.scan_parquet(TRACK_DATA_FILE),
+            tracks_adjacent=pl.scan_parquet(TRACK_ADJACENT_DATA_FILE),
+            track_lyrics=pl.scan_parquet(TRACK_LYRICS_DATA_FILE),
+            countries=extract_countries(pl.read_parquet(COUNTRY_DATA_FILE)),
+        )
+
+
+@dataclass
+class CombinedFilter:
+    playlist_filter: PlaylistFilter | None = None
+    playlist_track_filter: PlaylistTrackFilter | None = None
+    track_filter: TrackFilter | None = None
+    lyrics_filter: TrackLyricsFilter | None = None
+
+    playlist_in_result: bool = True
+    playlist_track_in_result: bool = True
+    lyrics_in_result: bool = True
+
+    def filter_tracks(self, data: CombinedData) -> lf.Tracks:
+        matching_playlists =\
+            self.playlist_filter.filter_playlists(data.playlists)
+
+        matching_playlist_tracks =\
+            self.playlist_track_filter.filter_playlist_tracks(
+                matching_playlists.filter_playlist_tracks(
+                    data.playlist_tracks,
+                    include_playlist_info=self.playlist_in_result))
+
+        matching_lyrics =\
+            self.lyrics_filter.filter_lyrics(
+                data.track_lyrics,
+                include_matched_lyrics=self.lyrics_in_result)
+
+        matching_tracks =\
+            self.track_filter.filter_tracks(
+                matching_lyrics.filter_tracks(
+                    matching_playlist_tracks.filter_tracks(
+                        data.tracks,
+                        include_playlist_track_info=self.playlist_track_in_result),
+                    include_lyrics=self.lyrics_in_result))
+
+        return matching_tracks
+
+
+class SearchEngine:
+    """Encapsulates the logic of filtering for specific songs, playlists etc."""
+
+    data: CombinedData
+
+    def set_data(self, **kwargs):
+        """Set the source data for the search engine."""
+        self.data = CombinedData.create(**kwargs)
 
     def load_data(self):
         """Load the pre-generated data from the Parquet files."""
-        self.playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)
-        self.playlist_tracks = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)
-        self.tracks = pl.scan_parquet(TRACK_DATA_FILE)
-        self.tracks_adjacent = pl.scan_parquet(TRACK_ADJACENT_DATA_FILE)
-        self.track_lyrics = pl.scan_parquet(TRACK_LYRICS_DATA_FILE)
-        self.countries = extract_countries(pl.read_parquet(COUNTRY_DATA_FILE))
+        self.data = CombinedData.load_from_files()
 
     def get_stats(self) -> tuple[int, int, int, int, int]:
         """Compute statistics about the database content."""
         songs_count, artists_count = count_n_unique(
-            self.tracks, ['track.name', 'track.artists.name'])
+            self.data.tracks, ['track.name', 'track.artists.name'])
         playlists_count, djs_count = count_n_unique(
-            self.playlists, ['playlist.name', 'owner.name'])
+            self.data.playlists, ['playlist.name', 'owner.name'])
         lyrics_count = count_n_unique(
-            self.track_lyrics.join(self.tracks, how='inner', on='track.id'),
+            self.data.track_lyrics.join(self.data.tracks, how='inner', on='track.id'),
             ['track.name', 'track.artists.name'],
             single_key=True)
         return songs_count, artists_count, playlists_count, djs_count, lyrics_count
@@ -497,6 +585,7 @@ class SearchEngine:
             limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the songs that match the given query."""
+
         #####################
         # Filter parameters #
         #####################
@@ -528,31 +617,21 @@ class SearchEngine:
             lyrics_limit=lyrics_limit,
         )
 
+        combined_filter = CombinedFilter(
+            playlist_filter=playlist_filter,
+            playlist_in_result=playlist_in_result,
+            playlist_track_filter=playlist_track_filter,
+            playlist_track_in_result=playlist_track_in_result,
+            track_filter=track_filter,
+            lyrics_filter=lyrics_filter,
+            lyrics_in_result=lyrics_in_result
+        )
+
         #####################
         # Perform filtering #
         #####################
 
-        matching_playlists =\
-            playlist_filter.filter_playlists(self.playlists)
-
-        matching_playlist_tracks =\
-            playlist_track_filter.filter_playlist_tracks(
-                matching_playlists.filter_playlist_tracks(
-                    self.playlist_tracks,
-                    include_playlist_info=playlist_in_result))
-
-        matching_lyrics =\
-            lyrics_filter.filter_lyrics(
-                self.track_lyrics,
-                include_matched_lyrics=lyrics_in_result)
-
-        matching_tracks =\
-            track_filter.filter_tracks(
-                matching_lyrics.filter_tracks(
-                    matching_playlist_tracks.filter_tracks(
-                        self.tracks,
-                        include_playlist_track_info=playlist_track_in_result),
-                    include_lyrics=lyrics_in_result))
+        matching_tracks = combined_filter.filter_tracks(self.data)
 
         return matching_tracks.with_extra_columns()\
             .tracks.slice(skip_num_top_results, limit or None)
@@ -592,17 +671,17 @@ class SearchEngine:
 
         matching_tracks =\
             track_filter.filter_tracks(
-                self.tracks)
+                self.data.tracks)
 
         if matching_tracks.is_filtered:
             matching_playlists =\
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
-                        self.playlist_tracks, self.playlists))
+                        self.data.playlist_tracks, self.data.playlists))
         else:
             matching_playlists = \
                 playlist_filter.filter_playlists(
-                    self.playlists)
+                    self.data.playlists)
 
         return matching_playlists.with_extra_columns()\
             .included_playlists.slice(0, limit or None)
@@ -634,10 +713,10 @@ class SearchEngine:
 
         matching_playlists =\
             playlist_filter.filter_playlists(
-                self.playlists)
+                self.data.playlists)
 
         return matching_playlists\
-            .filter_tracks(self.playlist_tracks, self.tracks)\
+            .filter_tracks(self.data.playlist_tracks, self.data.tracks)\
             .group_by('owner.name', 'owner.id').agg(
                 pl.n_unique('track.id').alias('song_count'),
                 pl.n_unique('track.artists.name').alias('artist_count'),
@@ -670,7 +749,7 @@ class SearchEngine:
 
         matching_tracks =\
             track_filter.filter_tracks(
-                self.tracks)
+                self.data.tracks)
 
         def find_adjacent_tracks(starting_tracks, direction: Literal['prev', 'next']):
             if direction == 'next':
@@ -704,7 +783,7 @@ class SearchEngine:
                 matching_tracks.tracks, direction)
 
         adjacent_tracks = TrackSet(adjacent_track_ids.join(
-            self.tracks, how='inner', on='track.id'), is_filtered=True)
+            self.data.tracks, how='inner', on='track.id'), is_filtered=True)
 
         return (matching_tracks.with_extra_columns().tracks.limit(100),
                 adjacent_tracks.with_extra_columns()

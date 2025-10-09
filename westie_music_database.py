@@ -66,7 +66,7 @@ def load_notes():
 
 @st.cache_data
 def load_countries():
-    return load_search_engine().countries
+    return load_search_engine().data.countries
 
 
 @st.cache_data
