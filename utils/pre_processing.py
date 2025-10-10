@@ -8,11 +8,13 @@ from utils.search_engine import (
     COUNTRY_DATA_FILE,
     PLAYLIST_DATA_FILE,
     PLAYLIST_TRACKS_DATA_FILE,
+    PLAYLIST_TRACKS_ORIGINAL_DATA_FILE,
     TRACK_ADJACENT_DATA_FILE,
-    TRACK_LYRICS_DATA_FILE,
+    TRACK_CANONICAL_DATA_FILE,
     TRACK_DATA_FILE,
     TRACK_DUPLICATES_DATA_FILE,
-    TRACK_CANONICAL_DATA_FILE,
+    TRACK_LYRICS_DATA_FILE,
+    TRACK_ORIGINAL_DATA_FILE,
 )
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
@@ -38,7 +40,7 @@ def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
     # TODO: Print file size of generated file
 
 
-def process_playlist_and_song_data():
+def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     source_data = pl.scan_parquet('data_playlists.parquet')
     bpm_data = pl.scan_parquet('data_song_bpm.parquet')
 
@@ -116,7 +118,8 @@ def process_playlist_and_song_data():
             pl.col('track.artists.name').cast(TRACK_ARTIST_DTYPE),
             pl.col('bpm').cast(TRACK_BPM_DTYPE).alias('track.bpm')
         ).unique(['track.name', 'track.artists.name']),
-        how='left', on=['track.name', 'track.artists.name']).sort('track.id')
+        how='left', on=['track.name', 'track.artists.name']
+    ).sort('track.id')
 
     playlist_tracks = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
@@ -149,13 +152,17 @@ def process_playlist_and_song_data():
         .collect(engine='streaming'))
 
     # Write pre-processed data to parquet files
-    write_to_parquet_file(playlists_extended, PLAYLIST_DATA_FILE)
-    write_to_parquet_file(tracks_extended, TRACK_DATA_FILE)
-    write_to_parquet_file(playlist_tracks, PLAYLIST_TRACKS_DATA_FILE)
     write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
+    write_to_parquet_file(playlists_extended, PLAYLIST_DATA_FILE)
+    write_to_parquet_file(
+        tracks_extended,
+        TRACK_ORIGINAL_DATA_FILE if prepare_deduplication else TRACK_DATA_FILE)
+    write_to_parquet_file(
+        playlist_tracks,
+        PLAYLIST_TRACKS_ORIGINAL_DATA_FILE if prepare_deduplication else PLAYLIST_TRACKS_DATA_FILE)
 
 
-def process_song_duplicates(print_statistics: bool = False):
+def process_song_duplicates(*, use_original_data: bool, print_statistics: bool = False):
     """Deduplicate songs based on track.name and track.artists.name."""
 
     # ===========================
@@ -212,7 +219,8 @@ def process_song_duplicates(print_statistics: bool = False):
     # There were ~75 songs with incomplete metdata that, on closer inspection,
     # seemed to not be songs but podcast episodes.
 
-    songs_df = pl.scan_parquet(TRACK_DATA_FILE)
+    songs_df = pl.scan_parquet(
+        TRACK_ORIGINAL_DATA_FILE if use_original_data else TRACK_DATA_FILE)
 
     def is_non_empty(expr): return expr.is_not_null() & expr.ne('')
     has_track_name = is_non_empty(pl.col('track.name'))
@@ -276,6 +284,49 @@ def process_song_duplicates(print_statistics: bool = False):
     write_to_parquet_file(duplicate_to_canonical, TRACK_CANONICAL_DATA_FILE)
 
 
+def deduplicate_playlist_and_song_data():
+    """Replace all duplicate tracks with their canonical versions."""
+
+    playlists = pl.scan_parquet(
+        PLAYLIST_DATA_FILE)
+
+    tracks_with_duplicates = pl.scan_parquet(
+        TRACK_ORIGINAL_DATA_FILE)
+
+    playlist_tracks_with_duplicates = pl.scan_parquet(
+        PLAYLIST_TRACKS_ORIGINAL_DATA_FILE)
+
+    duplicate_to_canonical = pl.scan_parquet(
+        TRACK_CANONICAL_DATA_FILE)
+
+    playlist_tracks = playlist_tracks_with_duplicates\
+        .join(duplicate_to_canonical, how='left', on='track.id')\
+        .with_columns(pl.col('track.id').alias('duplicate.track.id'))\
+        .with_columns(pl.col('canonical.track.id').fill_null(pl.col('duplicate.track.id')).alias('track.id'))\
+        .drop('canonical.track.id', 'duplicate.track.id')\
+        .unique(['playlist.id', 'track.id', 'playlist_track.number'])\
+        .sort('playlist.id', 'track.id', 'playlist_track.number')
+
+    only_duplicates = duplicate_to_canonical\
+        .filter(pl.col('track.id').ne(pl.col('canonical.track.id')))
+
+    track_statistics = playlist_tracks\
+        .join(playlists.select('playlist.id', 'owner.name'), how='inner', on='playlist.id')\
+        .group_by('track.id').agg(
+            pl.col('playlist.id').n_unique().alias('playlist_count'),
+            pl.col('owner.name').n_unique().alias('dj_count'),
+        )
+
+    tracks = tracks_with_duplicates\
+        .drop('playlist_count', 'dj_count')\
+        .join(only_duplicates, how='anti', on='track.id')\
+        .join(track_statistics, how='left', on='track.id')\
+        .sort('track.id')
+
+    write_to_parquet_file(tracks, TRACK_DATA_FILE)
+    write_to_parquet_file(playlist_tracks, PLAYLIST_TRACKS_DATA_FILE)
+
+
 def process_song_lyrics():
     """Process the song lyrics into a table sorted by track.id"""
     temp_file = 'temp_song_metadata_by_track_and_artist.parquet'
@@ -328,13 +379,16 @@ def process_song_pairings():
     write_to_parquet_file(songs_df, TRACK_ADJACENT_DATA_FILE)
 
 
-def process_everything():
+def process_everything(merge_duplicates: bool = True):
     """Runs all pre-processing in sequence."""
     # Initial run to split playlists, tracks and playlist entries
-    process_playlist_and_song_data()
+    process_playlist_and_song_data(prepare_deduplication=merge_duplicates)
 
     # Duplicate song detection reuses the track data generated above
-    process_song_duplicates()
+    process_song_duplicates(use_original_data=merge_duplicates)
+
+    if merge_duplicates:
+        deduplicate_playlist_and_song_data()
 
     # Song lyrics reuses the track data generated above
     process_song_lyrics()
