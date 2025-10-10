@@ -318,6 +318,9 @@ class TrackSet:
     tracks: lf.TracksWithPlaylist
     is_filtered: bool
 
+    def to_track_lyrics_set(self):
+        return TrackLyricsSet(self.tracks, self.is_filtered)
+
     def with_extra_columns(self):
         return TrackSet(self.tracks.with_columns(
             pl.col('track.bpm').fill_null(0.0),
@@ -331,16 +334,28 @@ class TrackSet:
             is_filtered=self.is_filtered,
         ) if by is not None else self
 
-    def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet, *, include_lyrics: bool = False) -> TrackLyricsSet:
-        if not self.is_filtered and not include_lyrics:
-            return lyrics_to_filter
+    def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet, *, include_lyrics: bool = False) -> tuple[TrackSet, TrackLyricsSet]:
+        if not self.is_filtered:
+            matching_lyrics = lyrics_to_filter
+        else:
+            matching_lyrics = TrackLyricsSet(
+                lyrics_to_filter.track_lyrics.join(
+                    self.tracks,
+                    how='semi',
+                    on=['track.id']),
+                is_filtered=True)
 
-        matching_lyrics = lyrics_to_filter.track_lyrics.join(
-            self.tracks,
-            how='inner' if include_lyrics else 'semi',
-            on=['track.id'])
+        if not include_lyrics:
+            matching_tracks = self.tracks
+        else:
+            matching_tracks = TrackSet(
+                lyrics_to_filter.track_lyrics.join(
+                    self.tracks,
+                    how='inner',
+                    on=['track.id']),
+                is_filtered=self.is_filtered or lyrics_to_filter.is_filtered)
 
-        return TrackLyricsSet(matching_lyrics, is_filtered=self.is_filtered)
+        return matching_tracks, matching_lyrics
 
     def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet) -> PlaylistTrackSet:
         # Skip join if it would be a no-op anyway
@@ -445,6 +460,9 @@ class TrackFilter:
 class TrackLyricsSet:
     track_lyrics: lf.TrackLyrics
     is_filtered: bool
+
+    def to_track_set(self):
+        return TrackSet(self.track_lyrics, self.is_filtered)
 
     def filter_tracks(self, tracks_to_filter: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
         """Filter the specified tracks to only include tracks with matching lyrics."""
@@ -646,10 +664,16 @@ class CombinedFilter:
                     filtered_lyrics = True
 
                     if filtered_tracks:
-                        matching_lyrics =\
+                        matching_tracks, matching_lyrics =\
                             matching_tracks.filter_lyrics(
                                 matching_lyrics,
                                 include_lyrics=self.lyrics_in_result)
+
+                        matching_tracks =\
+                            self.lyrics_filter.filter_lyrics(
+                                matching_tracks.to_track_lyrics_set(),
+                                include_matched_lyrics=self.lyrics_in_result)\
+                            .to_track_set()
 
                     matching_lyrics =\
                         self.lyrics_filter.filter_lyrics(
