@@ -153,6 +153,109 @@ def process_playlist_and_song_data():
     write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
 
 
+def process_song_duplicates():
+    """Deduplicate songs based on track.name and track.artists.name."""
+
+    # ===========================
+    # Notes on song deduplication
+    # ===========================
+    #
+    # Whereas Spotify considers the same song appearing on two different album
+    # as two different tracks (with different track.id values),
+    # we want to treat such instances only as a single track.
+    #
+    # =====================
+    # Possible side effects
+    # =====================
+    #
+    # --------------------------------
+    # False Positives and/or Negatives
+    # --------------------------------
+    #
+    # Due to data quality issues at Spotify's side, this will likely
+    # still leave *some* songs that are effectively duplicates,
+    # just with slightly different spellings of the title,
+    # while maybe unifying some songs that are different recordings
+    # which appear with the same name but on different albums.
+    #
+    # Most of these issues will likely mostly affect only older songs, though.
+    #
+    # NOTE: We could implement some safeguards, like checking for song length,
+    #       once we have extended our data scraper to retrieve that data.
+    #
+    # ----------------------------------------
+    # Unstable selection of canonical track.id
+    # ----------------------------------------
+    #
+    # We also DO NOT currently implement an algorithm for deterministically
+    # selecting one instance to be the "canonical" copy, but just use
+    # the first one we stumble upon that has good metadata.
+    #
+    # This means that, within a single data preprocessing run, only
+    # a single canonical track.id is selected for teach (name, artist)
+    # pair, but which track.id is selected may vary between different runs.
+    #
+    # ==============
+    # Other findings
+    # ==============
+    #
+    # Within our dataset of (at that time) ~200,000 songs, a whopping ~86,000
+    # were duplicates, that unified down to ~32,000 unique songs (plus the
+    # ~114,000 songs that already had only a single copy).
+    #
+    # The most duplicated song had 22 duplicates, with others following closely behind.
+    # Many duplicates were popular songs that were present in ~3,000 playlists each,
+    # meaning that those duplicates definitely skewed the total statistics.
+
+    songs_df = pl.scan_parquet(TRACK_DATA_FILE)
+
+    def is_non_empty(expr): return expr.is_not_null() & expr.ne('')
+    has_track_name = is_non_empty(pl.col('track.name'))
+    has_track_artist = is_non_empty(pl.col('track.artists.name'))
+
+    songs_without_track_name_and_artist = songs_df\
+        .filter(~has_track_name & ~has_track_artist)\
+        .select('track.name', 'track.artists.name', 'track.id', 'playlist_count', 'dj_count')
+
+    songs_without_track_name = songs_df\
+        .filter(~has_track_name & has_track_artist)\
+        .select('track.name', 'track.artists.name', 'track.id', 'playlist_count', 'dj_count')
+
+    # NOTE: Based on a quick look, the songs without an artist all seem to be podcasts
+    # TODO: Pre-filter playlists by removing podcasts (this information is exposed by the Spotify API)
+    songs_without_track_artist = songs_df\
+        .filter(~has_track_artist & has_track_name)\
+        .select('track.name', 'track.artists.name', 'track.id', 'playlist_count', 'dj_count')
+
+    duplicated_songs = songs_df\
+        .filter(has_track_name & has_track_artist)\
+        .group_by('track.name', 'track.artists.name')\
+        .agg(pl.col('track.id'),
+             pl.col('playlist_count').alias('playlist_count'),
+             pl.col('dj_count'),
+             pl.col('track.id').n_unique().alias('duplicate_count'),
+             # This is only an estimate, because we would like playlists
+             # which contain multiple different instances of the "same"
+             # (by our definition) song to only be counted once.
+             pl.col('playlist_count').sum().alias('estimated_total_playlist_count'))\
+        .filter(pl.col('duplicate_count').gt(1))
+
+    print(songs_without_track_name_and_artist.collect(engine='streaming'))
+    print(songs_without_track_name.collect(engine='streaming'))
+    print(songs_without_track_artist.collect(engine='streaming'))
+
+    print(duplicated_songs
+          .sort('duplicate_count', descending=True)
+          .collect(engine='streaming'))
+
+    print(duplicated_songs
+          .sort('estimated_total_playlist_count', descending=True)
+          .collect(engine='streaming'))
+
+    print(duplicated_songs.select(
+        'duplicate_count').sum().collect(engine='streaming'))
+
+
 def process_song_lyrics():
     """Process the song lyrics into a table sorted by track.id"""
     temp_file = 'temp_song_metadata_by_track_and_artist.parquet'
@@ -209,6 +312,9 @@ def process_everything():
     """Runs all pre-processing in sequence."""
     # Initial run to split playlists, tracks and playlist entries
     process_playlist_and_song_data()
+
+    # Duplicate song detection reuses the track data generated above
+    process_song_duplicates()
 
     # Song lyrics reuses the track data generated above
     process_song_lyrics()
