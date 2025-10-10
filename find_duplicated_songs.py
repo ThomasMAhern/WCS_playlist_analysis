@@ -10,7 +10,7 @@ else:
     mode = 'load'
 
 if mode == 'write':
-    process_song_duplicates()
+    process_song_duplicates(print_statistics=True)
     print("Done.")
 
 search_engine = SearchEngine()

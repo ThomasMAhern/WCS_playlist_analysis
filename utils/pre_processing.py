@@ -11,6 +11,8 @@ from utils.search_engine import (
     TRACK_ADJACENT_DATA_FILE,
     TRACK_LYRICS_DATA_FILE,
     TRACK_DATA_FILE,
+    TRACK_DUPLICATES_DATA_FILE,
+    TRACK_CANONICAL_DATA_FILE,
 )
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
@@ -153,7 +155,7 @@ def process_playlist_and_song_data():
     write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
 
 
-def process_song_duplicates():
+def process_song_duplicates(print_statistics: bool = False):
     """Deduplicate songs based on track.name and track.artists.name."""
 
     # ===========================
@@ -206,6 +208,9 @@ def process_song_duplicates():
     # The most duplicated song had 22 duplicates, with others following closely behind.
     # Many duplicates were popular songs that were present in ~3,000 playlists each,
     # meaning that those duplicates definitely skewed the total statistics.
+    #
+    # There were ~75 songs with incomplete metdata that, on closer inspection,
+    # seemed to not be songs but podcast episodes.
 
     songs_df = pl.scan_parquet(TRACK_DATA_FILE)
 
@@ -240,20 +245,35 @@ def process_song_duplicates():
              pl.col('playlist_count').sum().alias('estimated_total_playlist_count'))\
         .filter(pl.col('duplicate_count').gt(1))
 
-    print(songs_without_track_name_and_artist.collect(engine='streaming'))
-    print(songs_without_track_name.collect(engine='streaming'))
-    print(songs_without_track_artist.collect(engine='streaming'))
+    if print_statistics:
+        print(songs_without_track_name_and_artist.collect(engine='streaming'))
+        print(songs_without_track_name.collect(engine='streaming'))
+        print(songs_without_track_artist.collect(engine='streaming'))
 
-    print(duplicated_songs
-          .sort('duplicate_count', descending=True)
-          .collect(engine='streaming'))
+        print(duplicated_songs
+              .sort('duplicate_count', descending=True)
+              .collect(engine='streaming'))
 
-    print(duplicated_songs
-          .sort('estimated_total_playlist_count', descending=True)
-          .collect(engine='streaming'))
+        print(duplicated_songs
+              .sort('estimated_total_playlist_count', descending=True)
+              .collect(engine='streaming'))
 
-    print(duplicated_songs.select(
-        'duplicate_count').sum().collect(engine='streaming'))
+        print(duplicated_songs.select(
+            'duplicate_count').sum().collect(engine='streaming'))
+
+    duplicate_to_canonical = duplicated_songs\
+        .select(pl.col('track.id').list.drop_nulls())\
+        .select(pl.col('track.id'),
+                pl.col('track.id').list.first().alias('canonical.track.id'))\
+        .explode('track.id')\
+        .sort('track.id')
+
+    if print_statistics:
+        print(duplicate_to_canonical.collect(engine='streaming'))
+
+    write_to_parquet_file(duplicated_songs.sort(
+        ['track.name', 'track.artists.name']), TRACK_DUPLICATES_DATA_FILE)
+    write_to_parquet_file(duplicate_to_canonical, TRACK_CANONICAL_DATA_FILE)
 
 
 def process_song_lyrics():
