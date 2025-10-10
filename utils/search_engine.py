@@ -578,7 +578,7 @@ class TrackLyricsFilter:
             matching_track_lyrics = matching_track_lyrics.filter(
                 ~self.match_excluded_lyrics)
 
-        if include_matched_lyrics and self.match_lyrics:
+        if include_matched_lyrics and self.match_lyrics is not None:
             matching_track_lyrics = matching_track_lyrics\
                 .slice(0, self.lyrics_limit or None)\
                 .with_columns(
@@ -587,7 +587,9 @@ class TrackLyricsFilter:
                     .str.extract_all('|'.join(self.lyrics_include.lower().split(',')))
                     .list.eval(pl.element().str.to_lowercase())
                     .list.unique()
-                    .alias('matched_lyrics'))
+                    .alias('matched_lyrics'))\
+                .with_columns(
+                    pl.col('matched_lyrics').list.len().alias('matched_lyrics_count'))
 
         return TrackLyricsSet(matching_track_lyrics, is_filtered=self.has_filters or lyrics_to_filter.is_filtered)
 
@@ -846,7 +848,11 @@ class SearchEngine:
         #
         # Result options
         #
-        sort_by: Literal['playlist_count', 'dj_count'] | None = None,
+        sort_by: Literal[
+            'playlist_count',
+            'dj_count',
+            'matched_lyrics_count',
+        ] | None = None,
         descending: bool = True,
         skip_num_top_results: int = 0,
         limit: int | None = None,

@@ -44,7 +44,8 @@ q = search_engine.find_songs(
     playlist_track_in_result=False,
     lyrics_include='Love',
     lyrics_exclude='',
-    lyrics_limit=30,
+    lyrics_in_result=True,
+    sort_by='matched_lyrics_count',
     limit=30,
 )
 
