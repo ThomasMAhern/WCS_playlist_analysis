@@ -4,7 +4,14 @@ import polars as pl
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
-from utils.search_engine import COUNTRY_DATA_FILE, PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_ADJACENT_DATA_FILE, TRACK_DATA_FILE
+from utils.search_engine import (
+    COUNTRY_DATA_FILE,
+    PLAYLIST_DATA_FILE,
+    PLAYLIST_TRACKS_DATA_FILE,
+    TRACK_ADJACENT_DATA_FILE,
+    TRACK_LYRICS_DATA_FILE,
+    TRACK_DATA_FILE,
+)
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet
@@ -146,6 +153,32 @@ def process_playlist_and_song_data():
     write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
 
 
+def process_song_lyrics():
+    """Process the song lyrics into a table sorted by track.id"""
+    temp_file = 'temp_song_metadata_by_track_and_artist.parquet'
+
+    print(f'Writing {temp_file}...')
+    tracks = pl.scan_parquet(TRACK_DATA_FILE)\
+        .select('track.id', 'track.name', 'track.artists.name')\
+        .sort(['track.name', 'track.artists.name'])\
+        .sink_parquet(temp_file)
+
+    print(f'Reading {temp_file}...')
+    tracks = pl.scan_parquet(temp_file)
+
+    lyrics = pl.scan_parquet('song_lyrics.parquet')\
+        .join(tracks,
+              how='inner',
+              left_on=['song', 'artist'],
+              right_on=['track.name', 'track.artists.name'])\
+        .select(pl.col('track.id'),
+                pl.col('lyrics').alias('track.lyrics'))\
+        .unique('track.id')\
+        .sort('track.id')
+
+    write_to_parquet_file(lyrics, TRACK_LYRICS_DATA_FILE)
+
+
 def process_song_pairings():
     social_playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)\
         .filter(pl.col('playlist.is_social_set'))\
@@ -176,6 +209,9 @@ def process_everything():
     """Runs all pre-processing in sequence."""
     # Initial run to split playlists, tracks and playlist entries
     process_playlist_and_song_data()
+
+    # Song lyrics reuses the track data generated above
+    process_song_lyrics()
 
     # Song pairings reuses the playlist entries data generated above
     process_song_pairings()
