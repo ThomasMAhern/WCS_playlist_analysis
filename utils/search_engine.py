@@ -798,8 +798,10 @@ class SearchEngine:
 
     def get_stats(self) -> tuple[int, int, int, int, int]:
         """Compute statistics about the database content."""
-        songs_count, artists_count = count_n_unique(
-            self.data.tracks, ['track.name', 'track.artists.name'])
+        songs_count, = count_n_unique(self.data.tracks, ['track.id'])
+        # TODO: Count the number of unique artsits within track.artists instead
+        artists_count, = count_n_unique(
+            self.data.tracks, ['track.artists.name'])
         playlists_count, djs_count = count_n_unique(
             self.data.playlists, ['playlist.name', 'owner.name'])
         lyrics_count = count_n_unique(
