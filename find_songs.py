@@ -11,7 +11,8 @@ else:
 
 # Handle different caching modes
 if mode == 'write':
-   process_playlist_and_song_data()
+    process_playlist_and_song_data()
+    print("Done.")
 
 search_engine = SearchEngine()
 search_engine.load_data()

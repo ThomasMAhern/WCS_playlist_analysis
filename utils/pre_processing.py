@@ -1,11 +1,10 @@
 """Methods for pre-processing the data into more efficient formats at build time."""
 
 import polars as pl
-import sys
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
-from utils.search_engine import COUNTRY_DATA_FILE, PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_DATA_FILE
+from utils.search_engine import COUNTRY_DATA_FILE, PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_ADJACENT_DATA_FILE, TRACK_DATA_FILE
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet
@@ -20,6 +19,16 @@ PLAYLIST_ID_DTYPE = pl.String
 OWNER_ID_DTYPE = pl.String
 OWNER_NAME_DTYPE = pl.String
 
+
+def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
+    print(f'Writing {file_name}...')
+    if isinstance(data, pl.DataFrame):
+        data.write_parquet(file_name)
+    else:
+        data.sink_parquet(file_name)
+    # TODO: Print file size of generated file
+
+
 def process_playlist_and_song_data():
     source_data = pl.scan_parquet('data_playlists.parquet')
     bpm_data = pl.scan_parquet('data_song_bpm.parquet')
@@ -28,7 +37,8 @@ def process_playlist_and_song_data():
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
         pl.col('name').alias('playlist.name'),
         pl.col('owner.id').cast(OWNER_ID_DTYPE),
-        pl.col('owner.display_name').cast(OWNER_NAME_DTYPE).alias('owner.name'),
+        pl.col('owner.display_name').cast(
+            OWNER_NAME_DTYPE).alias('owner.name'),
         # Only required for extended data below
         pl.col('location').alias('playlist.location'),
     ).sort('playlist.id').unique('playlist.id')
@@ -79,8 +89,10 @@ def process_playlist_and_song_data():
         pl.col('owner.name').n_unique().alias('dj_count'),
     ).with_columns(
         pl.col('track.album.release_date').cast(pl.Date),
-        pl.col('track.region').list.filter(~pl.element().eq('')).cast(pl.List(pl.Categorical)),
-        pl.col('track.country').list.filter(~pl.element().eq('')).cast(pl.List(pl.Categorical)),
+        pl.col('track.region').list.filter(
+            ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
+        pl.col('track.country').list.filter(
+            ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
     ).sort('track.id').unique()
 
     tracks_extended = tracks.with_columns(
@@ -107,7 +119,7 @@ def process_playlist_and_song_data():
         pl.col('playlist.id').is_not_null(),
         pl.col('track.id').is_not_null(),
     ).unique(['playlist.id', 'track.id', 'playlist_track.number'])\
-    .sort('playlist.id', 'track.id', 'playlist_track.number')
+        .sort('playlist.id', 'track.id', 'playlist_track.number')
 
     # # Write pre-processed track <=> playlist membership data
     # # optimized for track => playlist lookup
@@ -128,16 +140,42 @@ def process_playlist_and_song_data():
         .collect(engine='streaming'))
 
     # Write pre-processed data to parquet files
-    print(f'Writing {PLAYLIST_DATA_FILE}...')
-    playlists_extended.sink_parquet(PLAYLIST_DATA_FILE)
+    write_to_parquet_file(playlists_extended, PLAYLIST_DATA_FILE)
+    write_to_parquet_file(tracks_extended, TRACK_DATA_FILE)
+    write_to_parquet_file(playlist_tracks, PLAYLIST_TRACKS_DATA_FILE)
+    write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
 
-    print(f'Writing {TRACK_DATA_FILE}...')
-    tracks_extended.sink_parquet(TRACK_DATA_FILE)
 
-    print(f'Writing {PLAYLIST_TRACKS_DATA_FILE}...')
-    playlist_tracks.sink_parquet(PLAYLIST_TRACKS_DATA_FILE)
+def process_song_pairings():
+    social_playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)\
+        .filter(pl.col('playlist.is_social_set'))\
+        .filter(~pl.col('playlist.name').str.contains_any(['The Maine', 'delete', 'SPOTIFY']))\
+        .select('playlist.id')
 
-    print(f'Writing {COUNTRY_DATA_FILE}...')
-    countries_df.write_parquet(COUNTRY_DATA_FILE)
+    songs_df = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)\
+        .with_columns(pl.col('playlist_track.number').cast(pl.Int64))\
+        .join(social_playlists, how='semi', on=['playlist.id'])\
+        .sort('playlist.id', 'playlist_track.number')\
+        .rolling(index_column='playlist_track.number', period='2i', group_by='playlist.id')\
+        .agg(pl.col('track.id'))\
+        .filter(pl.col('track.id').list.len().eq(2))\
+        .group_by(pl.col('track.id'))\
+        .agg(pl.col('playlist.id').n_unique().alias('playlist_count'))\
+        .select(pl.col('track.id').list.get(0).alias('pair1.track.id'),
+                pl.col('track.id').list.get(1).alias('pair2.track.id'),
+                pl.col('playlist_count'))\
+        .filter(~pl.col('pair1.track.id').eq(pl.col('pair2.track.id')))\
+        .sort(['pair1.track.id', 'pair2.track.id'])
+    # .sort('playlist_count', descending=True)
 
-    print("Done.")
+    # Write pre-processed data to parquet files
+    write_to_parquet_file(songs_df, TRACK_ADJACENT_DATA_FILE)
+
+
+def process_everything():
+    """Runs all pre-processing in sequence."""
+    # Initial run to split playlists, tracks and playlist entries
+    process_playlist_and_song_data()
+
+    # Song pairings reuses the playlist entries data generated above
+    process_song_pairings()
