@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Callable, Literal, NewType, overload
+from typing import Literal, overload
 
 import polars as pl
 
@@ -13,11 +13,43 @@ TRACK_LYRICS_DATA_FILE = 'data_song_lyrics.parquet'
 COUNTRY_DATA_FILE = 'data_countries.parquet'
 
 
+FilterOrTableName = Literal[
+    'playlists',
+    'playlist_tracks',
+    'tracks',
+    'track_lyrics',
+]
+
+
 def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
     return countries_dataframe['country'].to_list()
 
 
-def create_text_filter(filter_expression: str | list[str] | None, ascii_case_insensitive: bool = True) -> Callable[[pl.Expr], pl.Expr] | None:
+IntoExpr = str | list[str] | pl.Expr
+
+
+def into_expr(expr: IntoExpr) -> pl.Expr:
+    if isinstance(expr, str):
+        return pl.col(expr)
+    if isinstance(expr, list):
+        return pl.col(expr)
+    return expr
+
+
+def or_filter(*filters: pl.Expr | None) -> pl.Expr | None:
+    expr: pl.Exp | None = None
+    for filter in filters:
+        if filter is not None:
+            expr = expr | filter if expr is not None else filter
+    return expr
+
+
+def create_text_filter(
+    filter_expression: str | list[str] | None,
+    column: IntoExpr,
+    *,
+    ascii_case_insensitive: bool = True
+) -> pl.Expr | None:
     """Parse a filter expression for a text column."""
     if filter_expression is None:
         return None
@@ -37,18 +69,15 @@ def create_text_filter(filter_expression: str | list[str] | None, ascii_case_ins
     if not values:
         return None
 
-    return lambda expr: expr.cast(pl.String).str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
+    return into_expr(column).cast(pl.String).str.contains_any(values, ascii_case_insensitive=ascii_case_insensitive)
 
 
-def create_date_filter(filter_expression: str) -> Callable[[pl.Expr], pl.Expr] | None:
+def create_date_filter(filter_expression: str, column: IntoExpr) -> pl.Expr | None:
     """Parse a filter expression for a date column"""
-    text_filter = create_text_filter(
-        filter_expression, ascii_case_insensitive=False)
-
-    if not text_filter:
-        return None
-
-    return lambda expr: text_filter(expr.dt.to_string())
+    return create_text_filter(
+        filter_expression,
+        into_expr(column).dt.to_string(),
+        ascii_case_insensitive=False)
 
 
 @overload
@@ -76,7 +105,7 @@ def count_n_unique(data: pl.LazyFrame, columns: list[str], single_key: bool = Fa
                          .iter_rows())[0])
 
 
-@dataclass
+@dataclass(slots=True)
 class PlaylistSet:
     included_playlists: lf.Playlists
     excluded_playlists: lf.Playlists | None
@@ -139,7 +168,7 @@ class PlaylistSet:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class PlaylistFilter:
     """Playlist-specific filters."""
 
@@ -150,58 +179,74 @@ class PlaylistFilter:
     playlist_include: str = ''
     playlist_exclude: str = ''
 
+    # Parsed filters
+    match_country: pl.Expr = field(init=False)
+    match_dj_name: pl.Expr = field(init=False)
+    match_dj_name_exclude: pl.Expr = field(init=False)
+    match_playlist: pl.Expr = field(init=False)
+    match_excluded_playlist: pl.Expr = field(init=False)
+
+    def __post_init__(self):
+        """Parses the user-provided filter specifications."""
+        self.match_dj_name = or_filter(
+            create_text_filter(self.dj_name,
+                               pl.col('owner.name')),
+            create_text_filter(self.dj_name,
+                               pl.col('owner.id')))
+
+        self.match_dj_name_exclude = or_filter(
+            create_text_filter(self.dj_name_exclude,
+                               pl.col('owner.name')),
+            create_text_filter(self.dj_name_exclude,
+                               pl.col('owner.id')))
+
+        self.match_country =\
+            create_text_filter(self.country,
+                               pl.col('playlist.country'))
+
+        self.match_playlist =\
+            create_text_filter(self.playlist_include,
+                               pl.col('playlist.name'))
+
+        self.match_excluded_playlist =\
+            create_text_filter(self.playlist_exclude,
+                               pl.col('playlist.name'))
+
     @property
     def has_filters(self) -> bool:
         """Returns whether any playlist filters are defined."""
-        return bool(create_text_filter(self.dj_name)
-                    or create_text_filter(self.dj_name_exclude)
-                    or create_text_filter(self.country)
-                    or create_text_filter(self.playlist_include)
-                    or create_text_filter(self.playlist_exclude))
+        return self.match_dj_name is not None\
+            or self.match_dj_name_exclude is not None\
+            or self.match_country is not None\
+            or self.match_playlist is not None\
+            or self.match_excluded_playlist is not None
 
     def filter_playlists(self, playlists_to_filter: PlaylistSet) -> PlaylistSet:
         """Filter the specified playlists_to_filter to only include playlists matching this filter."""
-
-        # Parse filters
-        match_dj_name = create_text_filter(self.dj_name)
-        match_dj_name_exclude = create_text_filter(self.dj_name_exclude)
-        match_country = create_text_filter(self.country)
-        match_playlist = create_text_filter(self.playlist_include)
-        match_excluded_playlist = create_text_filter(self.playlist_exclude)
-
-        # Apply filters to provided data
-        has_playlist_filters = False
         matching_playlists = playlists_to_filter.included_playlists
 
-        if match_playlist:
-            has_playlist_filters = True
+        if self.match_playlist is not None:
             matching_playlists = matching_playlists.filter(
-                match_playlist(pl.col('playlist.name')))
+                self.match_playlist)
 
         # Courtesy of Franzi M. (for the country filter suggestion)
-        if match_country:
-            has_playlist_filters = True
+        if self.match_country is not None:
             matching_playlists = matching_playlists.filter(
-                match_country(pl.col('playlist.country')))
+                self.match_country)
 
-        if match_dj_name:
-            has_playlist_filters = True
+        if self.match_dj_name is not None:
             matching_playlists = matching_playlists.filter(
-                match_dj_name(pl.col('owner.name').cast(pl.String))
-                | match_dj_name(pl.col('owner.id').cast(pl.String)))
+                self.match_dj_name)
 
-        if match_dj_name_exclude:
-            has_playlist_filters = True
+        if self.match_dj_name_exclude is not None:
             matching_playlists = matching_playlists.filter(
-                ~match_dj_name_exclude(pl.col('owner.name').cast(pl.String))
-                & ~match_dj_name_exclude(pl.col('owner.id').cast(pl.String)))
+                ~self.match_dj_name_exclude)
 
         # Courtesy of Tobias N. (for the suggestion of the playlist_exclude filter)
         excluded_playlists: pl.LazyFrame | None
 
-        if match_excluded_playlist:
-            has_playlist_filters = True
-            anti_predicate = match_excluded_playlist(pl.col('playlist.name'))
+        if self.match_excluded_playlist is not None:
+            anti_predicate = self.match_excluded_playlist
 
             # We want to remove tracks that are in these excluded playlists
             # from the result, even when they are present in other matching playlists
@@ -228,11 +273,11 @@ class PlaylistFilter:
             included_playlists=matching_playlists,
             excluded_playlists=excluded_playlists,
             all_playlists=playlists_to_filter.all_playlists,
-            is_filtered=has_playlist_filters,
+            is_filtered=self.has_filters,
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class PlaylistTrackSet:
     playlist_tracks: lf.PlaylistTracksWithPlaylist
     is_filtered: bool
@@ -269,34 +314,41 @@ class PlaylistTrackSet:
         return TrackSet(matching_tracks, is_filtered=self.is_filtered)
 
 
-@dataclass
+@dataclass(slots=True)
 class PlaylistTrackFilter:
     """Playlist-membership-specific filters."""
 
     # User-provided parameters
     added_to_playlist_date: str = ''
 
+    # Parsed filters
+    match_added_to_playlist_date: pl.Expr = field(init=False)
+
+    def __post_init__(self):
+        """Parses the user-provided filter specifications."""
+        self.match_added_to_playlist_date =\
+            create_date_filter(self.added_to_playlist_date,
+                               pl.col('playlist_track.added_at'))
+
     @property
     def has_filters(self) -> bool:
         """Returns whether any playlist_track filters are defined."""
-        return bool(create_date_filter(self.added_to_playlist_date))
+        return self.match_added_to_playlist_date is not None
 
     def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet) -> PlaylistTrackSet:
         """Filter the specified playlist_tracks_to_filter to only include playlist_tracks matching this filter."""
 
         # Parse filters
-        match_added_to_playlist_date =\
-            create_date_filter(self.added_to_playlist_date)
 
         # Apply filters to provided data
         has_playlist_track_filters = False
         matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks
 
         # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
-        if match_added_to_playlist_date:
+        if self.match_added_to_playlist_date is not None:
             has_playlist_track_filters = True
             matching_playlist_tracks = matching_playlist_tracks.filter(
-                match_added_to_playlist_date(pl.col('playlist_track.added_at')))
+                self.match_added_to_playlist_date)
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
@@ -313,7 +365,7 @@ class PlaylistTrackFilter:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class TrackSet:
     tracks: lf.TracksWithPlaylist
     is_filtered: bool
@@ -387,7 +439,7 @@ class TrackSet:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class TrackFilter:
     """"Track-specific filters."""
 
@@ -399,64 +451,70 @@ class TrackFilter:
     artist_is_queer: bool = False
     artist_is_poc: bool = False
 
+    # Parsed filters
+    match_song_name: pl.Expr = field(init=False)
+    match_song_release_date: pl.Expr = field(init=False)
+    match_artist_name: pl.Expr = field(init=False)
+
+    def __post_init__(self):
+        """Parses the user-provided filter specifications."""
+        self.match_song_name =\
+            create_text_filter(self.song_name,
+                               pl.col('track.name'))
+        self.match_song_release_date =\
+            create_date_filter(self.song_release_date,
+                               pl.col('track.album.release_date'))
+        self.match_artist_name =\
+            create_text_filter(self.artist_name,
+                               pl.col('track.artists.name'))
+
     @property
     def has_filters(self) -> bool:
         """Returns whether any track filters are defined."""
-        return bool(create_text_filter(self.song_name)
-                    or create_date_filter(self.song_release_date)
-                    or create_text_filter(self.artist_name)
-                    or self.artist_is_queer
-                    or self.artist_is_poc)
+        return self.match_song_name is not None\
+            or self.song_bpm_range is not None\
+            or self.match_song_release_date is not None\
+            or self.match_artist_name is not None\
+            or self.artist_is_queer\
+            or self.artist_is_poc
 
     def filter_tracks(self, tracks_to_filter: TrackSet) -> TrackSet:
         """Filter the specified tracks_to_filter to only include tracks matching this filter."""
 
-        # Parse filters
-        match_song_name = create_text_filter(self.song_name)
-        match_song_release_date = create_date_filter(self.song_release_date)
-        match_artist_name = create_text_filter(self.artist_name)
-
         # Apply filters to provided data
-        has_track_filters = False
         matching_tracks = tracks_to_filter.tracks
 
-        if match_song_name:
-            has_track_filters = True
+        if self.match_song_name is not None:
             matching_tracks = matching_tracks.filter(
-                match_song_name(pl.col('track.name')))
+                self.match_song_name)
 
-        if match_artist_name:
-            has_track_filters = True
+        if self.match_artist_name is not None:
             matching_tracks = matching_tracks.filter(
-                match_artist_name(pl.col('track.artists.name')))
+                self.match_artist_name)
 
         if self.artist_is_queer:
-            has_track_filters = True
             matching_tracks = matching_tracks.filter(
                 pl.col('track.artists.is_queer_artist'))
 
         if self.artist_is_poc:
-            has_track_filters = True
             matching_tracks = matching_tracks.filter(
                 pl.col('track.artists.is_poc_artist'))
 
         if self.song_bpm_range:
-            has_track_filters = True
             matching_tracks = matching_tracks.filter(
                 pl.col('track.bpm').is_null()
                 | (pl.col('track.bpm').ge(self.song_bpm_range[0])
                    & pl.col('track.bpm').le(self.song_bpm_range[1])))
 
         # Courtesy of James B. (for the release_date filter suggestion)
-        if match_song_release_date:
-            has_track_filters = True
+        if self.match_song_release_date is not None:
             matching_tracks = matching_tracks.filter(
-                match_song_release_date(pl.col('track.album.release_date')))
+                self.match_song_release_date)
 
-        return TrackSet(matching_tracks, is_filtered=has_track_filters or tracks_to_filter.is_filtered)
+        return TrackSet(matching_tracks, is_filtered=self.has_filters or tracks_to_filter.is_filtered)
 
 
-@dataclass
+@dataclass(slots=True)
 class TrackLyricsSet:
     track_lyrics: lf.TrackLyrics
     is_filtered: bool
@@ -480,7 +538,7 @@ class TrackLyricsSet:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class TrackLyricsFilter:
     """Lyrics-specific filters."""
 
@@ -489,34 +547,38 @@ class TrackLyricsFilter:
     lyrics_exclude: str = ''
     lyrics_limit: int | None = None
 
+    # Parsed filters
+    match_lyrics: pl.Expr = field(init=False)
+    match_excluded_lyrics: pl.Expr = field(init=False)
+
+    def __post_init__(self):
+        """Parses the user-provided filter specifications."""
+        self.match_lyrics =\
+            create_text_filter(self.lyrics_include,
+                               pl.col('track.lyrics'))
+        self.match_excluded_lyrics =\
+            create_text_filter(self.lyrics_exclude,
+                               pl.col('track.lyrics'))
+
     @property
     def has_filters(self) -> bool:
         """Returns whether any lyrics filters are defined."""
-        return bool(create_text_filter(self.lyrics_include)
-                    or create_text_filter(self.lyrics_exclude))
+        return self.match_lyrics is not None\
+            or self.match_excluded_lyrics is not None
 
     def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet, *, include_matched_lyrics: bool = False) -> TrackLyricsSet:
         """Filter the specified lyrics_to_filter to only include lyrics matching this filter."""
-
-        # Parse filters
-        match_lyrics = create_text_filter(self.lyrics_include)
-        match_excluded_lyrics = create_text_filter(self.lyrics_exclude)
-
-        # Apply filters to provided data
-        has_lyrics_filters = False
         matching_track_lyrics = lyrics_to_filter.track_lyrics
 
-        if match_lyrics:
-            has_lyrics_filters = True
+        if self.match_lyrics is not None:
             matching_track_lyrics = matching_track_lyrics.filter(
-                match_lyrics(pl.col('track.lyrics')))
+                self.match_lyrics)
 
-        if match_excluded_lyrics:
-            has_lyrics_filters = True
+        if self.match_excluded_lyrics is not None:
             matching_track_lyrics = matching_track_lyrics.filter(
-                ~match_excluded_lyrics(pl.col('track.lyrics')))
+                ~self.match_excluded_lyrics)
 
-        if include_matched_lyrics and match_lyrics:
+        if include_matched_lyrics and self.match_lyrics:
             matching_track_lyrics = matching_track_lyrics\
                 .slice(0, self.lyrics_limit or None)\
                 .with_columns(
@@ -527,7 +589,7 @@ class TrackLyricsFilter:
                     .list.unique()
                     .alias('matched_lyrics'))
 
-        return TrackLyricsSet(matching_track_lyrics, is_filtered=has_lyrics_filters or lyrics_to_filter.is_filtered)
+        return TrackLyricsSet(matching_track_lyrics, is_filtered=self.has_filters or lyrics_to_filter.is_filtered)
 
 
 @dataclass(kw_only=True)
@@ -574,13 +636,7 @@ class CombinedData:
         )
 
 
-FilterOrTableName = Literal['playlists',
-                            'playlist_tracks',
-                            'tracks',
-                            'track_lyrics']
-
-
-@dataclass
+@dataclass(slots=True)
 class CombinedFilter:
     playlist_filter: PlaylistFilter = field(default_factory=PlaylistFilter)
     playlist_track_filter: PlaylistTrackFilter = \
@@ -758,42 +814,42 @@ class SearchEngine:
         return self.find_djs(playlist_limit=playlist_limit, dj_limit=dj_limit)
 
     def find_songs(
-            self,
-            *,
-            #
-            # Track-specific filters
-            #
-            song_name: str = '',
-            song_bpm_range: tuple[int, int] | None = None,
-            song_release_date: str = '',
-            artist_name: str = '',
-            artist_is_queer: bool = False,
-            artist_is_poc: bool = False,
-            lyrics_include: str = '',
-            lyrics_exclude: str = '',
-            lyrics_limit: int | None = None,
-            lyrics_in_result: bool = False,
-            #
-            # Playlist-specific filters
-            #
-            country: str | list[str] = '',
-            dj_name: str = '',
-            dj_name_exclude: str = '',
-            playlist_include: str = '',
-            playlist_exclude: str = '',
-            playlist_in_result: bool = True,
-            #
-            # Playlist-membership specific filters
-            #
-            added_to_playlist_date: str = '',
-            playlist_track_in_result: bool = True,
-            #
-            # Result options
-            #
-            sort_by: Literal['playlist_count', 'dj_count'] | None = None,
-            descending: bool = True,
-            skip_num_top_results: int = 0,
-            limit: int | None = None,
+        self,
+        *,
+        #
+        # Track-specific filters
+        #
+        song_name: str = '',
+        song_bpm_range: tuple[int, int] | None = None,
+        song_release_date: str = '',
+        artist_name: str = '',
+        artist_is_queer: bool = False,
+        artist_is_poc: bool = False,
+        lyrics_include: str = '',
+        lyrics_exclude: str = '',
+        lyrics_limit: int | None = None,
+        lyrics_in_result: bool = False,
+        #
+        # Playlist-specific filters
+        #
+        country: str | list[str] = '',
+        dj_name: str = '',
+        dj_name_exclude: str = '',
+        playlist_include: str = '',
+        playlist_exclude: str = '',
+        playlist_in_result: bool = True,
+        #
+        # Playlist-membership specific filters
+        #
+        added_to_playlist_date: str = '',
+        playlist_track_in_result: bool = True,
+        #
+        # Result options
+        #
+        sort_by: Literal['playlist_count', 'dj_count'] | None = None,
+        descending: bool = True,
+        skip_num_top_results: int = 0,
+        limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the songs that match the given query."""
 
