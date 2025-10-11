@@ -586,7 +586,13 @@ class TrackLyricsFilter:
         return self.match_lyrics is not None\
             or self.match_excluded_lyrics is not None
 
-    def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet, *, include_matched_lyrics: bool = False) -> TrackLyricsSet:
+    def filter_lyrics(
+        self,
+        lyrics_to_filter: TrackLyricsSet,
+        *,
+        include_full_lyrics: bool = False,
+        include_matched_lyrics: bool = False
+    ) -> TrackLyricsSet:
         """Filter the specified lyrics_to_filter to only include lyrics matching this filter."""
         matching_track_lyrics = lyrics_to_filter.track_lyrics
 
@@ -610,6 +616,9 @@ class TrackLyricsFilter:
                     .alias('matched_lyrics'))\
                 .with_columns(
                     pl.col('matched_lyrics').list.len().alias('matched_lyrics_count'))
+
+        if not include_full_lyrics:
+            matching_track_lyrics = matching_track_lyrics.drop('track.lyrics')
 
         return TrackLyricsSet(matching_track_lyrics, is_filtered=self.has_filters or lyrics_to_filter.is_filtered)
 
@@ -762,6 +771,7 @@ class CombinedFilter:
             matching_lyrics =\
                 self.lyrics_filter.filter_lyrics(
                     matching_lyrics,
+                    include_full_lyrics=False,
                     include_matched_lyrics=self.lyrics_in_result)
 
             matching_tracks =\
@@ -775,6 +785,7 @@ class CombinedFilter:
             matching_lyrics =\
                 self.lyrics_filter.filter_lyrics(
                     matching_lyrics,
+                    include_full_lyrics=False,
                     include_matched_lyrics=self.lyrics_in_result)
 
             matching_tracks =\
