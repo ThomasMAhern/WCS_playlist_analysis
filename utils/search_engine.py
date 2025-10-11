@@ -17,11 +17,17 @@ COUNTRY_DATA_FILE = 'data_countries.parquet'
 TRACK_DUPLICATES_DATA_FILE = 'data_song_duplicates.parquet'
 TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
 
-FilterOrTableName = Literal[
+FilterName = Literal[
     'playlists',
     'playlist_tracks',
     'tracks',
-    'track_lyrics',
+    'lyrics',
+]
+
+ResultTableName = Literal[
+    'playlists',
+    'playlist_tracks',
+    'tracks'
 ]
 
 
@@ -644,18 +650,131 @@ class CombinedData:
 
 @dataclass(slots=True)
 class CombinedFilter:
-    playlist_filter: PlaylistFilter = field(default_factory=PlaylistFilter)
+    playlist_filter: PlaylistFilter =\
+        field(default_factory=PlaylistFilter)
+    """Filters applied to playlist information."""
+
     playlist_track_filter: PlaylistTrackFilter = \
         field(default_factory=PlaylistTrackFilter)
-    track_filter: TrackFilter = field(default_factory=TrackFilter)
-    lyrics_filter: TrackLyricsFilter = field(default_factory=TrackLyricsFilter)
+    """Filters applied to playlist membership information. """
+
+    track_filter: TrackFilter = \
+        field(default_factory=TrackFilter)
+    """Filters applied to track information."""
+
+    lyrics_filter: TrackLyricsFilter = \
+        field(default_factory=TrackLyricsFilter)
+    """Filters applied to track lyrics."""
+
+    aggregate_by: Literal[
+        'playlist',
+        'owner',
+        'track',
+        'artist',
+    ] = 'track'
+    """
+    Whether to aggregate the returned dataset by playlists, tracks, (playlist) owners or (track) artists."""
 
     playlist_in_result: bool = True
-    playlist_track_in_result: bool = True
-    lyrics_in_result: bool = True
+    """Whether to include playlist-related columns in the returned dataset."""
 
-    def get_optimal_filter_order(self) -> list[FilterOrTableName]:
-        if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
+    playlist_track_in_result: bool = True
+    """Whether to include playlist-membership-related columns in the returned dataset."""
+
+    track_in_result: bool = True
+    """Whether to include track-related columns in the returned dataset."""
+
+    lyrics_in_result: bool = True
+    """Whether to included lyrics-related columns in the returned dataset."""
+
+    def get_optimal_filter_order(self) -> list[FilterName]:
+        """
+        Decide the performance-optimal filtering order for the current query.
+
+        There are two possible directions we can aggregate our result,
+        which ultimately lead to the same dataset (minus ordering),
+        but have different performance characteristics.
+
+        With the goal being to scan the least amount of rows possible,
+        we can either:
+
+        1.  Go playlists (`p`) => playlist\\_tracks (`m`) => tracks (`t`):
+
+            1.  Filter playlists (`O(p)`)
+            2.  Join those with playlist entry information (which, due to
+                both sides being sorted by the join key, is `O(min(p_filtered * log m, m))`
+                being effectively `O(log m)` or better for low `p_filtered`,
+                and `O(m)` in the worst case)),
+            3.  Then join track information (which, due to sorting of one side,
+                gives use `O(max(m_filtered, log t))` with `m_filtered ~ p_filtered`)
+
+            This gives roughly `O(p + min(p_filtered * log m, m) + max(p_filtered, log t))`.
+
+            -   If playlists aren't filtered at all, this results in `O(p + m + m*log t)`.
+            -   If most playlists are filtered out, this approaches  `O(p + log m + log t)`
+
+        2.  Go tracks (`t`) => tracks\\_playlists (`m`, same as playlist\\_tracks but sorted by `track.id`) => playlists (`p`):
+
+            1.  Filter tracks or lyrics (`O(t)`)
+            2.  Join with playlist entry information (`O(min(t_filtered * log m, m))`,
+                effectively `O(log m)` for low `t_filtered`, `O(m)` in the worst case)
+            3.  Join playlist information (`O(max(m_filtered, log p))`,
+                with `m_filtered ~ t_filtered`).
+
+            This gives roughly `O(t + min(t_filtered * log m, m) + max(t_filtered, log t))`.
+
+            -   If tracks aren't filtered at all, this results in `O(t + m + m*log p)`.
+            -   If most tracks are filtered out, this approaches `O(t + log m + log p)`.
+
+        To decide the best filter order, we want to answer the following question:
+
+        ```
+        estimate whether
+
+        O_1 >> O_2 (equivalent to: limit O_1/O_2 = 0 for p,m,t->infinity)
+
+        where
+
+        p% = p_filtered/p
+        t% = t_filtered/t
+        f(x,a,b) = interpolate(0 <= x <= 1, a, b) = x*a + (1-x)*b
+        m ~ p*t
+
+        O_1 = O(p + f(p%, (m + m*log t), (log m + log t)))
+        O_2 = O(t + f(t%, (m + m*log p), (log m + log p)))
+
+        assuming
+
+        p = t = n, m = n^2
+
+        this simplifies to
+
+          limit (n + f(p%, (n^2 + n^2 * log n), (log n^2 + log n)))
+              / (n + f(t%, (n^2 + n^2 * log n), (log n^2 + log n)))
+        = limit (n + p% * (n^2 + n^2 * log n) + (1-p%) * (log n^2 + log n)))
+              / (n + t% * (n^2 + n^2 * log n) + (1-t%) * (log n^2 + log n)))
+        = limit (n + p% n^2 + p% n^2 log n + (1-p%) log n^2 + (1-p%) log n)
+              / (n + t% n^2 + t% n^2 log n + (1-t%) log n^2 + (1-p%) log n)
+        = limit (n + p% n^2 + (p% n^2 + 1 - p%) log n + (1-p%) log n^2)
+              / (n + t% n^2 + (t% n^2 + 1 - t%) log n + (1-t%) log n^2)
+        = limit (n + p% n^2 + (p% (n^2 - 1) + 1) log n + (1-p%) log n^2)
+              / (n + t% n^2 + (t% (n^2 - 1) + 1) log n + (1-t%) log n^2)
+        = limit (n + p_f / n * n^2 + (p_f / n * (n^2 - 1) + 1) log n + (1-p_f/n) log n^2)
+              / (n + t_f / n * n^2 + (t_f / n * (n^2 - 1) + 1) log n + (1-t_f/n) log n^2)
+        = limit (n + p_f n + (p_f (n - 1/n) + 1) log n + (1-p_f/n) log n^2)
+              / (n + t_f n + (t_f (n - 1/n) + 1) log n + (1-p_f/n) log n^2)
+        = limit ((1 + p_f) n + p_f n log n - p_f 1/n log n + log n + log n^2 + - p_f/n log n^2)
+              / ((1 + t_f) n + t_f n log n - t_f 1/n log n + log n + log n^2 + - t_f/n log n^2)
+        = limit (p_f (n + n log n - 1/n log n - 1/n log n^2) + (n + log n^2 + log n))
+              / (t_f (n + n log n - 1/n log n - 1/n log n^2) + (n + log n^2 + log n))
+
+        basically:
+
+        The ratio `(p_f/p) / (t_f/t)` determines which order is best.
+        ```
+        """
+
+        if False and not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
             return [
                 'track_lyrics',
                 'tracks',
@@ -663,7 +782,7 @@ class CombinedFilter:
                 'playlists',
             ]
 
-        default_order: list[FilterOrTableName] = [
+        default_order: list[FilterName] = [
             'playlists',
             'playlist_tracks',
             'track_lyrics',
@@ -675,8 +794,7 @@ class CombinedFilter:
             self,
             data: CombinedData,
             *,
-            order: list[FilterOrTableName],
-            retrieve: FilterOrTableName,
+            order: list[FilterName]
     ):
         filtered_playlists = False
         filtered_playlist_tracks = False
@@ -764,17 +882,18 @@ class CombinedFilter:
                 case _:
                     raise ValueError(f'Invalid filter name: {filter_name}')
 
-        match retrieve:
-            case 'playlists':
+        match self.aggregate_by:
+            case 'playlist':
                 return matching_playlists
-            case 'playlist_tracks':
-                return matching_playlist_tracks
-            case 'track_lyrics':
-                return matching_lyrics
+            case 'owner':
+                return matching_playlists.group_by('owner.id')
             case 'tracks':
                 return matching_tracks
+            case 'artist':
+                # TODO: Group by individual artists
+                return matching_tracks.group_by('track.artists.name')
             case _:
-                raise ValueError(f'Invalid result field: {retrieve}')
+                raise ValueError(f'Invalid result field: {self.aggregate_by}')
 
     def filter_tracks(self, data: CombinedData) -> TrackSet:
         return self.apply_filters(
@@ -897,13 +1016,15 @@ class SearchEngine:
         )
 
         combined_filter = CombinedFilter(
+            aggregate_by='track',
             playlist_filter=playlist_filter,
             playlist_in_result=playlist_in_result,
             playlist_track_filter=playlist_track_filter,
             playlist_track_in_result=playlist_track_in_result,
             track_filter=track_filter,
+            track_in_result=True,
             lyrics_filter=lyrics_filter,
-            lyrics_in_result=lyrics_in_result
+            lyrics_in_result=lyrics_in_result,
         )
 
         #####################
