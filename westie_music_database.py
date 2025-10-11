@@ -5,6 +5,7 @@ import polars as pl
 import psutil
 
 from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
+from utils.columns import pull_columns_to_front
 from utils.logging import log_query
 from utils.playlist_classifiers import extract_dates_from_name
 from utils.search_engine import SearchEngine
@@ -148,36 +149,91 @@ st.markdown("#### Choose your own adventure!")
 # TODO: For general usage, it would be best to pre-compute the "Top Song"
 #       lists at build time
 
+
 @st.cache_data
 def top_songs():
     """Returns the top songs aggregated over all playlists."""
-    return search_engine.find_songs(
-        sort_by='playlist_count',
-        descending=True,
-        limit=100,
-    ).with_row_index(offset=1).collect(engine='streaming')
+    return search_engine\
+        .find_songs(
+            sort_by='playlist_count',
+            descending=True,
+            limit=100
+        )\
+        .drop('track.artists.name', 'track.region')\
+        .with_columns(pl.col('track.country').alias('country'))\
+        .select(pull_columns_to_front(
+            'track.name',
+            'track.url',
+            'playlist_count',
+            'dj_count',
+            'track.bpm',
+            'track.artists.is_queer_artist',
+            'track.artists.is_poc_artist',
+            'playlist.name',
+            'track.artists',
+            'owner.name',
+            'track.country',
+        ))\
+        .with_row_index(offset=1)\
+        .collect(engine='streaming')
 
 
 @st.cache_data
 def top_queer_songs():
     """Returns the top songs by queer artists aggregated over all playlists."""
-    return search_engine.find_songs(
-        artist_is_queer=True,
-        sort_by='playlist_count',
-        descending=True,
-        limit=100,
-    ).with_row_index(offset=1).collect(engine='streaming')
+    return search_engine\
+        .find_songs(
+            artist_is_queer=True,
+            sort_by='playlist_count',
+            descending=True,
+            limit=100,
+        )\
+        .drop('track.artists.name', 'track.region')\
+        .with_columns(pl.col('track.country').alias('country'))\
+        .select(pull_columns_to_front(
+            'track.name',
+            'track.url',
+            'playlist_count',
+            'dj_count',
+            'track.bpm',
+            'track.artists.is_queer_artist',
+            'track.artists.is_poc_artist',
+            'playlist.name',
+            'track.artists',
+            'owner.name',
+            'track.country',
+        ))\
+        .with_row_index(offset=1)\
+        .collect(engine='streaming')
 
 
 @st.cache_data
 def top_poc_songs():
     """Returns the top songs by POC artists aggregated over all playlists."""
-    return search_engine.find_songs(
-        artist_is_poc=True,
-        sort_by='playlist_count',
-        descending=True,
-        limit=100,
-    ).with_row_index(offset=1).collect(engine='streaming')
+    return search_engine\
+        .find_songs(
+            artist_is_poc=True,
+            sort_by='playlist_count',
+            descending=True,
+            limit=100,
+        )\
+        .drop('track.artists.name', 'track.region')\
+        .with_columns(pl.col('track.country').alias('country'))\
+        .select(pull_columns_to_front(
+            'track.name',
+            'track.url',
+            'playlist_count',
+            'dj_count',
+            'track.bpm',
+            'track.artists.is_queer_artist',
+            'track.artists.is_poc_artist',
+            'playlist.name',
+            'track.artists',
+            'owner.name',
+            'country',
+        ))\
+        .with_row_index(offset=1)\
+        .collect(engine='streaming')
 
 
 top_songs_toggle = st.toggle("Top 100 WCS songs!")
@@ -297,9 +353,29 @@ if song_locator_toggle:
             limit=1000,
         )
 
-        results_df = song_search_df.with_columns(
-            pl.col('playlist.name').list.head(30),
-        ).with_row_index(offset=1).collect(engine="streaming")
+        results_df = song_search_df\
+            .with_columns(
+                pl.col('playlist.name').list.head(30),
+            )\
+            .drop('track.artists.name', 'track.region')\
+            .with_columns(pl.col('track.country').alias('country'))\
+            .select(pull_columns_to_front(
+                'track.name',
+                'track.url',
+                'playlist_count',
+                'dj_count',
+                # 'hit_terms',
+                'track.bpm',
+                # 'matching_playlist_count',
+                'track.artists.is_queer_artist',
+                'track.artists.is_poc_artist',
+                'playlist.name',
+                'track.artists',
+                'owner.name',
+                'country',
+            ))\
+            .with_row_index(offset=1)\
+            .collect(engine="streaming")
 
         st.dataframe(results_df,
                      column_config={"track.url": st.column_config.LinkColumn()})
