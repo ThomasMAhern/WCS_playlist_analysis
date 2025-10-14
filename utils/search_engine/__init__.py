@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
-from enum import StrEnum
-from typing import Literal, overload
+from typing import Literal
 
 import polars as pl
 import polars.selectors as cs
 
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 from utils.search_engine.entity_base import PolarsLazyFrame
+from utils.search_engine.filters import FilterOrder, FilterType
 from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
 from utils.search_utils.stats import count_n_unique
 
@@ -21,13 +21,6 @@ COUNTRY_DATA_FILE = 'data_countries.parquet'
 
 TRACK_DUPLICATES_DATA_FILE = 'data_song_duplicates.parquet'
 TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
-
-
-class FilteredBy(StrEnum):
-    Playlist = 'playlist'
-    PlaylistTrack = 'playlist_track'
-    Track = 'track'
-    Lyrics = 'lyrics'
 
 
 @dataclass(slots=True)
@@ -617,7 +610,7 @@ class CombinedFilter:
     lyrics_in_result: bool = True
     """Whether to included lyrics-related columns in the returned dataset."""
 
-    def get_optimal_filter_order(self) -> Literal['playlists_first', 'playlists_and_tracks_first'] | list[FilteredBy]:
+    def get_optimal_filter_order(self) -> FilterOrder | list[FilterType]:
         """
         Decide the performance-optimal filtering order for the current query.
 
@@ -636,15 +629,15 @@ class CombinedFilter:
         """
 
         if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
-            return 'playlists_and_tracks_first'
+            return FilterOrder.PlaylistsAndTracks_First
 
-        return 'playlists_first'
+        return FilterOrder.Playlists_First
 
     def apply_filters(
             self,
             data: CombinedData,
             *,
-            order: Literal['playlists_first', 'playlists_and_tracks_first'] | list[FilteredBy],
+            order: FilterOrder | list[FilterType],
             aggregate_by: Literal[
                 'playlist',
                 'owner',
@@ -652,7 +645,7 @@ class CombinedFilter:
                 'artist',
             ] = 'track'
     ):
-        if order == 'playlists_first':
+        if order == FilterOrder.Playlists_First:
             # Filter playlists, then filter the entries in those playlists,
             # then filter the tracks referenced by those entries
             matching_playlists =\
@@ -678,7 +671,7 @@ class CombinedFilter:
                             data.all_tracks,
                             include_playlist_track_info=self.playlist_track_in_result),
                         include_lyrics=self.lyrics_in_result))
-        elif order == 'playlists_and_tracks_first':
+        elif order == FilterOrder.PlaylistsAndTracks_First:
             # Filter playlists & tracks separately, filter the entries
             # from those playlists with matching tracks, then join the
             # result back into the tracks
@@ -719,24 +712,24 @@ class CombinedFilter:
 
             for filter in order:
                 match filter:
-                    case FilteredBy.Playlist:
+                    case FilterType.Playlist:
                         playlists = self.playlist_filter.filter_playlists(playlists)
                         playlist_tracks = playlists.filter_playlist_tracks(
                             playlist_tracks, include_playlist_info=self.playlist_in_result)
 
-                    case FilteredBy.PlaylistTrack:
+                    case FilterType.PlaylistTrack:
                         playlist_tracks = self.playlist_track_filter.filter_playlist_tracks(playlist_tracks)
                         playlists = playlist_tracks.filter_playlists(playlists)
                         tracks = playlist_tracks.filter_tracks(
                             tracks, include_playlist_track_info=self.playlist_track_in_result)
 
-                    case FilteredBy.Lyrics:
+                    case FilterType.Lyrics:
                         lyrics = self.lyrics_filter.filter_lyrics(
                             lyrics, include_full_lyrics=False, include_matched_lyrics=self.lyrics_in_result)
                         tracks = lyrics.filter_tracks(
                             tracks, include_lyrics=self.lyrics_in_result)
 
-                    case FilteredBy.Track:
+                    case FilterType.Track:
                         tracks = self.track_filter.filter_tracks(tracks)
                         lyrics = tracks.filter_lyrics(lyrics)
                         playlist_tracks = tracks.filter_playlist_tracks(
