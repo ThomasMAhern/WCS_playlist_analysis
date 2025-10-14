@@ -555,7 +555,7 @@ class CombinedData:
     playlist_tracks: PolarsLazyFrame[PlaylistTrack]
     tracks: PolarsLazyFrame[Track]
     tracks_adjacent: PolarsLazyFrame[TrackAdjacent]
-    track_lyrics: PolarsLazyFrame[TrackLyrics] | None = None
+    track_lyrics: PolarsLazyFrame[TrackLyrics]
     countries: list[str]
 
     @property
@@ -573,26 +573,6 @@ class CombinedData:
     @property
     def all_track_lyrics(self):
         return TrackLyricsSet(self.track_lyrics, is_filtered=False)
-
-    @staticmethod
-    def create(
-        *,
-        playlists: PolarsLazyFrame[Playlist],
-        playlist_tracks: PolarsLazyFrame[PlaylistTrack],
-        tracks: PolarsLazyFrame[Track],
-        countries: pl.DataFrame,
-        tracks_adjacent: pl.LazyFrame | None = None,
-        track_lyrics: pl.LazyFrame | None = None,
-    ):
-        """Set the source data for the search engine."""
-        return CombinedData(
-            playlists=playlists,
-            playlist_tracks=playlist_tracks,
-            tracks=tracks,
-            tracks_adjacent=tracks_adjacent,
-            track_lyrics=track_lyrics,
-            countries=extract_countries(countries),
-        )
 
     @staticmethod
     def load_from_files():
@@ -806,10 +786,6 @@ class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
 
     data: CombinedData
-
-    def set_data(self, **kwargs):
-        """Set the source data for the search engine."""
-        self.data = CombinedData.create(**kwargs)
 
     def load_data(self):
         """Load the pre-generated data from the Parquet files."""
