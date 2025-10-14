@@ -5,9 +5,10 @@ from typing import Literal, overload
 import polars as pl
 import polars.selectors as cs
 
+from utils.search_engine.entity import TrackLyrics, Playlist, PlaylistTrack, Track, TrackAdjacent
+from utils.search_engine.entity_base import PolarsLazyFrame
 from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
 from utils.search_utils.stats import count_n_unique
-import utils.types.lazyframes as lf
 
 PLAYLIST_DATA_FILE = 'data_playlist_metadata.parquet'
 PLAYLIST_TRACKS_DATA_FILE = 'data_playlist_songs.parquet'
@@ -36,9 +37,9 @@ class FilteredBy(StrEnum):
 @dataclass(slots=True)
 class PlaylistSet:
     """A collection of playlists. Each `playlist.id` should appear at most once within each collection."""
-    included_playlists: lf.Playlists
-    excluded_playlists: lf.Playlists | None
-    all_playlists: lf.Playlists
+    included_playlists: PolarsLazyFrame[Playlist]
+    excluded_playlists: PolarsLazyFrame[Playlist] | None
+    all_playlists: PolarsLazyFrame[Playlist]
     is_filtered: bool
 
     def with_playlist_url(self):
@@ -211,7 +212,7 @@ class PlaylistFilter:
 @dataclass(slots=True)
 class PlaylistTrackSet:
     """A collection of playlist-to-track relations."""
-    playlist_tracks: lf.PlaylistTracksWithPlaylist
+    playlist_tracks: PolarsLazyFrame[PlaylistTrack] # PlaylistTrackWithPlaylist
     is_filtered: bool
 
     def filter_playlists(self, playlists_to_filter: PlaylistSet) -> PlaylistSet:
@@ -322,7 +323,7 @@ class PlaylistTrackFilter:
 @dataclass(slots=True)
 class TrackSet:
     """A collection of tracks. Each `track.id` should appear at most once with each collection."""
-    tracks: lf.TracksWithPlaylist
+    tracks: PolarsLazyFrame[Track] # TrackWithPlaylist
     is_filtered: bool
 
     def with_extra_columns(self):
@@ -481,7 +482,7 @@ class TrackFilter:
 
 @dataclass(slots=True)
 class TrackLyricsSet:
-    track_lyrics: lf.TrackLyrics
+    track_lyrics: PolarsLazyFrame[TrackLyrics]
     is_filtered: bool
 
     def filter_tracks(self, tracks_to_filter: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
@@ -572,11 +573,11 @@ class TrackLyricsFilter:
 class CombinedData:
     """Holder for the different underlying data sources."""
 
-    playlists: lf.Playlists
-    playlist_tracks: lf.PlaylistTracks
-    tracks: lf.Tracks
-    tracks_adjacent: lf.TracksAdjacent | None = None
-    track_lyrics: lf.TrackLyrics | None = None
+    playlists: PolarsLazyFrame[Playlist]
+    playlist_tracks: PolarsLazyFrame[PlaylistTrack]
+    tracks: PolarsLazyFrame[Track]
+    tracks_adjacent: PolarsLazyFrame[TrackAdjacent]
+    track_lyrics: PolarsLazyFrame[TrackLyrics] | None = None
     countries: list[str]
 
     @property
@@ -598,9 +599,9 @@ class CombinedData:
     @staticmethod
     def create(
         *,
-        playlists: lf.Playlists,
-        playlist_tracks: lf.PlaylistTracks,
-        tracks: lf.Tracks,
+        playlists: PolarsLazyFrame[Playlist],
+        playlist_tracks: PolarsLazyFrame[PlaylistTrack],
+        tracks: PolarsLazyFrame[Track],
         countries: pl.DataFrame,
         tracks_adjacent: pl.LazyFrame | None = None,
         track_lyrics: pl.LazyFrame | None = None,
