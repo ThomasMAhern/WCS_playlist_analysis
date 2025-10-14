@@ -715,35 +715,16 @@ if search_dj_toggle:
     st.markdown(f"#### ")
 
 
-# TODO: The region/country statistics calculation has not yet been optimized,
-#       and may even crash on lower-end systems that do not have large amounts of RAM.
 @st.cache_data
 def region_data():
-    return (search_engine.find_songs()
-            .with_columns(pl.col('track.region').alias('region'))
-            .explode('region')
-            .group_by('region')
-            .agg(song_count=pl.n_unique('track.id'),
-                 playlist_count=pl.n_unique('playlist.id'),
-                 dj_count=pl.n_unique('owner.name'),
-                 djs=pl.col('owner.name'))
-            .with_columns(pl.col('djs').list.unique().list.head(30))
-            .sort('region')
-            .collect(streaming=True))
+    return (search_engine.get_region_stats()
+            .collect(engine='streaming'))
 
 
 @st.cache_data
 def country_data():
-    return (search_engine.find_songs()
-            .with_columns(pl.col('track.country').alias('country'))
-            .group_by('country')
-            .agg(song_count=pl.n_unique('track.id'),
-                 playlist_count=pl.n_unique('playlist.id'),
-                 dj_count=pl.n_unique('owner.name'),
-                 djs=pl.col('owner.name'))
-            .with_columns(pl.col('djs').list.unique().list.head(30))
-            .sort('country')
-            .collect(streaming=True))
+    return (search_engine.get_country_stats()
+            .collect(engine='streaming'))
 
 
 # Courtesy of Lino V.

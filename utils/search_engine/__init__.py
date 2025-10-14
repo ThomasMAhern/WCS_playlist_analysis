@@ -263,6 +263,35 @@ class SearchEngine:
         # Courtesy of Lino V. (for the DJ stats feature suggestion)
         return self.find_djs(playlist_limit=playlist_limit, dj_limit=dj_limit)
 
+    def get_region_stats(self) -> pl.LazyFrame:
+        """Get some useful database statistics by geographic region."""
+        return self.get_grouped_stats(Playlist.region, 'region')
+
+    def get_country_stats(self) -> pl.LazyFrame:
+        """Get some useful database statistics by country."""
+        return self.get_grouped_stats(Playlist.country, 'country')
+
+    def get_grouped_stats(self, group_by: str, group_header: str) -> pl.LazyFrame:
+        song_counts_by_group =\
+            self.data.all_playlists.filter_playlist_tracks(
+                self.data.all_playlist_tracks(Playlist.id),
+                include_playlist_info=True)\
+            .included_playlist_tracks.group_by(group_by)\
+            .agg(song_count=pl.n_unique(Track.id))
+
+        playlist_counts_by_group =\
+            self.data.playlists.group_by(group_by)\
+            .agg(playlist_count=pl.n_unique(Playlist.id),
+                 dj_count=pl.n_unique(PlaylistOwner.id),
+                 djs=pl.col(PlaylistOwner.name))\
+            .with_columns(pl.col('djs').list.unique().list.head(30))
+
+        return playlist_counts_by_group\
+            .join(song_counts_by_group, how='full', on=group_by, nulls_equal=True)\
+            .with_columns(pl.col(group_by).fill_null(pl.col(group_by + "_right")))\
+            .select(pl.col(group_by).alias(group_header), 'song_count', 'playlist_count', 'dj_count', 'djs')\
+            .sort(group_header)
+
     def find_songs(
         self,
         *,
