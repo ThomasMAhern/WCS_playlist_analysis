@@ -335,25 +335,10 @@ class TrackSet:
         if not self.is_filtered and not include_track_info:
             return playlist_tracks
 
-        # TODO: Benchmark which implementation is faster, remove the other one
-        #       If both are comparable, remove the more complicated second version
-        use_first_impl = True
-
-        if use_first_impl:
-            matching_playlist_tracks = playlist_tracks.included_playlist_tracks.join(
-                self.included_tracks,
-                how='inner' if include_track_info else 'semi',
-                on=Track.id)
-        else:
-            matching_tracks = self.included_tracks
-
-            if not include_track_info:
-                matching_tracks = matching_tracks.select(Track.id)
-
-            matching_playlist_tracks = matching_tracks.join(
-                playlist_tracks.included_playlist_tracks,
-                how='inner',
-                on=Track.id)
+        matching_playlist_tracks = playlist_tracks.included_playlist_tracks.join(
+            self.included_tracks,
+            how='inner' if include_track_info else 'semi',
+            on=Track.id)
 
         return PlaylistTrackSet(matching_playlist_tracks,
                                 is_filtered=True)
