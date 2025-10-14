@@ -65,36 +65,39 @@ class PlaylistSet:
             .with_playlist_url()\
             .with_owner_url()
 
-    def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet, include_playlist_info: bool = True) -> PlaylistTrackSet:
-        """Filter the specified playlist_tracks_to_filter to only include tracks from matched playlists."""
+    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_playlist_info: bool = True) -> PlaylistTrackSet:
+        """Filter the specified playlist_tracks to only include tracks from matched playlists."""
 
+        # Skip join if it would be a no-op anyway
         if not self.is_filtered and not include_playlist_info:
-            return playlist_tracks_to_filter
+            return playlist_tracks
 
         matching_playlist_tracks = self.included_playlists.join(
-            playlist_tracks_to_filter.playlist_tracks,
+            playlist_tracks.included_playlist_tracks,
             how='inner' if include_playlist_info else 'semi',
             on=Playlist.id)
 
         if self.excluded_playlists is not None:
             excluded_playlist_tracks = self.excluded_playlists.join(
-                playlist_tracks_to_filter.playlist_tracks, how='inner', on=Playlist.id)
+                playlist_tracks.included_playlist_tracks, how='inner', on=Playlist.id)
 
             matching_playlist_tracks = matching_playlist_tracks.join(
                 excluded_playlist_tracks, how='anti', on=Track.id)
 
-        return PlaylistTrackSet(matching_playlist_tracks,
-                                is_filtered=self.is_filtered or playlist_tracks_to_filter.is_filtered)
+        return PlaylistTrackSet(
+            matching_playlist_tracks,
+            is_filtered=self.is_filtered or playlist_tracks.is_filtered
+        )
 
-    def filter_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet, tracks_to_filter: TrackSet) -> TrackSet:
-        """Filter the specified tracks_to_filter to only include tracks from matched playlists."""
+    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet) -> TrackSet:
+        """Filter the specified tracks to only include tracks from matched playlists."""
         matching_playlist_tracks =\
             self.filter_playlist_tracks(
-                playlist_tracks_to_filter)
+                playlist_tracks)
 
         matching_tracks =\
             matching_playlist_tracks.filter_tracks(
-                tracks_to_filter,
+                tracks,
                 include_playlist_track_info=True)
 
         return matching_tracks
@@ -153,9 +156,9 @@ class PlaylistFilter:
             or self.match_playlist is not None\
             or self.match_excluded_playlist is not None
 
-    def filter_playlists(self, playlists_to_filter: PlaylistSet) -> PlaylistSet:
-        """Filter the specified playlists_to_filter to only include playlists matching this filter."""
-        matching_playlists = playlists_to_filter.included_playlists
+    def filter_playlists(self, playlists: PlaylistSet) -> PlaylistSet:
+        """Filter the specified playlists to only include playlists matching this filter."""
+        matching_playlists = playlists.included_playlists
 
         if self.match_playlist is not None:
             matching_playlists = matching_playlists.filter(
@@ -182,7 +185,7 @@ class PlaylistFilter:
 
             # We want to remove tracks that are in these excluded playlists
             # from the result, even when they are present in other matching playlists
-            excluded_playlists = playlists_to_filter.all_playlists.filter(anti_predicate)\
+            excluded_playlists = playlists.all_playlists.filter(anti_predicate)\
                 .select(Playlist.id)
 
             # But as an optimization, we also want to avoid including those playlists in the first place.
@@ -190,64 +193,59 @@ class PlaylistFilter:
                 anti_predicate.not_())
 
             # Also keep the list of playlists to exclude from before
-            if playlists_to_filter.excluded_playlists is not None:
+            if playlists.excluded_playlists is not None:
                 excluded_playlists = pl.concat([
                     excluded_playlists,
-                    playlists_to_filter.excluded_playlists,
+                    playlists.excluded_playlists,
                 ]).unique(Playlist.id)
         else:
-            excluded_playlists = playlists_to_filter.excluded_playlists
-
-        # # Remove everything but the strictly necessary information
-        # matching_playlists = matching_playlists.select(Playlist.id)
+            excluded_playlists = playlists.excluded_playlists
 
         return PlaylistSet(
             included_playlists=matching_playlists,
             excluded_playlists=excluded_playlists,
-            all_playlists=playlists_to_filter.all_playlists,
-            is_filtered=self.has_filters,
+            all_playlists=playlists.all_playlists,
+            is_filtered=self.has_filters or playlists.is_filtered,
         )
 
 
 @dataclass(slots=True)
 class PlaylistTrackSet:
     """A collection of playlist-to-track relations."""
-    playlist_tracks: PolarsLazyFrame[PlaylistTrack]  # PlaylistTrackWithPlaylist
+    included_playlist_tracks: PolarsLazyFrame[PlaylistTrack]  # PlaylistTrackWithPlaylist
     is_filtered: bool
 
-    def filter_playlists(self, playlists_to_filter: PlaylistSet) -> PlaylistSet:
+    def filter_playlists(self, playlists: PlaylistSet) -> PlaylistSet:
         """Filter the specified playlists to only include playlists mentioned in this set."""
 
+        # Skip join if it would be a no-op anyway
         if not self.is_filtered:
-            return playlists_to_filter
+            return playlists
 
-        matching_playlists = playlists_to_filter.included_playlists.join(
-            self.playlist_tracks,
+        matching_playlists = playlists.included_playlists.join(
+            self.included_playlist_tracks,
             how='semi',
             on=Playlist.id)
 
         return PlaylistSet(
             included_playlists=matching_playlists,
-            excluded_playlists=playlists_to_filter.excluded_playlists,
-            all_playlists=playlists_to_filter.all_playlists,
-            is_filtered=self.is_filtered or playlists_to_filter.is_filtered,
+            excluded_playlists=playlists.excluded_playlists,
+            all_playlists=playlists.all_playlists,
+            is_filtered=self.is_filtered or playlists.is_filtered,
         )
 
     def filter_tracks(
         self,
-        tracks_to_filter: TrackSet,
+        tracks: TrackSet,
         *,
         include_playlist_info: bool = True,
         include_playlist_track_info: bool = True
     ) -> TrackSet:
         """Filter the specified tracks to only include tracks from playlists in this set."""
 
+        # Skip join if it would be a no-op anyway
         if not self.is_filtered and not include_playlist_info and not include_playlist_track_info:
-            # return tracks_to_filter
-            return TrackSet(
-                tracks_to_filter.tracks,
-                is_filtered=tracks_to_filter.is_filtered,
-            )
+            return tracks
 
         if include_playlist_info or include_playlist_track_info:
             columns_to_select = cs.empty()
@@ -259,20 +257,20 @@ class PlaylistTrackSet:
             if include_playlist_track_info:
                 columns_to_select |= PlaylistTrack.matching_columns()
 
-            matching_playlist_tracks = self.playlist_tracks\
+            matching_playlist_tracks = self.included_playlist_tracks\
                 .group_by(Track.id)\
                 .agg(columns_to_select)
         else:
-            matching_playlist_tracks = self.playlist_tracks
+            matching_playlist_tracks = self.included_playlist_tracks
 
-        matching_tracks = tracks_to_filter.tracks.join(
+        matching_tracks = tracks.included_tracks.join(
             matching_playlist_tracks,
             how='inner' if include_playlist_info or include_playlist_track_info else 'semi',
             on=Track.id)
 
         return TrackSet(
             matching_tracks,
-            is_filtered=self.is_filtered or tracks_to_filter.is_filtered,
+            is_filtered=self.is_filtered or tracks.is_filtered,
         )
 
 
@@ -297,9 +295,9 @@ class PlaylistTrackFilter:
         """Returns whether any playlist_track filters are defined."""
         return self.match_added_to_playlist_date is not None
 
-    def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet) -> PlaylistTrackSet:
-        """Filter the specified playlist_tracks_to_filter to only include playlist_tracks matching this filter."""
-        matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks
+    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet) -> PlaylistTrackSet:
+        """Filter the specified playlist_tracks to only include playlist_tracks matching this filter."""
+        matching_playlist_tracks = playlist_tracks.included_playlist_tracks
 
         # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
         if self.match_added_to_playlist_date is not None:
@@ -316,18 +314,18 @@ class PlaylistTrackFilter:
 
         return PlaylistTrackSet(
             matching_playlist_tracks,
-            is_filtered=self.has_filters or playlist_tracks_to_filter.is_filtered
+            is_filtered=self.has_filters or playlist_tracks.is_filtered
         )
 
 
 @dataclass(slots=True)
 class TrackSet:
     """A collection of tracks. Each `track.id` should appear at most once with each collection."""
-    tracks: PolarsLazyFrame[Track]  # TrackWithPlaylist
+    included_tracks: PolarsLazyFrame[Track]  # TrackWithPlaylist
     is_filtered: bool
 
     def with_extra_columns(self):
-        return TrackSet(self.tracks.with_columns(
+        return TrackSet(self.included_tracks.with_columns(
             pl.col(Track.beats_per_minute).fill_null(0.0),
             pl.when(pl.col(Track.id).is_not_null()).then(pl.concat_str(
                 pl.lit('https://open.spotify.com/track/'), Track.id)).alias(Track.url),
@@ -335,69 +333,70 @@ class TrackSet:
 
     def sort_by(self, by, *more_by, descending: bool):
         return TrackSet(
-            self.tracks.sort(by, *more_by, descending=descending),
+            self.included_tracks.sort(by, *more_by, descending=descending),
             is_filtered=self.is_filtered,
         ) if by is not None else self
 
-    def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet) -> TrackLyricsSet:
-        if not self.is_filtered:
-            return TrackLyricsSet(
-                lyrics_to_filter,
-                is_filtered=lyrics_to_filter.is_filtered)
-        else:
-            return TrackLyricsSet(
-                lyrics_to_filter.track_lyrics.join(
-                    self.tracks,
-                    how='semi',
-                    on=Track.id),
-                is_filtered=True)
+    def filter_lyrics(self, lyrics: TrackLyricsSet) -> TrackLyricsSet:
+        """Filter the specified track lyrics to only include ones for tracks in this set."""
 
-    def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet, *, include_track_info: bool = True) -> PlaylistTrackSet:
         # Skip join if it would be a no-op anyway
         if not self.is_filtered:
-            return playlist_tracks_to_filter
+            return lyrics
+
+        return TrackLyricsSet(
+            lyrics.included_track_lyrics.join(
+                self.included_tracks,
+                how='semi',
+                on=Track.id),
+            is_filtered=True)
+
+    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_track_info: bool = True) -> PlaylistTrackSet:
+        """Filter the specified playlist-to-track relations to only include ones for tracks in this set."""
+
+        # Skip join if it would be a no-op anyway
+        if not self.is_filtered and not include_track_info:
+            return playlist_tracks
 
         # TODO: Benchmark which implementation is faster, remove the other one
         #       If both are comparable, remove the more complicated second version
         use_first_impl = True
 
         if use_first_impl:
-            matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks.join(
-                self.tracks,
+            matching_playlist_tracks = playlist_tracks.included_playlist_tracks.join(
+                self.included_tracks,
                 how='inner' if include_track_info else 'semi',
                 on=Track.id)
         else:
-            matching_tracks = self.tracks
+            matching_tracks = self.included_tracks
 
             if not include_track_info:
                 matching_tracks = matching_tracks.select(Track.id)
 
             matching_playlist_tracks = matching_tracks.join(
-                playlist_tracks_to_filter.playlist_tracks,
+                playlist_tracks.included_playlist_tracks,
                 how='inner',
                 on=Track.id)
 
-        return PlaylistTrackSet(
-            matching_playlist_tracks,
-            is_filtered=True,
-        )
+        return PlaylistTrackSet(matching_playlist_tracks,
+                                is_filtered=True)
 
-    def filter_playlists(self, playlist_tracks_to_filter: PlaylistTrackSet, playlists_to_filter: PlaylistSet) -> PlaylistSet:
-        """Filter the specified playlists_to_filter to only include playlists that contain at least one track from this set."""
+    def filter_playlists(self, playlist_tracks: PlaylistTrackSet, playlists: PlaylistSet) -> PlaylistSet:
+        """Filter the specified playlists to only include playlists that contain at least one track from this set."""
 
         # Skip join if it would be a no-op anyway
         if not self.is_filtered:
-            return playlists_to_filter
+            return playlists
 
-        matching_playlists = playlists_to_filter.included_playlists.join(
-            playlist_tracks_to_filter.playlist_tracks.join(
-                self.tracks, how='semi', on=Track.id),
+        matching_playlists = playlists.included_playlists.join(
+            playlist_tracks.included_playlist_tracks.join(
+                self.included_tracks, how='semi', on=Track.id),
             how='semi', on=Playlist.id)
 
         return PlaylistSet(
             matching_playlists,
-            playlists_to_filter.excluded_playlists,
-            playlists_to_filter.all_playlists,
+            playlists.excluded_playlists,
+            playlists.all_playlists,
             is_filtered=True,
         )
 
@@ -441,11 +440,9 @@ class TrackFilter:
             or self.artist_is_queer\
             or self.artist_is_poc
 
-    def filter_tracks(self, tracks_to_filter: TrackSet) -> TrackSet:
-        """Filter the specified tracks_to_filter to only include tracks matching this filter."""
-
-        # Apply filters to provided data
-        matching_tracks = tracks_to_filter.tracks
+    def filter_tracks(self, tracks: TrackSet) -> TrackSet:
+        """Filter the specified tracks to only include tracks matching this filter."""
+        matching_tracks = tracks.included_tracks
 
         if self.match_song_name is not None:
             matching_tracks = matching_tracks.filter(
@@ -474,30 +471,27 @@ class TrackFilter:
             matching_tracks = matching_tracks.filter(
                 self.match_song_release_date)
 
-        return TrackSet(
-            matching_tracks,
-            is_filtered=self.has_filters or tracks_to_filter.is_filtered,
-        )
+        return TrackSet(matching_tracks, is_filtered=self.has_filters or tracks.is_filtered)
 
 
 @dataclass(slots=True)
 class TrackLyricsSet:
-    track_lyrics: PolarsLazyFrame[TrackLyrics]
+    included_track_lyrics: PolarsLazyFrame[TrackLyrics]
     is_filtered: bool
 
-    def filter_tracks(self, tracks_to_filter: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
+    def filter_tracks(self, tracks: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
         """Filter the specified tracks to only include tracks with matching lyrics."""
 
         # Skip join if it would be a no-op anyway
         if not self.is_filtered and not include_lyrics:
-            return tracks_to_filter
+            return tracks
 
         return TrackSet(
-            tracks_to_filter.tracks.join(
-                self.track_lyrics,
+            tracks.included_tracks.join(
+                self.included_track_lyrics,
                 how='inner' if include_lyrics else 'semi',
                 on=Track.id),
-            is_filtered=self.is_filtered or tracks_to_filter.is_filtered,
+            is_filtered=self.is_filtered or tracks.is_filtered,
         )
 
 
@@ -529,15 +523,9 @@ class TrackLyricsFilter:
         return self.match_lyrics is not None\
             or self.match_excluded_lyrics is not None
 
-    def filter_lyrics(
-        self,
-        lyrics_to_filter: TrackLyricsSet,
-        *,
-        include_full_lyrics: bool = False,
-        include_matched_lyrics: bool = False
-    ) -> TrackLyricsSet:
-        """Filter the specified lyrics_to_filter to only include lyrics matching this filter."""
-        matching_track_lyrics = lyrics_to_filter.track_lyrics
+    def filter_lyrics(self, lyrics: TrackLyricsSet, *, include_full_lyrics: bool = False, include_matched_lyrics: bool = False) -> TrackLyricsSet:
+        """Filter the specified lyrics to only include lyrics matching this filter."""
+        matching_track_lyrics = lyrics.included_track_lyrics
 
         if self.match_lyrics is not None:
             matching_track_lyrics = matching_track_lyrics.filter(
@@ -565,7 +553,7 @@ class TrackLyricsFilter:
 
         return TrackLyricsSet(
             matching_track_lyrics,
-            is_filtered=self.has_filters or lyrics_to_filter.is_filtered,
+            is_filtered=self.has_filters or lyrics.is_filtered,
         )
 
 
@@ -957,7 +945,7 @@ class SearchEngine:
 
         return matching_tracks.with_extra_columns()\
             .sort_by(sort_by, descending=descending)\
-            .tracks.slice(skip_num_top_results, limit or None)
+            .included_tracks.slice(skip_num_top_results, limit or None)
 
     def find_playlists(
         self,
@@ -1040,7 +1028,7 @@ class SearchEngine:
 
         return matching_playlists\
             .filter_tracks(self.data.all_playlist_tracks, self.data.all_tracks)\
-            .tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
+            .included_tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
             .agg(pl.n_unique(Track.id).alias(Stats.song_count),
                  pl.n_unique(Track.artist_names).alias(Stats.artist_count),
                  pl.n_unique(Playlist.name).alias(Stats.playlist_count),
@@ -1097,19 +1085,19 @@ class SearchEngine:
 
         if direction == 'any':
             adjacent_track_ids = pl.concat([
-                find_adjacent_tracks(matching_tracks.tracks, 'prev'),
-                find_adjacent_tracks(matching_tracks.tracks, 'next')
+                find_adjacent_tracks(matching_tracks.included_tracks, 'prev'),
+                find_adjacent_tracks(matching_tracks.included_tracks, 'next')
             ]).group_by(Track.id).agg(
                 pl.col(TrackAdjacent.times_played_together).sum(),
             )
         else:
             adjacent_track_ids = find_adjacent_tracks(
-                matching_tracks.tracks, direction)
+                matching_tracks.included_tracks, direction)
 
         adjacent_tracks = TrackSet(adjacent_track_ids.join(
             self.data.tracks, how='inner', on=Track.id), is_filtered=True)
 
-        return (matching_tracks.with_extra_columns().tracks.limit(100),
+        return (matching_tracks.with_extra_columns().included_tracks.limit(100),
                 adjacent_tracks.with_extra_columns()
-                .tracks.sort(TrackAdjacent.times_played_together, descending=True)
+                .included_tracks.sort(TrackAdjacent.times_played_together, descending=True)
                 .slice(0, limit or None))
