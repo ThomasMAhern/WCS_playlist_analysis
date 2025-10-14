@@ -281,14 +281,6 @@ class PlaylistTrackFilter:
             matching_playlist_tracks = matching_playlist_tracks.filter(
                 self.match_added_to_playlist_date)
 
-        # Remove everything but the strictly necessary information
-        matching_playlist_tracks = matching_playlist_tracks\
-            .group_by(Track.id)\
-            .agg(cs.by_name(Playlist.id, Playlist.name,
-                            PlaylistOwner.id, PlaylistOwner.name,
-                            require_all=False)
-                 .unique().sort())
-
         return PlaylistTrackSet(
             matching_playlist_tracks,
             is_filtered=self.has_filters or playlist_tracks.is_filtered
