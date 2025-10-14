@@ -87,7 +87,8 @@ class CombinedFilter:
             # then filter the tracks referenced by those entries
             matching_playlists =\
                 self.playlist_filter.filter_playlists(
-                    data.all_playlists)
+                    data.all_playlists,
+                    include_matched_terms=self.playlist_in_result)
 
             matching_playlist_tracks =\
                 self.playlist_track_filter.filter_playlist_tracks(
@@ -116,7 +117,8 @@ class CombinedFilter:
             # result back into the tracks
             matching_playlists =\
                 self.playlist_filter.filter_playlists(
-                    data.all_playlists)
+                    data.all_playlists,
+                    include_matched_terms=self.playlist_in_result)
 
             matching_lyrics =\
                 self.lyrics_filter.filter_lyrics(
@@ -156,7 +158,8 @@ class CombinedFilter:
             for filter in order:
                 match filter:
                     case FilterType.Playlist:
-                        playlists = self.playlist_filter.filter_playlists(playlists)
+                        playlists = self.playlist_filter.filter_playlists(
+                            playlists, include_matched_terms=self.playlist_in_result)
                         playlist_tracks = playlists.filter_playlist_tracks(
                             playlist_tracks, include_playlist_info=self.playlist_in_result)
 
@@ -413,11 +416,13 @@ class SearchEngine:
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
                         self.data.all_playlist_tracks(Playlist.id),
-                        self.data.all_playlists))
+                        self.data.all_playlists),
+                    include_matched_terms=True)
         else:
             matching_playlists = \
                 playlist_filter.filter_playlists(
-                    self.data.all_playlists)
+                    self.data.all_playlists,
+                    include_matched_terms=True)
 
         return matching_playlists.with_extra_columns()\
             .included_playlists.slice(0, limit or None)
@@ -449,7 +454,8 @@ class SearchEngine:
 
         matching_playlists =\
             playlist_filter.filter_playlists(
-                self.data.all_playlists)
+                self.data.all_playlists,
+                include_matched_terms=False)
 
         return matching_playlists\
             .filter_tracks(self.data.all_playlist_tracks(Playlist.id), self.data.all_tracks)\

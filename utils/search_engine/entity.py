@@ -25,6 +25,10 @@ class Playlist(Entity):
     country: Final = "playlist.country"
     url: Final = "playlist.url"
 
+    matched_terms: Final = "hit_terms"
+    matched_terms_count: Final = "hit_count"
+    matching_playlist_count: Final = "matching_playlist_count"
+
     class Owner(SubEntity[PlaylistOwner], PlaylistOwner):
         pass
 
@@ -72,3 +76,6 @@ class TrackLyrics(Entity):
     lyrics: Final = "track.lyrics"
     matched_lyrics: Final = "matched_lyrics"
     matched_lyrics_count: Final = "matched_lyrics_count"
+
+    hit_terms: Final = matched_lyrics
+    hit_count: Final = matched_lyrics_count

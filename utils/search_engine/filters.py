@@ -152,7 +152,7 @@ class PlaylistFilter:
             or self.match_playlist is not None\
             or self.match_excluded_playlist is not None
 
-    def filter_playlists(self, playlists: PlaylistSet) -> PlaylistSet:
+    def filter_playlists(self, playlists: PlaylistSet, *, include_matched_terms: bool) -> PlaylistSet:
         """Filter the specified playlists to only include playlists matching this filter."""
         matching_playlists = playlists.included_playlists
 
@@ -197,6 +197,20 @@ class PlaylistFilter:
         else:
             excluded_playlists = playlists.excluded_playlists
 
+        if include_matched_terms and self.match_playlist is not None:
+            matching_playlists = matching_playlists\
+                .with_columns(
+                    pl.col(Playlist.name)
+                    .str.to_lowercase()
+                    .str.extract_all('|'.join(self.playlist_include.lower().split(',')))
+                    .list.eval(pl.element().str.to_lowercase())
+                    .list.unique()
+                    .list.sort()
+                    .alias(Playlist.matched_terms))\
+                .with_columns(
+                    pl.col(Playlist.matched_terms).list.len()
+                    .alias(Playlist.matched_terms_count))
+
         return PlaylistSet(
             included_playlists=matching_playlists,
             excluded_playlists=excluded_playlists,
@@ -239,17 +253,32 @@ class PlaylistTrackSet:
 
         if include_playlist_info or include_playlist_track_info:
             columns_to_select = cs.empty()
+            additional_aggregate_columns: list[pl.Expr] = []
+            additional_columns: list[pl.Expr] = []
 
             if include_playlist_info:
                 columns_to_select |= Playlist.matching_columns()
                 columns_to_select |= Playlist.Owner.matching_columns()
+
+                additional_aggregate_columns.append(
+                    pl.col('playlist.id').n_unique().alias(Playlist.matching_playlist_count))
+
+                additional_aggregate_columns.append(
+                    cs.matches("^" + Playlist.matched_terms + "$")
+                    .as_expr().flatten().implode().list.unique().list.sort())
+
+                additional_columns.append(
+                    cs.matches("^" + Playlist.matched_terms + "$")
+                    .as_expr().list.len().alias(Playlist.matched_terms_count))
 
             if include_playlist_track_info:
                 columns_to_select |= PlaylistTrack.matching_columns()
 
             matching_playlist_tracks = self.included_playlist_tracks\
                 .group_by(Track.id)\
-                .agg(columns_to_select.slice(0, playlist_limit))
+                .agg(columns_to_select.slice(0, playlist_limit),
+                     *additional_aggregate_columns)\
+                .with_columns(*additional_columns)
         else:
             matching_playlist_tracks = self.included_playlist_tracks
 
@@ -305,6 +334,10 @@ class TrackSet:
     """A collection of tracks. Each `track.id` should appear at most once with each collection."""
     included_tracks: PolarsLazyFrame[Track]  # TrackWithPlaylist
     is_filtered: bool
+
+    def rename(self, mapping: dict[str, str]):
+        return TrackSet(self.included_tracks.rename(mapping),
+                        is_filtered=self.is_filtered)
 
     def with_extra_columns(self):
         return TrackSet(self.included_tracks.with_columns(
