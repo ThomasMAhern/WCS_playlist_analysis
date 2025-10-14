@@ -350,6 +350,13 @@ if song_locator_toggle:
             playlist_exclude=anti_playlist_input,
             added_to_playlist_date=added_2_playlist_date,
             skip_num_top_results=num_results,
+            sort_by=[
+                'hit_count',
+                'matching_playlist_count',
+                'playlist_count',
+                'dj_count'
+            ],
+            descending=True,
             limit=1000,
         )
 
@@ -364,9 +371,9 @@ if song_locator_toggle:
                 'track.url',
                 'playlist_count',
                 'dj_count',
-                # 'hit_terms',
+                'hit_terms',
                 'track.bpm',
-                # 'matching_playlist_count',
+                'matching_playlist_count',
                 'track.artists.is_queer_artist',
                 'track.artists.is_poc_artist',
                 'playlist.name',

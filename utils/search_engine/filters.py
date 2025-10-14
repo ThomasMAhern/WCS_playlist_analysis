@@ -310,14 +310,13 @@ class TrackSet:
         return TrackSet(self.included_tracks.with_columns(
             pl.col(Track.beats_per_minute).fill_null(0.0),
             pl.when(pl.col(Track.id).is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/track/'), Track.id)).alias(Track.url),
-        ), is_filtered=self.is_filtered)
+                pl.lit('https://open.spotify.com/track/'), Track.id)).alias(Track.url)),
+            is_filtered=self.is_filtered)
 
     def sort_by(self, by, *more_by, descending: bool):
-        return TrackSet(
-            self.included_tracks.sort(by, *more_by, descending=descending),
-            is_filtered=self.is_filtered,
-        ) if by is not None else self
+        return (self if by is None or (isinstance(by, list) and len(by) == 0) else
+                TrackSet(self.included_tracks.sort(by, *more_by, descending=descending),
+                         is_filtered=self.is_filtered))
 
     def filter_lyrics(self, lyrics: TrackLyricsSet) -> TrackLyricsSet:
         """Filter the specified track lyrics to only include ones for tracks in this set."""

@@ -217,6 +217,15 @@ class CombinedFilter:
             aggregate_by='track')
 
 
+type SortKey = Literal[
+    'hit_count',
+    'playlist_count',
+    'dj_count',
+    'matching_playlist_count',
+    'matched_lyrics_count',
+]
+
+
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
 
@@ -285,16 +294,26 @@ class SearchEngine:
         #
         # Result options
         #
-        sort_by: Literal[
-            'playlist_count',
-            'dj_count',
-            'matched_lyrics_count',
-        ] | None = None,
+        sort_by: SortKey | list[SortKey] | None = None,
         descending: bool = True,
         skip_num_top_results: int = 0,
         limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the songs that match the given query."""
+
+        if isinstance(sort_by, str):
+            _sort_by: list[SortKey] = [sort_by]
+        elif sort_by is None:
+            _sort_by: list[SortKey] = []
+        else:
+            _sort_by: list[SortKey] = sort_by
+
+        def is_sorted_by_any_of(*columns: SortKey) -> bool:
+            if len(columns) == 0:
+                raise ValueError("No columns specified")
+            if len(_sort_by) == 0:
+                return False
+            return set(_sort_by).issubset(set(columns))
 
         #####################
         # Filter parameters #
@@ -320,7 +339,7 @@ class SearchEngine:
             artist_is_queer=artist_is_queer,
             artist_is_poc=artist_is_poc,
             pre_filter=PreFilterOptions(sort_by, limit, descending)
-            if sort_by in ['playlist_count', 'dj_count']
+            if is_sorted_by_any_of('playlist_count', 'dj_count')
             and limit is not None else None,
         )
 
