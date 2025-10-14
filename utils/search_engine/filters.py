@@ -89,7 +89,7 @@ class PlaylistSet:
             is_filtered=self.is_filtered or playlist_tracks.is_filtered
         )
 
-    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool) -> TrackSet:
+    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool, playlist_limit: int | None) -> TrackSet:
         """Filter the specified tracks to only include tracks from matched playlists."""
         matching_playlist_tracks =\
             self.filter_playlist_tracks(
@@ -99,6 +99,7 @@ class PlaylistSet:
         matching_tracks =\
             matching_playlist_tracks.filter_tracks(
                 tracks,
+                playlist_limit=playlist_limit,
                 include_playlist_info=include_playlist_info,
                 include_playlist_track_info=include_playlist_track_info)
 
@@ -229,7 +230,7 @@ class PlaylistTrackSet:
             is_filtered=self.is_filtered or playlists.is_filtered,
         )
 
-    def filter_tracks(self, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool) -> TrackSet:
+    def filter_tracks(self, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool, playlist_limit: int | None) -> TrackSet:
         """Filter the specified tracks to only include tracks from playlists in this set."""
 
         # Skip join if it would be a no-op anyway
@@ -248,7 +249,7 @@ class PlaylistTrackSet:
 
             matching_playlist_tracks = self.included_playlist_tracks\
                 .group_by(Track.id)\
-                .agg(columns_to_select)
+                .agg(columns_to_select.slice(0, playlist_limit))
         else:
             matching_playlist_tracks = self.included_playlist_tracks
 

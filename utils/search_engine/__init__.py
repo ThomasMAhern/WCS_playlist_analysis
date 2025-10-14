@@ -35,6 +35,9 @@ class CombinedFilter:
     playlist_in_result: bool = True
     """Whether to include playlist-related columns in the returned dataset."""
 
+    playlist_limit: int | None = 30
+    """Only include up to N playlists in the aggregated columns of the result."""
+
     playlist_track_in_result: bool = True
     """Whether to include playlist-membership-related columns in the returned dataset."""
 
@@ -103,6 +106,7 @@ class CombinedFilter:
                     matching_lyrics.filter_tracks(
                         matching_playlist_tracks.filter_tracks(
                             data.all_tracks,
+                            playlist_limit=self.playlist_limit,
                             include_playlist_info=self.playlist_in_result,
                             include_playlist_track_info=self.playlist_track_in_result),
                         include_lyrics=self.lyrics_in_result))
@@ -138,6 +142,7 @@ class CombinedFilter:
             matching_tracks =\
                 matching_playlist_tracks.filter_tracks(
                     matching_tracks,
+                    playlist_limit=self.playlist_limit,
                     include_playlist_info=self.playlist_in_result,
                     include_playlist_track_info=self.playlist_track_in_result)
 
@@ -159,7 +164,10 @@ class CombinedFilter:
                         playlist_tracks = self.playlist_track_filter.filter_playlist_tracks(playlist_tracks)
                         playlists = playlist_tracks.filter_playlists(playlists)
                         tracks = playlist_tracks.filter_tracks(
-                            tracks, include_playlist_track_info=self.playlist_track_in_result)
+                            tracks,
+                            playlist_limit=self.playlist_limit,
+                            include_playlist_info=self.playlist_in_result,
+                            include_playlist_track_info=self.playlist_track_in_result)
 
                     case FilterType.Lyrics:
                         lyrics = self.lyrics_filter.filter_lyrics(
@@ -268,6 +276,7 @@ class SearchEngine:
         playlist_include: str = '',
         playlist_exclude: str = '',
         playlist_in_result: bool = True,
+        playlist_limit: int | None = 30,
         #
         # Playlist-membership specific filters
         #
@@ -325,6 +334,7 @@ class SearchEngine:
             aggregate_by='track',
             playlist_filter=playlist_filter,
             playlist_in_result=playlist_in_result,
+            playlist_limit=playlist_limit,
             playlist_track_filter=playlist_track_filter,
             playlist_track_in_result=playlist_track_in_result,
             track_filter=track_filter,
