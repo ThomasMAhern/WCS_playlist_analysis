@@ -7,20 +7,9 @@ import polars.selectors as cs
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 from utils.search_engine.entity_base import PolarsLazyFrame
 from utils.search_engine.filters import FilterOrder, FilterType
+from utils.search_engine.source_data import *
 from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
 from utils.search_utils.stats import count_n_unique
-
-PLAYLIST_DATA_FILE = 'data_playlist_metadata.parquet'
-PLAYLIST_TRACKS_DATA_FILE = 'data_playlist_songs.parquet'
-PLAYLIST_TRACKS_ORIGINAL_DATA_FILE = 'data_playlist_songs.original.parquet'
-TRACK_DATA_FILE = 'data_song_metadata.parquet'
-TRACK_ORIGINAL_DATA_FILE = 'data_song_metadata.original.parquet'
-TRACK_ADJACENT_DATA_FILE = 'data_song_adjacent.parquet'
-TRACK_LYRICS_DATA_FILE = 'data_song_lyrics.parquet'
-COUNTRY_DATA_FILE = 'data_countries.parquet'
-
-TRACK_DUPLICATES_DATA_FILE = 'data_song_duplicates.parquet'
-TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
 
 
 @dataclass(slots=True)
