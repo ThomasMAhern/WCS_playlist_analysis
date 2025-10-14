@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import NamedTuple
 
 import polars as pl
 import polars.selectors as cs
@@ -20,6 +21,17 @@ class FilterType(StrEnum):
     PlaylistTrack = 'playlist_track'
     Track = 'track'
     Lyrics = 'lyrics'
+
+
+class PreFilterOptions(NamedTuple):
+    sort_by: str
+    """The field to sort by."""
+
+    limit: int
+    """Grab the first N results after sorting."""
+
+    descending: bool
+    """Whether to sort in descending instead of ascending order."""
 
 
 @dataclass(slots=True)
@@ -367,6 +379,9 @@ class TrackFilter:
     artist_is_queer: bool = False
     artist_is_poc: bool = False
 
+    # Internal optimizations
+    pre_filter: PreFilterOptions | None = None
+
     # Parsed filters
     match_song_name: pl.Expr = field(init=False)
     match_song_release_date: pl.Expr = field(init=False)
@@ -389,7 +404,8 @@ class TrackFilter:
             or self.match_song_release_date is not None\
             or self.match_artist_name is not None\
             or self.artist_is_queer\
-            or self.artist_is_poc
+            or self.artist_is_poc\
+            or self.pre_filter is not None
 
     def filter_tracks(self, tracks: TrackSet) -> TrackSet:
         """Filter the specified tracks to only include tracks matching this filter."""
@@ -421,6 +437,12 @@ class TrackFilter:
         if self.match_song_release_date is not None:
             matching_tracks = matching_tracks.filter(
                 self.match_song_release_date)
+
+        # Pre-filter the results for certain queries over all tracks
+        if self.pre_filter is not None:
+            matching_tracks = matching_tracks\
+                .sort(self.pre_filter.sort_by, descending=self.pre_filter.descending)\
+                .limit(self.pre_filter.limit)
 
         return TrackSet(matching_tracks, is_filtered=self.has_filters or tracks.is_filtered)
 

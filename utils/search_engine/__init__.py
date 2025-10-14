@@ -4,7 +4,7 @@ from typing import Literal
 import polars as pl
 
 from utils.search_engine.entity import Playlist, PlaylistOwner, Stats, Track, TrackAdjacent
-from utils.search_engine.filters import FilterOrder, FilterType, PlaylistFilter, PlaylistTrackFilter, TrackFilter, TrackLyricsFilter, TrackSet
+from utils.search_engine.filters import FilterOrder, FilterType, PlaylistFilter, PlaylistTrackFilter, PreFilterOptions, TrackFilter, TrackLyricsFilter, TrackSet
 from utils.search_engine.source_data import CombinedData
 from utils.search_engine.source_data import *  # Export all constants
 from utils.search_utils.stats import count_n_unique
@@ -310,6 +310,9 @@ class SearchEngine:
             artist_name=artist_name,
             artist_is_queer=artist_is_queer,
             artist_is_poc=artist_is_poc,
+            pre_filter=PreFilterOptions(sort_by, limit, descending)
+            if sort_by in ['playlist_count', 'dj_count']
+            and limit is not None else None,
         )
 
         lyrics_filter = TrackLyricsFilter(
