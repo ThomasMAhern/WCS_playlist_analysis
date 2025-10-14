@@ -89,7 +89,7 @@ class CombinedFilter:
             matching_playlist_tracks =\
                 self.playlist_track_filter.filter_playlist_tracks(
                     matching_playlists.filter_playlist_tracks(
-                        data.all_playlist_tracks,
+                        data.all_playlist_tracks(Playlist.id),
                         include_playlist_info=self.playlist_in_result))
 
             matching_lyrics =\
@@ -130,7 +130,8 @@ class CombinedFilter:
                 self.playlist_track_filter.filter_playlist_tracks(
                     matching_tracks.filter_playlist_tracks(
                         matching_playlists.filter_playlist_tracks(
-                            data.all_playlist_tracks,
+                            data.all_playlist_tracks(Playlist.id if matching_playlists.is_filtered
+                                                     or self.playlist_in_result else Track.id),
                             include_playlist_info=self.playlist_in_result),
                         include_track_info=False))
 
@@ -142,7 +143,8 @@ class CombinedFilter:
 
         elif isinstance(order, list):
             playlists = data.all_playlists
-            playlist_tracks = data.all_playlist_tracks
+            # TODO: Automatically choose Track.id if that likely leads to better performance
+            playlist_tracks = data.all_playlist_tracks(Playlist.id)
             tracks = data.all_tracks
             lyrics = data.all_track_lyrics
 
@@ -378,7 +380,7 @@ class SearchEngine:
             matching_playlists =\
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
-                        self.data.all_playlist_tracks,
+                        self.data.all_playlist_tracks(Playlist.id),
                         self.data.all_playlists))
         else:
             matching_playlists = \
@@ -418,7 +420,7 @@ class SearchEngine:
                 self.data.all_playlists)
 
         return matching_playlists\
-            .filter_tracks(self.data.all_playlist_tracks, self.data.all_tracks)\
+            .filter_tracks(self.data.all_playlist_tracks(Playlist.id), self.data.all_tracks)\
             .included_tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
             .agg(pl.n_unique(Track.id).alias(Stats.song_count),
                  pl.n_unique(Track.artist_names).alias(Stats.artist_count),

@@ -15,6 +15,7 @@ from utils.search_engine import (
     TRACK_DUPLICATES_DATA_FILE,
     TRACK_LYRICS_DATA_FILE,
     TRACK_ORIGINAL_DATA_FILE,
+    TRACK_PLAYLISTS_DATA_FILE,
 )
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
@@ -132,16 +133,6 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
         pl.col('track.id').is_not_null(),
     ).unique(['playlist.id', 'track.id', 'playlist_track.number'])\
         .sort('playlist.id', 'track.id', 'playlist_track.number')
-
-    # # Write pre-processed track <=> playlist membership data
-    # # optimized for track => playlist lookup
-    #     playlist_tracks = source_data.select(
-    #     pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
-    #     pl.col('track.id').cast(TRACK_ID_DTYPE).alias('track.id'),
-    #     # The following metadata is not strictly required
-    #     pl.col('song_number').alias('playlist_track.number'),
-    #     pl.col('added_at').alias('playlist_track.added_at'),
-    # ).sort('playlist.id', 'track.id', 'playlist_track.number').unique()
 
     countries_df = (
         playlists_extended.select(
@@ -327,6 +318,18 @@ def deduplicate_playlist_and_song_data():
     write_to_parquet_file(playlist_tracks, PLAYLIST_TRACKS_DATA_FILE)
 
 
+def process_playlist_tracks_inverse():
+    """
+    Create a separate copy of playlist_tracks that is optimized
+    for track => playlist lookup, to enable certain query optimizations.
+    """
+    playlist_tracks = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)
+
+    track_playlists = playlist_tracks.sort('track.id', 'playlist.id', 'playlist_track.number')
+
+    write_to_parquet_file(track_playlists, TRACK_PLAYLISTS_DATA_FILE)
+
+
 def process_song_lyrics():
     """Process the song lyrics into a table sorted by track.id"""
     temp_file = 'temp_song_metadata_by_track_and_artist.parquet'
@@ -389,6 +392,9 @@ def process_everything(merge_duplicates: bool = True):
 
     if merge_duplicates:
         deduplicate_playlist_and_song_data()
+
+    # Inverse track => playlist lookup reuses the (possibly deduplicated) data generated above
+    process_playlist_tracks_inverse()
 
     # Song lyrics reuses the track data generated above
     process_song_lyrics()
