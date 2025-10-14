@@ -126,28 +126,21 @@ class PlaylistFilter:
     def __post_init__(self):
         """Parses the user-provided filter specifications."""
         self.match_dj_name = or_filter(
-            create_text_filter(self.dj_name,
-                               pl.col(PlaylistOwner.name)),
-            create_text_filter(self.dj_name,
-                               pl.col(PlaylistOwner.id)))
+            create_text_filter(self.dj_name, PlaylistOwner.name),
+            create_text_filter(self.dj_name, PlaylistOwner.id))
 
         self.match_dj_name_exclude = or_filter(
-            create_text_filter(self.dj_name_exclude,
-                               pl.col(PlaylistOwner.name)),
-            create_text_filter(self.dj_name_exclude,
-                               pl.col(PlaylistOwner.id)))
+            create_text_filter(self.dj_name_exclude, PlaylistOwner.name),
+            create_text_filter(self.dj_name_exclude, PlaylistOwner.id))
 
         self.match_country =\
-            create_text_filter(self.country,
-                               pl.col(Playlist.country))
+            create_text_filter(self.country, Playlist.country)
 
         self.match_playlist =\
-            create_text_filter(self.playlist_include,
-                               pl.col(Playlist.name))
+            create_text_filter(self.playlist_include, Playlist.name)
 
         self.match_excluded_playlist =\
-            create_text_filter(self.playlist_exclude,
-                               pl.col(Playlist.name))
+            create_text_filter(self.playlist_exclude, Playlist.name)
 
     @property
     def has_filters(self) -> bool:
@@ -423,14 +416,11 @@ class TrackFilter:
     def __post_init__(self):
         """Parses the user-provided filter specifications."""
         self.match_song_name =\
-            create_text_filter(self.song_name,
-                               pl.col(Track.name))
+            create_text_filter(self.song_name, Track.name)
         self.match_song_release_date =\
-            create_date_filter(self.song_release_date,
-                               pl.col(Track.release_date))
+            create_date_filter(self.song_release_date, Track.release_date)
         self.match_artist_name =\
-            create_text_filter(self.artist_name,
-                               pl.col(Track.artist_names))
+            create_text_filter(self.artist_name, Track.artist_names)
 
     @property
     def has_filters(self) -> bool:
@@ -513,11 +503,9 @@ class TrackLyricsFilter:
     def __post_init__(self):
         """Parses the user-provided filter specifications."""
         self.match_lyrics =\
-            create_text_filter(self.lyrics_include,
-                               pl.col(TrackLyrics.lyrics))
+            create_text_filter(self.lyrics_include, TrackLyrics.lyrics)
         self.match_excluded_lyrics =\
-            create_text_filter(self.lyrics_exclude,
-                               pl.col(TrackLyrics.lyrics))
+            create_text_filter(self.lyrics_exclude, TrackLyrics.lyrics)
 
     @property
     def has_filters(self) -> bool:
