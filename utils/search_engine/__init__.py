@@ -5,7 +5,7 @@ from typing import Literal, overload
 import polars as pl
 import polars.selectors as cs
 
-from utils.search_engine.entity import TrackLyrics, Playlist, PlaylistTrack, Track, TrackAdjacent
+from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 from utils.search_engine.entity_base import PolarsLazyFrame
 from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
 from utils.search_utils.stats import count_n_unique
@@ -45,8 +45,8 @@ class PlaylistSet:
     def with_playlist_url(self):
         return PlaylistSet(
             included_playlists=self.included_playlists.with_columns(
-                pl.when(pl.col('playlist.id').is_not_null()).then(pl.concat_str(
-                    pl.lit('https://open.spotify.com/track/'), 'playlist.id')).alias('playlist.url')),
+                pl.when(pl.col(Playlist.id).is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/track/'), Playlist.id)).alias(Playlist.url)),
             excluded_playlists=self.excluded_playlists,
             all_playlists=self.all_playlists,
             is_filtered=self.is_filtered)
@@ -54,8 +54,8 @@ class PlaylistSet:
     def with_owner_url(self):
         return PlaylistSet(
             included_playlists=self.included_playlists.with_columns(
-                pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
-                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url')),
+                pl.when(pl.col(PlaylistOwner.id).is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/user/'), PlaylistOwner.id)).alias(PlaylistOwner.url)),
             excluded_playlists=self.excluded_playlists,
             all_playlists=self.all_playlists,
             is_filtered=self.is_filtered)
@@ -74,14 +74,14 @@ class PlaylistSet:
         matching_playlist_tracks = self.included_playlists.join(
             playlist_tracks_to_filter.playlist_tracks,
             how='inner' if include_playlist_info else 'semi',
-            on=['playlist.id'])
+            on=Playlist.id)
 
         if self.excluded_playlists is not None:
             excluded_playlist_tracks = self.excluded_playlists.join(
-                playlist_tracks_to_filter.playlist_tracks, how='inner', on=['playlist.id'])
+                playlist_tracks_to_filter.playlist_tracks, how='inner', on=Playlist.id)
 
             matching_playlist_tracks = matching_playlist_tracks.join(
-                excluded_playlist_tracks, how='anti', on=['track.id'])
+                excluded_playlist_tracks, how='anti', on=Track.id)
 
         return PlaylistTrackSet(matching_playlist_tracks,
                                 is_filtered=self.is_filtered or playlist_tracks_to_filter.is_filtered)
@@ -122,27 +122,27 @@ class PlaylistFilter:
         """Parses the user-provided filter specifications."""
         self.match_dj_name = or_filter(
             create_text_filter(self.dj_name,
-                               pl.col('owner.name')),
+                               pl.col(PlaylistOwner.name)),
             create_text_filter(self.dj_name,
-                               pl.col('owner.id')))
+                               pl.col(PlaylistOwner.id)))
 
         self.match_dj_name_exclude = or_filter(
             create_text_filter(self.dj_name_exclude,
-                               pl.col('owner.name')),
+                               pl.col(PlaylistOwner.name)),
             create_text_filter(self.dj_name_exclude,
-                               pl.col('owner.id')))
+                               pl.col(PlaylistOwner.id)))
 
         self.match_country =\
             create_text_filter(self.country,
-                               pl.col('playlist.country'))
+                               pl.col(Playlist.country))
 
         self.match_playlist =\
             create_text_filter(self.playlist_include,
-                               pl.col('playlist.name'))
+                               pl.col(Playlist.name))
 
         self.match_excluded_playlist =\
             create_text_filter(self.playlist_exclude,
-                               pl.col('playlist.name'))
+                               pl.col(Playlist.name))
 
     @property
     def has_filters(self) -> bool:
@@ -183,7 +183,7 @@ class PlaylistFilter:
             # We want to remove tracks that are in these excluded playlists
             # from the result, even when they are present in other matching playlists
             excluded_playlists = playlists_to_filter.all_playlists.filter(anti_predicate)\
-                .select('playlist.id')
+                .select(Playlist.id)
 
             # But as an optimization, we also want to avoid including those playlists in the first place.
             matching_playlists = matching_playlists.filter(
@@ -194,12 +194,12 @@ class PlaylistFilter:
                 excluded_playlists = pl.concat([
                     excluded_playlists,
                     playlists_to_filter.excluded_playlists,
-                ]).unique(['playlist.id'])
+                ]).unique(Playlist.id)
         else:
             excluded_playlists = playlists_to_filter.excluded_playlists
 
         # # Remove everything but the strictly necessary information
-        # matching_playlists = matching_playlists.select('playlist.id')
+        # matching_playlists = matching_playlists.select(Playlist.id)
 
         return PlaylistSet(
             included_playlists=matching_playlists,
@@ -212,7 +212,7 @@ class PlaylistFilter:
 @dataclass(slots=True)
 class PlaylistTrackSet:
     """A collection of playlist-to-track relations."""
-    playlist_tracks: PolarsLazyFrame[PlaylistTrack] # PlaylistTrackWithPlaylist
+    playlist_tracks: PolarsLazyFrame[PlaylistTrack]  # PlaylistTrackWithPlaylist
     is_filtered: bool
 
     def filter_playlists(self, playlists_to_filter: PlaylistSet) -> PlaylistSet:
@@ -224,7 +224,7 @@ class PlaylistTrackSet:
         matching_playlists = playlists_to_filter.included_playlists.join(
             self.playlist_tracks,
             how='semi',
-            on=['playlist.id'])
+            on=Playlist.id)
 
         return PlaylistSet(
             included_playlists=matching_playlists,
@@ -253,14 +253,14 @@ class PlaylistTrackSet:
             columns_to_select = cs.empty()
 
             if include_playlist_info:
-                columns_to_select |= cs.starts_with("playlist.")
-                columns_to_select |= cs.starts_with("owner.")
+                columns_to_select |= Playlist.matching_columns()
+                columns_to_select |= Playlist.Owner.matching_columns()
 
             if include_playlist_track_info:
-                columns_to_select |= cs.starts_with("playlist_track.")
+                columns_to_select |= PlaylistTrack.matching_columns()
 
             matching_playlist_tracks = self.playlist_tracks\
-                .group_by('track.id')\
+                .group_by(Track.id)\
                 .agg(columns_to_select)
         else:
             matching_playlist_tracks = self.playlist_tracks
@@ -268,7 +268,7 @@ class PlaylistTrackSet:
         matching_tracks = tracks_to_filter.tracks.join(
             matching_playlist_tracks,
             how='inner' if include_playlist_info or include_playlist_track_info else 'semi',
-            on=['track.id'])
+            on=Track.id)
 
         return TrackSet(
             matching_tracks,
@@ -290,7 +290,7 @@ class PlaylistTrackFilter:
         """Parses the user-provided filter specifications."""
         self.match_added_to_playlist_date =\
             create_date_filter(self.added_to_playlist_date,
-                               pl.col('playlist_track.added_at'))
+                               pl.col(PlaylistTrack.added_at))
 
     @property
     def has_filters(self) -> bool:
@@ -308,9 +308,9 @@ class PlaylistTrackFilter:
 
         # Remove everything but the strictly necessary information
         matching_playlist_tracks = matching_playlist_tracks\
-            .group_by('track.id')\
-            .agg(cs.by_name('playlist.id', 'playlist.name',
-                            'owner.id', 'owner.name',
+            .group_by(Track.id)\
+            .agg(cs.by_name(Playlist.id, Playlist.name,
+                            PlaylistOwner.id, PlaylistOwner.name,
                             require_all=False)
                  .unique().sort())
 
@@ -323,14 +323,14 @@ class PlaylistTrackFilter:
 @dataclass(slots=True)
 class TrackSet:
     """A collection of tracks. Each `track.id` should appear at most once with each collection."""
-    tracks: PolarsLazyFrame[Track] # TrackWithPlaylist
+    tracks: PolarsLazyFrame[Track]  # TrackWithPlaylist
     is_filtered: bool
 
     def with_extra_columns(self):
         return TrackSet(self.tracks.with_columns(
-            pl.col('track.bpm').fill_null(0.0),
-            pl.when(pl.col('track.id').is_not_null()).then(pl.concat_str(
-                pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
+            pl.col(Track.beats_per_minute).fill_null(0.0),
+            pl.when(pl.col(Track.id).is_not_null()).then(pl.concat_str(
+                pl.lit('https://open.spotify.com/track/'), Track.id)).alias(Track.url),
         ), is_filtered=self.is_filtered)
 
     def sort_by(self, by, *more_by, descending: bool):
@@ -349,7 +349,7 @@ class TrackSet:
                 lyrics_to_filter.track_lyrics.join(
                     self.tracks,
                     how='semi',
-                    on='track.id'),
+                    on=Track.id),
                 is_filtered=True)
 
     def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet, *, include_track_info: bool = True) -> PlaylistTrackSet:
@@ -365,17 +365,17 @@ class TrackSet:
             matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks.join(
                 self.tracks,
                 how='inner' if include_track_info else 'semi',
-                on='track.id')
+                on=Track.id)
         else:
             matching_tracks = self.tracks
 
             if not include_track_info:
-                matching_tracks = matching_tracks.select('track.id')
+                matching_tracks = matching_tracks.select(Track.id)
 
             matching_playlist_tracks = matching_tracks.join(
                 playlist_tracks_to_filter.playlist_tracks,
                 how='inner',
-                on=['track.id'])
+                on=Track.id)
 
         return PlaylistTrackSet(
             matching_playlist_tracks,
@@ -391,8 +391,8 @@ class TrackSet:
 
         matching_playlists = playlists_to_filter.included_playlists.join(
             playlist_tracks_to_filter.playlist_tracks.join(
-                self.tracks, how='semi', on=['track.id']),
-            how='semi', on=['playlist.id'])
+                self.tracks, how='semi', on=Track.id),
+            how='semi', on=Playlist.id)
 
         return PlaylistSet(
             matching_playlists,
@@ -423,13 +423,13 @@ class TrackFilter:
         """Parses the user-provided filter specifications."""
         self.match_song_name =\
             create_text_filter(self.song_name,
-                               pl.col('track.name'))
+                               pl.col(Track.name))
         self.match_song_release_date =\
             create_date_filter(self.song_release_date,
-                               pl.col('track.album.release_date'))
+                               pl.col(Track.release_date))
         self.match_artist_name =\
             create_text_filter(self.artist_name,
-                               pl.col('track.artists.name'))
+                               pl.col(Track.artist_names))
 
     @property
     def has_filters(self) -> bool:
@@ -457,17 +457,17 @@ class TrackFilter:
 
         if self.artist_is_queer:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.artists.is_queer_artist'))
+                pl.col(Track.has_queer_artist))
 
         if self.artist_is_poc:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.artists.is_poc_artist'))
+                pl.col(Track.has_poc_artist))
 
         if self.song_bpm_range:
             matching_tracks = matching_tracks.filter(
-                pl.col('track.bpm').is_null()
-                | (pl.col('track.bpm').ge(self.song_bpm_range[0])
-                   & pl.col('track.bpm').le(self.song_bpm_range[1])))
+                pl.col(Track.beats_per_minute).is_null()
+                | (pl.col(Track.beats_per_minute).ge(self.song_bpm_range[0])
+                   & pl.col(Track.beats_per_minute).le(self.song_bpm_range[1])))
 
         # Courtesy of James B. (for the release_date filter suggestion)
         if self.match_song_release_date is not None:
@@ -496,7 +496,7 @@ class TrackLyricsSet:
             tracks_to_filter.tracks.join(
                 self.track_lyrics,
                 how='inner' if include_lyrics else 'semi',
-                on='track.id'),
+                on=Track.id),
             is_filtered=self.is_filtered or tracks_to_filter.is_filtered,
         )
 
@@ -518,10 +518,10 @@ class TrackLyricsFilter:
         """Parses the user-provided filter specifications."""
         self.match_lyrics =\
             create_text_filter(self.lyrics_include,
-                               pl.col('track.lyrics'))
+                               pl.col(TrackLyrics.lyrics))
         self.match_excluded_lyrics =\
             create_text_filter(self.lyrics_exclude,
-                               pl.col('track.lyrics'))
+                               pl.col(TrackLyrics.lyrics))
 
     @property
     def has_filters(self) -> bool:
@@ -551,17 +551,17 @@ class TrackLyricsFilter:
             matching_track_lyrics = matching_track_lyrics\
                 .slice(0, self.lyrics_limit or None)\
                 .with_columns(
-                    pl.col('track.lyrics')
+                    pl.col(TrackLyrics.lyrics)
                     .str.to_lowercase()
                     .str.extract_all('|'.join(self.lyrics_include.lower().split(',')))
                     .list.eval(pl.element().str.to_lowercase())
                     .list.unique()
-                    .alias('matched_lyrics'))\
+                    .alias(TrackLyrics.matched_lyrics))\
                 .with_columns(
-                    pl.col('matched_lyrics').list.len().alias('matched_lyrics_count'))
+                    pl.col(TrackLyrics.matched_lyrics).list.len().alias(TrackLyrics.matched_lyrics_count))
 
         if not include_full_lyrics:
-            matching_track_lyrics = matching_track_lyrics.drop('track.lyrics')
+            matching_track_lyrics = matching_track_lyrics.drop(TrackLyrics.lyrics)
 
         return TrackLyricsSet(
             matching_track_lyrics,
@@ -808,12 +808,12 @@ class CombinedFilter:
             case 'playlist':
                 return matching_playlists
             case 'owner':
-                return matching_playlists.group_by('owner.id')
+                return matching_playlists.group_by(PlaylistOwner.id)
             case 'track':
                 return matching_tracks
             case 'artist':
                 # TODO: Group by individual artists
-                return matching_tracks.group_by('track.artists.name')
+                return matching_tracks.group_by(Track.artist_names)
             case _:
                 raise ValueError(f'Invalid aggregate_by value: {aggregate_by}')
 
@@ -839,16 +839,16 @@ class SearchEngine:
 
     def get_stats(self) -> tuple[int, int, int, int, int]:
         """Compute statistics about the database content."""
-        songs_count, = count_n_unique(self.data.tracks, ['track.id'])
+        songs_count, = count_n_unique(self.data.tracks, [Track.id])
         # TODO: Count the number of unique artsits within track.artists instead
         artists_count, = count_n_unique(
-            self.data.tracks, ['track.artists.name'])
+            self.data.tracks, [Track.artist_names])
         playlists_count, djs_count = count_n_unique(
-            self.data.playlists, ['playlist.name', 'owner.name'])
+            self.data.playlists, [Playlist.name, PlaylistOwner.name])
         lyrics_count = count_n_unique(
             self.data.track_lyrics.join(
-                self.data.tracks, how='inner', on='track.id'),
-            ['track.name', 'track.artists.name'],
+                self.data.tracks, how='inner', on=Track.id),
+            [Track.name, Track.artist_names],
             single_key=True)
         return songs_count, artists_count, playlists_count, djs_count, lyrics_count
 
@@ -1040,16 +1040,16 @@ class SearchEngine:
 
         return matching_playlists\
             .filter_tracks(self.data.all_playlist_tracks, self.data.all_tracks)\
-            .tracks.group_by('owner.name', 'owner.id')\
-            .agg(pl.n_unique('track.id').alias('song_count'),
-                 pl.n_unique('track.artists.name').alias('artist_count'),
-                 pl.n_unique('playlist.name').alias('playlist_count'),
-                 pl.col('playlist.name').drop_nulls().unique()
+            .tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
+            .agg(pl.n_unique(Track.id).alias(Stats.song_count),
+                 pl.n_unique(Track.artist_names).alias(Stats.artist_count),
+                 pl.n_unique(Playlist.name).alias(Stats.playlist_count),
+                 pl.col(Playlist.name).drop_nulls().unique()
                  .sort().slice(0, playlist_limit or None))\
             .with_columns(
-                pl.when(pl.col('owner.id').is_not_null()).then(pl.concat_str(
-                    pl.lit('https://open.spotify.com/user/'), 'owner.id')).alias('owner.url'))\
-            .sort('playlist_count', descending=True)\
+                pl.when(pl.col(PlaylistOwner.id).is_not_null()).then(pl.concat_str(
+                    pl.lit('https://open.spotify.com/user/'), PlaylistOwner.id)).alias(PlaylistOwner.url))\
+            .sort(Stats.playlist_count, descending=True)\
             .slice(0, dj_limit or None)
 
     def find_related_songs(
@@ -1077,11 +1077,11 @@ class SearchEngine:
 
         def find_adjacent_tracks(starting_tracks, direction: Literal['prev', 'next']):
             if direction == 'next':
-                this_song_id = 'pair1.track.id'
-                other_song_id = 'pair2.track.id'
+                this_song_id = TrackAdjacent.FirstTrack.id
+                other_song_id = TrackAdjacent.SecondTrack.id
             elif direction == 'prev':
-                this_song_id = 'pair2.track.id'
-                other_song_id = 'pair1.track.id'
+                this_song_id = TrackAdjacent.SecondTrack.id
+                other_song_id = TrackAdjacent.FirstTrack.id
             else:
                 raise ValueError(f'Invalid value for direction: {direction}')
 
@@ -1089,27 +1089,27 @@ class SearchEngine:
                 starting_tracks,
                 how='semi',
                 left_on=this_song_id,
-                    right_on='track.id',
+                right_on=Track.id,
             ).select(
-                pl.col(other_song_id).alias('track.id'),
-                pl.col('playlist_count').alias('times_played_together')
+                pl.col(other_song_id).alias(Track.id),
+                pl.col(Stats.playlist_count).alias(TrackAdjacent.times_played_together)
             )
 
         if direction == 'any':
             adjacent_track_ids = pl.concat([
                 find_adjacent_tracks(matching_tracks.tracks, 'prev'),
                 find_adjacent_tracks(matching_tracks.tracks, 'next')
-            ]).group_by('track.id').agg(
-                pl.col('times_played_together').sum(),
+            ]).group_by(Track.id).agg(
+                pl.col(TrackAdjacent.times_played_together).sum(),
             )
         else:
             adjacent_track_ids = find_adjacent_tracks(
                 matching_tracks.tracks, direction)
 
         adjacent_tracks = TrackSet(adjacent_track_ids.join(
-            self.data.tracks, how='inner', on='track.id'), is_filtered=True)
+            self.data.tracks, how='inner', on=Track.id), is_filtered=True)
 
         return (matching_tracks.with_extra_columns().tracks.limit(100),
                 adjacent_tracks.with_extra_columns()
-                .tracks.sort('times_played_together', descending=True)
+                .tracks.sort(TrackAdjacent.times_played_together, descending=True)
                 .slice(0, limit or None))

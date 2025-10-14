@@ -39,12 +39,14 @@ class Track(Entity):
     has_poc_artist: Final = "track.artists.is_poc_artist"
     release_date: Final = "track.album.release_date"
     beats_per_minute: Final = "track.bpm"
+    url: Final = "track.url"
 
     pass
 
 
 class PlaylistTrack(Entity):
     PREFIX: Final = "playlist_track."
+    added_at: Final = "playlist_track.added_at"
 
     class Playlist(SubEntity[Playlist]):
         id: Final = Playlist.id

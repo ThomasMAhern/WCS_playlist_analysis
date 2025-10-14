@@ -5,6 +5,7 @@ from utils.typing import get_type_args_of_base
 
 
 class Entity:
+    @classmethod
     def matching_columns(cls) -> cs.Selector:
         return cs.starts_with(getattr(cls, 'PREFIX'))
 
