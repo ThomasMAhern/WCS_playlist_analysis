@@ -53,7 +53,7 @@ class PlaylistSet:
             .with_playlist_url()\
             .with_owner_url()
 
-    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_playlist_info: bool = True) -> PlaylistTrackSet:
+    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_playlist_info: bool) -> PlaylistTrackSet:
         """Filter the specified playlist_tracks to only include tracks from matched playlists."""
 
         # Skip join if it would be a no-op anyway
@@ -77,7 +77,7 @@ class PlaylistSet:
             is_filtered=self.is_filtered or playlist_tracks.is_filtered
         )
 
-    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet, *, include_playlist_info: bool = True, include_playlist_track_info: bool = True) -> TrackSet:
+    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool) -> TrackSet:
         """Filter the specified tracks to only include tracks from matched playlists."""
         matching_playlist_tracks =\
             self.filter_playlist_tracks(
@@ -217,13 +217,7 @@ class PlaylistTrackSet:
             is_filtered=self.is_filtered or playlists.is_filtered,
         )
 
-    def filter_tracks(
-        self,
-        tracks: TrackSet,
-        *,
-        include_playlist_info: bool = True,
-        include_playlist_track_info: bool = True
-    ) -> TrackSet:
+    def filter_tracks(self, tracks: TrackSet, *, include_playlist_info: bool, include_playlist_track_info: bool) -> TrackSet:
         """Filter the specified tracks to only include tracks from playlists in this set."""
 
         # Skip join if it would be a no-op anyway
@@ -334,7 +328,7 @@ class TrackSet:
                 on=Track.id),
             is_filtered=True)
 
-    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_track_info: bool = True) -> PlaylistTrackSet:
+    def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_track_info: bool) -> PlaylistTrackSet:
         """Filter the specified playlist-to-track relations to only include ones for tracks in this set."""
 
         # Skip join if it would be a no-op anyway
@@ -459,7 +453,7 @@ class TrackLyricsSet:
     included_track_lyrics: PolarsLazyFrame[TrackLyrics]
     is_filtered: bool
 
-    def filter_tracks(self, tracks: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
+    def filter_tracks(self, tracks: TrackSet, *, include_lyrics: bool) -> TrackSet:
         """Filter the specified tracks to only include tracks with matching lyrics."""
 
         # Skip join if it would be a no-op anyway
@@ -501,7 +495,7 @@ class TrackLyricsFilter:
         return self.match_lyrics is not None\
             or self.match_excluded_lyrics is not None
 
-    def filter_lyrics(self, lyrics: TrackLyricsSet, *, include_full_lyrics: bool = False, include_matched_lyrics: bool = False) -> TrackLyricsSet:
+    def filter_lyrics(self, lyrics: TrackLyricsSet, *, include_full_lyrics: bool, include_matched_lyrics: bool) -> TrackLyricsSet:
         """Filter the specified lyrics to only include lyrics matching this filter."""
         matching_track_lyrics = lyrics.included_track_lyrics
 

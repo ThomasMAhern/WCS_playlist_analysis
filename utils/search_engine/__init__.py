@@ -103,6 +103,7 @@ class CombinedFilter:
                     matching_lyrics.filter_tracks(
                         matching_playlist_tracks.filter_tracks(
                             data.all_tracks,
+                            include_playlist_info=self.playlist_in_result,
                             include_playlist_track_info=self.playlist_track_in_result),
                         include_lyrics=self.lyrics_in_result))
         elif order == FilterOrder.PlaylistsAndTracks_First:
@@ -130,7 +131,8 @@ class CombinedFilter:
                     matching_tracks.filter_playlist_tracks(
                         matching_playlists.filter_playlist_tracks(
                             data.all_playlist_tracks,
-                            include_playlist_info=self.playlist_in_result)))
+                            include_playlist_info=self.playlist_in_result),
+                        include_track_info=False))
 
             matching_tracks =\
                 matching_playlist_tracks.filter_tracks(
