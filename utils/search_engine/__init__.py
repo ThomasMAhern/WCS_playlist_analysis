@@ -6,6 +6,7 @@ import polars as pl
 import polars.selectors as cs
 
 from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
+from utils.search_utils.stats import count_n_unique
 import utils.types.lazyframes as lf
 
 PLAYLIST_DATA_FILE = 'data_playlist_metadata.parquet'
@@ -23,31 +24,6 @@ TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
 
 def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
     return countries_dataframe['country'].to_list()
-
-
-@overload
-def count_n_unique(data: pl.LazyFrame, columns: list[str], single_key: Literal[True]) -> int:
-    pass
-
-
-@overload
-def count_n_unique(data: pl.LazyFrame, columns: list[str], single_key: Literal[False] = False) -> list[int]:
-    pass
-
-
-def count_n_unique(data: pl.LazyFrame, columns: list[str], single_key: bool = False) -> int | list[int]:
-    """Count the number of unique values in the specified columns."""
-    if single_key:
-        # Count the number of unique combinations of the specified columns
-        return list(data.select(pl.concat_list(columns).n_unique().alias('count'))
-                    .collect(engine='streaming')
-                    .iter_rows())[0][0]
-
-    else:
-        # Count each column separately
-        return list(list(data.select(pl.n_unique(*columns))
-                         .collect(engine='streaming')
-                         .iter_rows())[0])
 
 
 class FilteredBy(StrEnum):
