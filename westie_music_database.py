@@ -2,6 +2,7 @@ import streamlit as st
 # import wordcloud
 # import matplotlib.pyplot as plt
 import polars as pl
+import polars.selectors as cs
 import psutil
 
 from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
@@ -9,6 +10,7 @@ from utils.columns import pull_columns_to_front
 from utils.logging import log_query
 from utils.playlist_classifiers import extract_dates_from_name
 from utils.search_engine import SearchEngine
+from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack
 
 # avail_threads = pl.threadpool_size()
 
@@ -159,8 +161,14 @@ def top_songs():
             descending=True,
             limit=100
         )\
-        .drop('track.artists.name', 'track.region')\
-        .with_columns(pl.col('track.country').alias('country'))\
+        .rename({'track.country': 'country'})\
+        .drop('track.region')\
+        .select((cs.all()
+                - Playlist.matching_columns()
+                - PlaylistTrack.matching_columns()
+                - PlaylistOwner.matching_columns())
+                | cs.by_name('playlist.name')
+                | cs.by_name('owner.name'))\
         .select(pull_columns_to_front(
             'track.name',
             'track.url',
@@ -172,7 +180,7 @@ def top_songs():
             'playlist.name',
             'track.artists',
             'owner.name',
-            'track.country',
+            'country',
         ))\
         .with_row_index(offset=1)\
         .collect(engine='streaming')
@@ -188,8 +196,14 @@ def top_queer_songs():
             descending=True,
             limit=100,
         )\
-        .drop('track.artists.name', 'track.region')\
-        .with_columns(pl.col('track.country').alias('country'))\
+        .rename({'track.country': 'country'})\
+        .drop('track.region')\
+        .select((cs.all()
+                - Playlist.matching_columns()
+                - PlaylistTrack.matching_columns()
+                - PlaylistOwner.matching_columns())
+                | cs.by_name('playlist.name')
+                | cs.by_name('owner.name'))\
         .select(pull_columns_to_front(
             'track.name',
             'track.url',
@@ -201,7 +215,7 @@ def top_queer_songs():
             'playlist.name',
             'track.artists',
             'owner.name',
-            'track.country',
+            'country',
         ))\
         .with_row_index(offset=1)\
         .collect(engine='streaming')
@@ -217,8 +231,14 @@ def top_poc_songs():
             descending=True,
             limit=100,
         )\
-        .drop('track.artists.name', 'track.region')\
-        .with_columns(pl.col('track.country').alias('country'))\
+        .rename({'track.country': 'country'})\
+        .drop('track.region')\
+        .select((cs.all()
+                - Playlist.matching_columns()
+                - PlaylistTrack.matching_columns()
+                - PlaylistOwner.matching_columns())
+                | cs.by_name('playlist.name')
+                | cs.by_name('owner.name'))\
         .select(pull_columns_to_front(
             'track.name',
             'track.url',
@@ -244,7 +264,7 @@ if top_songs_toggle:
                    url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
     st.dataframe(top_songs.drop('playlist_count'),
-                 column_config={"song_url": st.column_config.LinkColumn()})
+                 column_config={"track.url": st.column_config.LinkColumn()})
 
 
 top_queer_songs_toggle = st.toggle("Top 100 🏳️‍🌈 songs!")
@@ -255,7 +275,7 @@ if top_queer_songs_toggle:
     #        url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
     st.dataframe(top_queer_songs.drop('playlist_count'),
-                 column_config={"song_url": st.column_config.LinkColumn()})
+                 column_config={"track.url": st.column_config.LinkColumn()})
 
 
 top_poc_songs_toggle = st.toggle("Top 100 POC songs!")
@@ -364,8 +384,15 @@ if song_locator_toggle:
             .with_columns(
                 pl.col('playlist.name').list.head(30),
             )\
-            .drop('track.artists.name', 'track.region')\
-            .with_columns(pl.col('track.country').alias('country'))\
+            .rename({'track.country': 'country'})\
+            .drop('track.region', 'hit_count')\
+            .drop('track.id', 'track.album.release_date')\
+            .select((cs.all()
+                    - Playlist.matching_columns()
+                    - PlaylistTrack.matching_columns()
+                    - PlaylistOwner.matching_columns())
+                    | cs.by_name('playlist.name')
+                    | cs.by_name('owner.name'))\
             .select(pull_columns_to_front(
                 'track.name',
                 'track.url',
