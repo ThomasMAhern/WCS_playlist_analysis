@@ -648,7 +648,7 @@ class CombinedFilter:
             self,
             data: CombinedData,
             *,
-            order: Literal['playlists_first', 'tracks_first'] | list[FilteredBy],
+            order: Literal['playlists_first', 'playlists_and_tracks_first'] | list[FilteredBy],
             aggregate_by: Literal[
                 'playlist',
                 'owner',
