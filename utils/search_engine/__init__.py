@@ -23,10 +23,6 @@ TRACK_DUPLICATES_DATA_FILE = 'data_song_duplicates.parquet'
 TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
 
 
-def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
-    return countries_dataframe['country'].to_list()
-
-
 class FilteredBy(StrEnum):
     Playlist = 'playlist'
     PlaylistTrack = 'playlist_track'
@@ -583,7 +579,7 @@ class CombinedData:
             tracks=pl.scan_parquet(TRACK_DATA_FILE),
             tracks_adjacent=pl.scan_parquet(TRACK_ADJACENT_DATA_FILE),
             track_lyrics=pl.scan_parquet(TRACK_LYRICS_DATA_FILE),
-            countries=extract_countries(pl.read_parquet(COUNTRY_DATA_FILE)),
+            countries=pl.read_parquet(COUNTRY_DATA_FILE)['country'].to_list(),
         )
 
 
