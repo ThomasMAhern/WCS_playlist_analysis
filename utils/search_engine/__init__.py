@@ -89,16 +89,18 @@ class PlaylistSet:
             is_filtered=self.is_filtered or playlist_tracks.is_filtered
         )
 
-    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet) -> TrackSet:
+    def filter_tracks(self, playlist_tracks: PlaylistTrackSet, tracks: TrackSet, *, include_playlist_info: bool = True, include_playlist_track_info: bool = True) -> TrackSet:
         """Filter the specified tracks to only include tracks from matched playlists."""
         matching_playlist_tracks =\
             self.filter_playlist_tracks(
-                playlist_tracks)
+                playlist_tracks,
+                include_playlist_info=include_playlist_info)
 
         matching_tracks =\
             matching_playlist_tracks.filter_tracks(
                 tracks,
-                include_playlist_track_info=True)
+                include_playlist_info=include_playlist_info,
+                include_playlist_track_info=include_playlist_track_info)
 
         return matching_tracks
 
