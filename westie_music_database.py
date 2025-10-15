@@ -923,6 +923,10 @@ if songs_together_toggle:
         st.dataframe(search_engine.find_related_songs('prev', song_name=song_input, artist_name=artist_name_input)[1],
                      column_config={"track.url": st.column_config.LinkColumn()})
 
+        st.markdown(f"#### Most common songs to play before _or_ after _{song_input}_:")
+        st.dataframe(search_engine.find_related_songs('any', song_name=song_input, artist_name=artist_name_input)[1],
+                     column_config={"track.url": st.column_config.LinkColumn()})
+
         st.session_state["processing"] = False
     st.link_button("Andreas' connected-songs visualization!",
                    'https://loewclan.de/song-galaxy/')
