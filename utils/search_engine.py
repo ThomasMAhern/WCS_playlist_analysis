@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
+from enum import Enum, StrEnum, auto
 from typing import Literal, overload
 
 import polars as pl
+import polars.selectors as cs
 
 import utils.types.lazyframes as lf
 
@@ -16,19 +18,6 @@ COUNTRY_DATA_FILE = 'data_countries.parquet'
 
 TRACK_DUPLICATES_DATA_FILE = 'data_song_duplicates.parquet'
 TRACK_CANONICAL_DATA_FILE = 'data_song_canonical.parquet'
-
-FilterName = Literal[
-    'playlists',
-    'playlist_tracks',
-    'tracks',
-    'lyrics',
-]
-
-ResultTableName = Literal[
-    'playlists',
-    'playlist_tracks',
-    'tracks'
-]
 
 
 def extract_countries(countries_dataframe: pl.DataFrame) -> list[str]:
@@ -117,6 +106,7 @@ def count_n_unique(data: pl.LazyFrame, columns: list[str], single_key: bool = Fa
 
 @dataclass(slots=True)
 class PlaylistSet:
+    """A collection of playlists. Each `playlist.id` should appear at most once within each collection."""
     included_playlists: lf.Playlists
     excluded_playlists: lf.Playlists | None
     all_playlists: lf.Playlists
@@ -171,11 +161,12 @@ class PlaylistSet:
             self.filter_playlist_tracks(
                 playlist_tracks_to_filter)
 
-        return TrackSet(
-            matching_playlist_tracks.playlist_tracks.join(
-                tracks_to_filter.tracks, how='inner', on=['track.id']),
-            is_filtered=matching_playlist_tracks.is_filtered or tracks_to_filter.is_filtered,
-        )
+        matching_tracks =\
+            matching_playlist_tracks.filter_tracks(
+                tracks_to_filter,
+                include_playlist_track_info=True)
+
+        return matching_tracks
 
 
 @dataclass(slots=True)
@@ -289,6 +280,7 @@ class PlaylistFilter:
 
 @dataclass(slots=True)
 class PlaylistTrackSet:
+    """A collection of playlist-to-track relations."""
     playlist_tracks: lf.PlaylistTracksWithPlaylist
     is_filtered: bool
 
@@ -310,18 +302,40 @@ class PlaylistTrackSet:
             is_filtered=self.is_filtered
         )
 
-    def filter_tracks(self, tracks_to_filter: TrackSet, include_playlist_track_info: bool = True) -> TrackSet:
+    def filter_tracks(
+        self,
+        tracks_to_filter: TrackSet,
+        *,
+        include_playlist_info: bool = True,
+        include_playlist_track_info: bool = True
+    ) -> TrackSet:
         """Filter the specified tracks to only include tracks from playlists in this set."""
 
-        if not self.is_filtered and not include_playlist_track_info:
+        if not self.is_filtered and not include_playlist_info and not include_playlist_track_info:
             return tracks_to_filter
 
-        matching_tracks = self.playlist_tracks.join(
-            tracks_to_filter.tracks,
-            how='inner' if include_playlist_track_info else 'semi',
+        if include_playlist_info or include_playlist_track_info:
+            columns_to_select = cs.empty()
+
+            if include_playlist_info:
+                columns_to_select |= cs.starts_with("playlist.")
+                columns_to_select |= cs.starts_with("owner.")
+
+            if include_playlist_track_info:
+                columns_to_select |= cs.starts_with("playlist_track.")
+
+            matching_playlist_tracks = self.playlist_tracks\
+                .group_by('track.id')\
+                .agg(columns_to_select)
+        else:
+            matching_playlist_tracks = self.playlist_tracks
+
+        matching_tracks = tracks_to_filter.tracks.join(
+            matching_playlist_tracks,
+            how='inner' if include_playlist_info or include_playlist_track_info else 'semi',
             on=['track.id'])
 
-        return TrackSet(matching_tracks, is_filtered=self.is_filtered)
+        return TrackSet(matching_tracks, is_filtered=self.is_filtered or tracks_to_filter.is_filtered)
 
 
 @dataclass(slots=True)
@@ -347,16 +361,10 @@ class PlaylistTrackFilter:
 
     def filter_playlist_tracks(self, playlist_tracks_to_filter: PlaylistTrackSet) -> PlaylistTrackSet:
         """Filter the specified playlist_tracks_to_filter to only include playlist_tracks matching this filter."""
-
-        # Parse filters
-
-        # Apply filters to provided data
-        has_playlist_track_filters = False
         matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks
 
         # Courtesy of Franzi M. (for the added_to_playlist_date filter suggestion)
         if self.match_added_to_playlist_date is not None:
-            has_playlist_track_filters = True
             matching_playlist_tracks = matching_playlist_tracks.filter(
                 self.match_added_to_playlist_date)
 
@@ -371,17 +379,15 @@ class PlaylistTrackFilter:
 
         return PlaylistTrackSet(
             matching_playlist_tracks,
-            is_filtered=has_playlist_track_filters or playlist_tracks_to_filter.is_filtered
+            is_filtered=self.has_filters or playlist_tracks_to_filter.is_filtered
         )
 
 
 @dataclass(slots=True)
 class TrackSet:
+    """A collection of tracks. Each `track.id` should appear at most once with each collection."""
     tracks: lf.TracksWithPlaylist
     is_filtered: bool
-
-    def to_track_lyrics_set(self):
-        return TrackLyricsSet(self.tracks, self.is_filtered)
 
     def with_extra_columns(self):
         return TrackSet(self.tracks.with_columns(
@@ -390,9 +396,9 @@ class TrackSet:
                 pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
         ), is_filtered=self.is_filtered)
 
-    def sort_by(self, by, *, descending: bool):
+    def sort_by(self, by, *more_by, descending: bool):
         return TrackSet(
-            self.tracks.sort(by, descending=descending),
+            self.tracks.sort(by, *more_by, descending=descending),
             is_filtered=self.is_filtered,
         ) if by is not None else self
 
@@ -424,8 +430,15 @@ class TrackSet:
         if not self.is_filtered:
             return playlist_tracks_to_filter
 
-        matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks.join(
-            self.tracks, how='semi', on=['track.id'])
+        # TODO: To my understanding, this would keep the order of playlist_tracks in the result
+        # matching_playlist_tracks = playlist_tracks_to_filter.playlist_tracks.join(
+        #     self.tracks, how='semi', on=['track.id'])
+
+        # TODO: But instead, we want to maintain the order from self.tracks to make
+        #       the join back into self.tracks later on faster
+        # TODO: Verify that polars actually works this way (or, even better, do a benchmark)
+        matching_playlist_tracks = self.tracks.select('track.id').join(
+            playlist_tracks_to_filter.playlist_tracks, how='inner', on=['track.id'])
 
         return PlaylistTrackSet(matching_playlist_tracks, is_filtered=True)
 
@@ -529,9 +542,6 @@ class TrackLyricsSet:
     track_lyrics: lf.TrackLyrics
     is_filtered: bool
 
-    def to_track_set(self):
-        return TrackSet(self.track_lyrics, self.is_filtered)
-
     def filter_tracks(self, tracks_to_filter: TrackSet, *, include_lyrics: bool = False) -> TrackSet:
         """Filter the specified tracks to only include tracks with matching lyrics."""
 
@@ -615,6 +625,22 @@ class CombinedData:
     track_lyrics: lf.TrackLyrics | None = None
     countries: list[str]
 
+    @property
+    def all_playlists(self) -> PlaylistSet:
+        return PlaylistSet(self.playlists, None, self.playlists, is_filtered=False)
+
+    @property
+    def all_playlist_tracks(self) -> PlaylistTrackSet:
+        return PlaylistTrackSet(self.playlist_tracks, is_filtered=False)
+
+    @property
+    def all_tracks(self) -> TrackSet:
+        return TrackSet(self.tracks, is_filtered=False)
+
+    @property
+    def all_track_lyrics(self):
+        return TrackLyricsSet(self.track_lyrics, is_filtered=False)
+
     @staticmethod
     def create(
         *,
@@ -650,20 +676,16 @@ class CombinedData:
 
 @dataclass(slots=True)
 class CombinedFilter:
-    playlist_filter: PlaylistFilter =\
-        field(default_factory=PlaylistFilter)
+    playlist_filter: PlaylistFilter = field(default_factory=PlaylistFilter)
     """Filters applied to playlist information."""
 
-    playlist_track_filter: PlaylistTrackFilter = \
-        field(default_factory=PlaylistTrackFilter)
+    playlist_track_filter: PlaylistTrackFilter = field(default_factory=PlaylistTrackFilter)
     """Filters applied to playlist membership information. """
 
-    track_filter: TrackFilter = \
-        field(default_factory=TrackFilter)
+    track_filter: TrackFilter = field(default_factory=TrackFilter)
     """Filters applied to track information."""
 
-    lyrics_filter: TrackLyricsFilter = \
-        field(default_factory=TrackLyricsFilter)
+    lyrics_filter: TrackLyricsFilter = field(default_factory=TrackLyricsFilter)
     """Filters applied to track lyrics."""
 
     aggregate_by: Literal[
@@ -671,9 +693,8 @@ class CombinedFilter:
         'owner',
         'track',
         'artist',
-    ] = 'track'
-    """
-    Whether to aggregate the returned dataset by playlists, tracks, (playlist) owners or (track) artists."""
+    ] | None = 'track'
+    """Whether to aggregate the returned dataset by playlists, tracks, (playlist) owners or (track) artists."""
 
     playlist_in_result: bool = True
     """Whether to include playlist-related columns in the returned dataset."""
@@ -687,219 +708,126 @@ class CombinedFilter:
     lyrics_in_result: bool = True
     """Whether to included lyrics-related columns in the returned dataset."""
 
-    def get_optimal_filter_order(self) -> list[FilterName]:
+    def get_optimal_filter_order(self) -> Literal['playlists_first', 'tracks_first']:
         """
         Decide the performance-optimal filtering order for the current query.
 
         There are two possible directions we can aggregate our result,
         which ultimately lead to the same dataset (minus ordering),
-        but have different performance characteristics.
+        but have different performance characteristics:
 
-        With the goal being to scan the least amount of rows possible,
-        we can either:
+        1.  Go playlists => playlist\\_tracks => tracks:
+        2.  Go (playlists & tracks) => playlist\\_tracks => tracks:
 
-        1.  Go playlists (`p`) => playlist\\_tracks (`m`) => tracks (`t`):
-
-            1.  Filter playlists (`O(p)`)
-            2.  Join those with playlist entry information (which, due to
-                both sides being sorted by the join key, is `O(min(p_filtered * log m, m))`
-                being effectively `O(log m)` or better for low `p_filtered`,
-                and `O(m)` in the worst case)),
-            3.  Then join track information (which, due to sorting of one side,
-                gives use `O(max(m_filtered, log t))` with `m_filtered ~ p_filtered`)
-
-            This gives roughly `O(p + min(p_filtered * log m, m) + max(p_filtered, log t))`.
-
-            -   If playlists aren't filtered at all, this results in `O(p + m + m*log t)`.
-            -   If most playlists are filtered out, this approaches  `O(p + log m + log t)`
-
-        2.  Go tracks (`t`) => tracks\\_playlists (`m`, same as playlist\\_tracks but sorted by `track.id`) => playlists (`p`):
-
-            1.  Filter tracks or lyrics (`O(t)`)
-            2.  Join with playlist entry information (`O(min(t_filtered * log m, m))`,
-                effectively `O(log m)` for low `t_filtered`, `O(m)` in the worst case)
-            3.  Join playlist information (`O(max(m_filtered, log p))`,
-                with `m_filtered ~ t_filtered`).
-
-            This gives roughly `O(t + min(t_filtered * log m, m) + max(t_filtered, log t))`.
-
-            -   If tracks aren't filtered at all, this results in `O(t + m + m*log p)`.
-            -   If most tracks are filtered out, this approaches `O(t + log m + log p)`.
-
-        To decide the best filter order, we want to answer the following question:
-
-        ```
-        estimate whether
-
-        O_1 >> O_2 (equivalent to: limit O_1/O_2 = 0 for p,m,t->infinity)
-
-        where
-
-        p% = p_filtered/p
-        t% = t_filtered/t
-        f(x,a,b) = interpolate(0 <= x <= 1, a, b) = x*a + (1-x)*b
-        m ~ p*t
-
-        O_1 = O(p + f(p%, (m + m*log t), (log m + log t)))
-        O_2 = O(t + f(t%, (m + m*log p), (log m + log p)))
-
-        assuming
-
-        p = t = n, m = n^2
-
-        this simplifies to
-
-          limit (n + f(p%, (n^2 + n^2 * log n), (log n^2 + log n)))
-              / (n + f(t%, (n^2 + n^2 * log n), (log n^2 + log n)))
-        = limit (n + p% * (n^2 + n^2 * log n) + (1-p%) * (log n^2 + log n)))
-              / (n + t% * (n^2 + n^2 * log n) + (1-t%) * (log n^2 + log n)))
-        = limit (n + p% n^2 + p% n^2 log n + (1-p%) log n^2 + (1-p%) log n)
-              / (n + t% n^2 + t% n^2 log n + (1-t%) log n^2 + (1-p%) log n)
-        = limit (n + p% n^2 + (p% n^2 + 1 - p%) log n + (1-p%) log n^2)
-              / (n + t% n^2 + (t% n^2 + 1 - t%) log n + (1-t%) log n^2)
-        = limit (n + p% n^2 + (p% (n^2 - 1) + 1) log n + (1-p%) log n^2)
-              / (n + t% n^2 + (t% (n^2 - 1) + 1) log n + (1-t%) log n^2)
-        = limit (n + p_f / n * n^2 + (p_f / n * (n^2 - 1) + 1) log n + (1-p_f/n) log n^2)
-              / (n + t_f / n * n^2 + (t_f / n * (n^2 - 1) + 1) log n + (1-t_f/n) log n^2)
-        = limit (n + p_f n + (p_f (n - 1/n) + 1) log n + (1-p_f/n) log n^2)
-              / (n + t_f n + (t_f (n - 1/n) + 1) log n + (1-p_f/n) log n^2)
-        = limit ((1 + p_f) n + p_f n log n - p_f 1/n log n + log n + log n^2 + - p_f/n log n^2)
-              / ((1 + t_f) n + t_f n log n - t_f 1/n log n + log n + log n^2 + - t_f/n log n^2)
-        = limit (p_f (n + n log n - 1/n log n - 1/n log n^2) + (n + log n^2 + log n))
-              / (t_f (n + n log n - 1/n log n - 1/n log n^2) + (n + log n^2 + log n))
-
-        basically:
-
-        The ratio `(p_f/p) / (t_f/t)` determines which order is best.
+        Abstracting from the technical details & considerations, this boils
+        down to estimating which one of `len(filter_playlists(all_playlists))`
+        and `len(filter_tracks(all_tracks))` will be smaller, and choosing the
+        evaluation order based on that.
         ```
         """
 
-        if False and not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
-            return [
-                'track_lyrics',
-                'tracks',
-                'playlist_tracks',
-                'playlists',
-            ]
+        if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
+            return 'tracks_first'
 
-        default_order: list[FilterName] = [
-            'playlists',
-            'playlist_tracks',
-            'track_lyrics',
-            'tracks',
-        ]
-        return default_order
+        return 'playlists_first'
 
     def apply_filters(
             self,
             data: CombinedData,
             *,
-            order: list[FilterName]
+            order: Literal['playlists_first', 'tracks_first'],
+            aggregate_by: Literal[
+                'playlist',
+                'owner',
+                'track',
+                'artist',
+            ] = 'track'
     ):
-        filtered_playlists = False
-        filtered_playlist_tracks = False
-        filtered_tracks = False
-        filtered_lyrics = False
+        matching_playlists = data.all_playlists
+        matching_playlist_tracks = data.all_playlist_tracks
+        matching_tracks = data.all_tracks
+        matching_lyrics = data.all_track_lyrics
 
-        matching_playlists =\
-            PlaylistSet(data.playlists, None, data.playlists, False)
-        matching_playlist_tracks =\
-            PlaylistTrackSet(data.playlist_tracks, False)
-        matching_tracks = TrackSet(data.tracks, False)
-        matching_lyrics = TrackLyricsSet(data.track_lyrics, False)
+        if order == 'playlists_first':
+            matching_playlists =\
+                self.playlist_filter.filter_playlists(
+                    data.all_playlists)
 
-        for filter_name in order:
-            match filter_name:
-                case 'playlists':
-                    filtered_playlists = True
+            matching_playlist_tracks =\
+                self.playlist_track_filter.filter_playlist_tracks(
+                    matching_playlists.filter_playlist_tracks(
+                        data.all_playlist_tracks,
+                        include_playlist_info=self.playlist_in_result))
 
-                    if filtered_playlist_tracks:
-                        matching_playlists =\
-                            matching_playlist_tracks.filter_playlists(
-                                matching_playlists)
+            matching_lyrics =\
+                self.lyrics_filter.filter_lyrics(
+                    matching_lyrics,
+                    include_matched_lyrics=self.lyrics_in_result)
 
-                    matching_playlists =\
-                        self.playlist_filter.filter_playlists(
-                            matching_playlists)
+            matching_tracks =\
+                self.track_filter.filter_tracks(
+                    matching_lyrics.filter_tracks(
+                        matching_playlist_tracks.filter_tracks(
+                            data.all_tracks,
+                            include_playlist_track_info=self.playlist_track_in_result),
+                        include_lyrics=self.lyrics_in_result))
+        elif order == 'tracks_first':
+            matching_lyrics =\
+                self.lyrics_filter.filter_lyrics(
+                    matching_lyrics,
+                    include_matched_lyrics=self.lyrics_in_result)
 
-                case 'playlist_tracks':
-                    filtered_playlist_tracks = True
+            matching_tracks =\
+                self.track_filter.filter_tracks(
+                    matching_lyrics.filter_tracks(
+                        data.all_tracks,
+                        include_lyrics=self.lyrics_in_result))
 
-                    if filtered_playlists:
-                        matching_playlist_tracks =\
-                            matching_playlists.filter_playlist_tracks(
-                                matching_playlist_tracks,
-                                include_playlist_info=self.playlist_in_result)
+            matching_playlist_tracks =\
+                self.playlist_track_filter.filter_playlist_tracks(
+                    matching_tracks.filter_playlist_tracks(
+                        data.all_playlist_tracks))
 
-                    elif filtered_tracks:
-                        matching_playlist_tracks =\
-                            matching_tracks.filter_playlist_tracks(
-                                matching_playlist_tracks)
+            matching_playlists =\
+                self.playlist_filter.filter_playlists(
+                    matching_playlist_tracks.filter_playlists(
+                        data.all_playlists))
 
-                    matching_playlist_tracks =\
-                        self.playlist_track_filter.filter_playlist_tracks(
-                            matching_playlist_tracks)
+            # Join the playlist information back into the playlist_tracks data
+            matching_playlist_tracks =\
+                matching_playlists.filter_playlist_tracks(
+                    data.all_playlist_tracks,
+                    include_playlist_info=self.playlist_in_result)
 
-                case 'track_lyrics':
-                    filtered_lyrics = True
+            if self.playlist_in_result or self.playlist_track_in_result:
+                # Join the playlist information back into the track data
+                matching_tracks =\
+                    matching_playlist_tracks.filter_tracks(
+                        matching_tracks,
+                        include_playlist_info=self.playlist_in_result,
+                        include_playlist_track_info=self.playlist_track_in_result)
 
-                    if filtered_tracks:
-                        matching_tracks, matching_lyrics =\
-                            matching_tracks.filter_lyrics(
-                                matching_lyrics,
-                                include_lyrics=self.lyrics_in_result)
+        else:
+            raise ValueError(f'Invalid order value: {order}')
 
-                        matching_tracks =\
-                            self.lyrics_filter.filter_lyrics(
-                                matching_tracks.to_track_lyrics_set(),
-                                include_matched_lyrics=self.lyrics_in_result)\
-                            .to_track_set()
-
-                    matching_lyrics =\
-                        self.lyrics_filter.filter_lyrics(
-                            matching_lyrics,
-                            include_matched_lyrics=self.lyrics_in_result)
-
-                case 'tracks':
-                    filtered_tracks = True
-
-                    if filtered_playlist_tracks:
-                        matching_tracks =\
-                            matching_playlist_tracks.filter_tracks(
-                                matching_tracks,
-                                include_playlist_track_info=self.playlist_track_in_result)
-
-                    if filtered_lyrics:
-                        matching_tracks =\
-                            matching_lyrics.filter_tracks(
-                                matching_tracks,
-                                include_lyrics=self.lyrics_in_result)
-
-                    matching_tracks =\
-                        self.track_filter.filter_tracks(
-                            matching_tracks)
-
-                case _:
-                    raise ValueError(f'Invalid filter name: {filter_name}')
-
-        match self.aggregate_by:
+        match aggregate_by or self.aggregate_by:
             case 'playlist':
                 return matching_playlists
             case 'owner':
                 return matching_playlists.group_by('owner.id')
-            case 'tracks':
+            case 'track':
                 return matching_tracks
             case 'artist':
                 # TODO: Group by individual artists
                 return matching_tracks.group_by('track.artists.name')
             case _:
-                raise ValueError(f'Invalid result field: {self.aggregate_by}')
+                raise ValueError(f'Invalid aggregate_by value: {aggregate_by}')
 
     def filter_tracks(self, data: CombinedData) -> TrackSet:
         return self.apply_filters(
             data,
             order=self.get_optimal_filter_order(),
-            retrieve='tracks')
+            aggregate_by='track')
 
 
 class SearchEngine:
@@ -1071,19 +999,18 @@ class SearchEngine:
         #####################
 
         matching_tracks =\
-            track_filter.filter_tracks(
-                TrackSet(self.data.tracks, False))
+            track_filter.filter_tracks(self.data.all_tracks)
 
         if matching_tracks.is_filtered:
             matching_playlists =\
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
-                        PlaylistTrackSet(self.data.playlist_tracks, False),
-                        PlaylistSet(self.data.playlists, None, self.data.playlists, False)))
+                        self.data.all_playlist_tracks,
+                        self.data.all_playlists))
         else:
             matching_playlists = \
                 playlist_filter.filter_playlists(
-                    PlaylistSet(self.data.playlists, None, self.data.playlists, False))
+                    self.data.all_playlists)
 
         return matching_playlists.with_extra_columns()\
             .included_playlists.slice(0, limit or None)
@@ -1115,10 +1042,10 @@ class SearchEngine:
 
         matching_playlists =\
             playlist_filter.filter_playlists(
-                PlaylistSet(self.data.playlists, None, self.data.playlists, False))
+                self.data.all_playlists)
 
         return matching_playlists\
-            .filter_tracks(PlaylistTrackSet(self.data.playlist_tracks, False), TrackSet(self.data.tracks, False))\
+            .filter_tracks(self.data.all_playlist_tracks, self.data.all_tracks)\
             .tracks.group_by('owner.name', 'owner.id')\
             .agg(pl.n_unique('track.id').alias('song_count'),
                  pl.n_unique('track.artists.name').alias('artist_count'),
@@ -1152,7 +1079,7 @@ class SearchEngine:
 
         matching_tracks =\
             track_filter.filter_tracks(
-                TrackSet(self.data.tracks, False))
+                self.data.all_tracks)
 
         def find_adjacent_tracks(starting_tracks, direction: Literal['prev', 'next']):
             if direction == 'next':
