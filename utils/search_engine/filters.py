@@ -270,7 +270,10 @@ class PlaylistTrackSet:
 
             if include_playlist_info:
                 columns_to_select |= Playlist.matching_columns()
-                columns_to_select |= Playlist.Owner.matching_columns()
+
+                additional_aggregate_columns.append(
+                    PlaylistOwner.matching_columns().as_expr()
+                    .unique().sort().slice(0, playlist_limit))
 
                 additional_aggregate_columns.append(
                     pl.col(Playlist.id).n_unique().alias(Playlist.matching_playlist_count))
