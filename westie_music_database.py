@@ -649,6 +649,7 @@ if search_dj_toggle:
                          .group_by(pl.all().exclude(Playlist.name))
                          .agg(Playlist.name)
                          .sort(Stats.playlist_count, descending=True)
+                         .drop(Track.id)
                          .head(100),
                          column_config={Track.url: st.column_config.LinkColumn()})
 
