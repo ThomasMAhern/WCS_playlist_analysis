@@ -1193,18 +1193,18 @@ if search_dj_toggle:
 
                         
                         
-                        # st.text(f"Music unique to _{', '.join(dj_input)}_")
-                        # st.dataframe(djs_music.join(others_music, 
-                        #                         how='anti', 
-                        #                         on=['track.name', pl.col('owner.display_name').cast(pl.String), 
-                        #                                 'dj_count', 'playlist_count', 'song_url'])
-                        #         .group_by(pl.all().exclude('playlist_name'))
-                        #         .agg('playlist_name')
-                        #         .sort('playlist_count', descending=True)
-                        #         .filter(pl.col('dj_count').eq(1))
-                        #         .head(100)
-                        #         .collect(streaming=True), 
-                        #         column_config={"song_url": st.column_config.LinkColumn()})
+                        st.text(f"Music unique to _{', '.join(dj_input)}_")
+                        st.dataframe(djs_music.join(others_music, 
+                                                how='anti', 
+                                                on=['track.name', pl.col('owner.display_name').cast(pl.String), 
+                                                        'dj_count', 'playlist_count', 'song_url'])
+                                .group_by(pl.all().exclude('playlist_name'))
+                                .agg('playlist_name')
+                                .sort('playlist_count', descending=True)
+                                .filter(pl.col('dj_count').eq(1))
+                                .head(100)
+                                .collect(streaming=True), 
+                                column_config={"song_url": st.column_config.LinkColumn()})
                         
                         
                         
