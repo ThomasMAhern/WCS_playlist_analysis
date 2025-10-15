@@ -245,8 +245,11 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     ).filter(
         pl.col(Playlist.id).is_not_null(),
         pl.col(Track.id).is_not_null(),
-    ).unique([Playlist.id, Track.id, PlaylistTrack.number])\
-        .sort(Playlist.id, Track.id, PlaylistTrack.number)
+    ).group_by(Playlist.id, Track.id, PlaylistTrack.number).agg(
+        # The source data contains duplicated entries with varying
+        # metadata, possibly from different scaping runs.
+        pl.col(PlaylistTrack.added_at).min()
+    ).sort(Playlist.id, Track.id, PlaylistTrack.number)
 
     # Write pre-processed data to parquet files
     write_to_parquet_file(
@@ -402,7 +405,10 @@ def deduplicate_playlist_and_song_data():
         .with_columns(pl.col(Track.id).alias('duplicate.track.id'))\
         .with_columns(pl.col('canonical.track.id').fill_null(pl.col('duplicate.track.id')).alias(Track.id))\
         .drop('canonical.track.id', 'duplicate.track.id')\
-        .unique([Playlist.id, Track.id, PlaylistTrack.number])\
+        .group_by(Playlist.id, Track.id, PlaylistTrack.number).agg(
+            # The source data contains duplicated entries with varying
+            # metadata, possibly from different scaping runs.
+            pl.col(PlaylistTrack.added_at).min())\
         .sort(Playlist.id, Track.id, PlaylistTrack.number)
 
     only_duplicates = duplicate_to_canonical\
