@@ -786,12 +786,12 @@ if geo_region_toggle:
         )
 
         country_1_df = (countries_df
-                        .filter(pl.col(Track.country).cast(pl.String).eq(countries_selectbox[0]))
+                        .filter(pl.col(Track.country).list.contains(countries_selectbox[0]))
                         .select(pl.col(Track.country).alias('country'), Track.id,
                                 Track.name, Track.url, Stats.dj_count, Stats.playlist_count))
 
         country_2_df = (countries_df
-                        .filter(pl.col(Track.country).cast(pl.String).eq(countries_selectbox[1]))
+                        .filter(pl.col(Track.country).list.contains(countries_selectbox[1]))
                         .select(pl.col(Track.country).alias('country'), Track.id,
                                 Track.name, Track.url, Stats.dj_count, Stats.playlist_count))
 
