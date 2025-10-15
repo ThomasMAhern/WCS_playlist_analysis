@@ -576,10 +576,16 @@ if playlist_locator_toggle:
             dj_name=dj_input,
             playlist_include=playlist_input,
             playlist_exclude=anti_playlist_input2,
+            tracks_in_result=True,
+            tracks_limit=30,
             limit=500,
         )
 
-        st.dataframe(playlist_search_df.collect(streaming=True),
+        st.dataframe(playlist_search_df
+                     .select(Playlist.name, Playlist.url, PlaylistOwner.name,
+                             Playlist.matching_song_count, Stats.song_count,
+                             Stats.artist_count, Track.name)
+                     .collect(streaming=True),
                      column_config={Playlist.url: st.column_config.LinkColumn()})
         st.session_state["processing"] = False
     st.markdown(f"#### ")

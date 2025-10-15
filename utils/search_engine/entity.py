@@ -133,6 +133,9 @@ class Playlist(Entity):
     matching_playlist_count: Final = field("matching_playlist_count", pl.UInt32)
     """The number of playlists this track is in that also matched the search query."""
 
+    matching_song_count: Final = field("matching_song_count", pl.UInt32)
+    """The number of songs in this playlist that matched the search query."""
+
     class Owner(SubEntity[PlaylistOwner], PlaylistOwner):
         """Represents the owner of a playlist."""
         pass

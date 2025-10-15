@@ -420,6 +420,8 @@ class SearchEngine:
         dj_name: str = '',
         playlist_include: str = '',
         playlist_exclude: str = '',
+        tracks_in_result: bool = False,
+        tracks_limit: int | None = None,
         limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the playlists that match the given query."""
@@ -452,10 +454,12 @@ class SearchEngine:
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
                         self.data.all_playlist_tracks(Playlist.id),
-                        self.data.all_playlists),
+                        self.data.all_playlists,
+                        tracks_in_result=tracks_in_result,
+                        tracks_limit=tracks_limit),
                     include_matched_terms=True)
         else:
-            matching_playlists = \
+            matching_playlists =\
                 playlist_filter.filter_playlists(
                     self.data.all_playlists,
                     include_matched_terms=True)

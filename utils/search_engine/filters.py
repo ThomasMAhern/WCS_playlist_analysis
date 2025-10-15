@@ -266,7 +266,7 @@ class PlaylistTrackSet:
                 columns_to_select |= Playlist.Owner.matching_columns()
 
                 additional_aggregate_columns.append(
-                    pl.col('playlist.id').n_unique().alias(Playlist.matching_playlist_count))
+                    pl.col(Playlist.id).n_unique().alias(Playlist.matching_playlist_count))
 
                 additional_aggregate_columns.append(
                     cs.matches("^" + Playlist.matched_terms + "$")
@@ -385,17 +385,38 @@ class TrackSet:
         return PlaylistTrackSet(matching_playlist_tracks,
                                 is_filtered=True)
 
-    def filter_playlists(self, playlist_tracks: PlaylistTrackSet, playlists: PlaylistSet) -> PlaylistSet:
+    def filter_playlists(self, playlist_tracks: PlaylistTrackSet, playlists: PlaylistSet, *, tracks_in_result: bool, tracks_limit: int | None) -> PlaylistSet:
         """Filter the specified playlists to only include playlists that contain at least one track from this set."""
 
         # Skip join if it would be a no-op anyway
-        if not self.is_filtered:
+        if not self.is_filtered and not tracks_in_result:
             return playlists
 
-        matching_playlists = playlists.included_playlists.join(
-            playlist_tracks.included_playlist_tracks.join(
-                self.included_tracks, how='semi', on=Track.id),
-            how='semi', on=Playlist.id)
+        if tracks_in_result:
+            if self.is_filtered:
+                aggregated_tracks_per_playlist = playlist_tracks.included_playlist_tracks\
+                    .select(PlaylistTrack.Track.id, PlaylistTrack.Playlist.id)\
+                    .join(self.included_tracks.select(Track.id, Track.name), how='inner', on=Track.id)\
+                    .join(playlists.included_playlists, how='semi', on=Playlist.id)\
+                    .group_by(Playlist.id)\
+                    .agg(pl.col(Track.name).unique().slice(0, tracks_limit),
+                         pl.col(Track.id).n_unique().alias(Playlist.matching_song_count))
+            else:
+                aggregated_tracks_per_playlist = playlist_tracks.included_playlist_tracks\
+                    .select(PlaylistTrack.Track.id, PlaylistTrack.Playlist.id)\
+                    .join(playlists.included_playlists, how='semi', on=Playlist.id)\
+                    .join(self.included_tracks.select(Track.id, Track.name), how='inner', on=Track.id)\
+                    .group_by(Playlist.id)\
+                    .agg(pl.col(Track.name).unique().slice(0, tracks_limit),
+                         pl.col(Track.id).n_unique().alias(Playlist.matching_song_count))
+
+            matching_playlists = playlists.included_playlists\
+                .join(aggregated_tracks_per_playlist, how='inner', on=Playlist.id)
+        else:
+            matching_playlists = playlists.included_playlists.join(
+                playlist_tracks.included_playlist_tracks.join(
+                    self.included_tracks, how='semi', on=Track.id),
+                how='semi', on=Playlist.id)
 
         return PlaylistSet(
             matching_playlists,
