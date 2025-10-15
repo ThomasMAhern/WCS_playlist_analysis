@@ -33,19 +33,50 @@ PLAYLIST_ID_DTYPE = pl.String
 OWNER_ID_DTYPE = pl.String
 OWNER_NAME_DTYPE = pl.String
 
+# Simplistic file tracker to verify that operations
+# are invoked in the correct order.
+opened_files: set[str] = set()
+written_files: set[str] = set()
+
+
+def reset_file_tracker():
+    opened_files.clear()
+    written_files.clear()
+
 
 def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
     print(f'Writing {file_name}...')
+
+    if file_name in opened_files:
+        print(f'WARNING: {file_name} has already been read during this session.'
+              + ' This should not have happened, and likely indicates an implementation error.')
+
+    if file_name in written_files:
+        print(f'WARNING: {file_name} has already been written to during this session.'
+              + ' This should not have happened, and likely indicates an implementation error.')
+
+    written_files.add(file_name)
+
     if isinstance(data, pl.DataFrame):
         data.write_parquet(file_name)
     else:
         data.sink_parquet(file_name)
+
     # TODO: Print file size of generated file
 
 
+def scan_parquet_file(file_name: str) -> pl.LazyFrame:
+    if file_name in written_files:
+        print(f'<< Reading {file_name} from previous step...')
+    else:
+        print(f'<< Reading {file_name}...')
+
+    return pl.scan_parquet(file_name)
+
+
 def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
-    source_data = pl.scan_parquet('processed_data/data_playlists.parquet')
-    bpm_data = pl.scan_parquet('processed_data/data_song_bpm.parquet')
+    source_data = scan_parquet_file('processed_data/data_playlists.parquet')
+    bpm_data = scan_parquet_file('processed_data/data_song_bpm.parquet')
 
     playlists = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias(Playlist.id),
@@ -75,8 +106,8 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
             0, null_on_oob=True).cast(pl.Categorical).alias(Playlist.region),
         pl.col('playlist.location').str.split(' - ').list.get(
             1, null_on_oob=True).cast(pl.Categorical).alias(Playlist.country),
-        pl.lit(None).cast(pl.UInt32).alias(Stats.song_count), # Stub, will be be calculated after deduplication
-        pl.lit(None).cast(pl.UInt32).alias(Stats.artist_count), # Stub, will be calculated after deduplication
+        pl.lit(None).cast(pl.UInt32).alias(Stats.song_count),  # Stub, will be be calculated after deduplication
+        pl.lit(None).cast(pl.UInt32).alias(Stats.artist_count),  # Stub, will be calculated after deduplication
     ).with_columns(
         _is_social_set.alias(Playlist.is_social_set),
         _is_wcs_dj.alias(PlaylistOwner.is_wcs_dj),
@@ -215,7 +246,7 @@ def process_song_duplicates(*, use_original_data: bool, print_statistics: bool =
     # There were ~75 songs with incomplete metdata that, on closer inspection,
     # seemed to not be songs but podcast episodes.
 
-    songs_df = pl.scan_parquet(
+    songs_df = scan_parquet_file(
         TRACK_ORIGINAL_DATA_FILE if use_original_data else TRACK_DATA_FILE)
 
     def is_non_empty(expr): return expr.is_not_null() & expr.ne('')
@@ -283,16 +314,16 @@ def process_song_duplicates(*, use_original_data: bool, print_statistics: bool =
 def deduplicate_playlist_and_song_data():
     """Replace all duplicate tracks with their canonical versions."""
 
-    playlists = pl.scan_parquet(
+    playlists = scan_parquet_file(
         PLAYLIST_ORIGINAL_DATA_FILE)
 
-    tracks_with_duplicates = pl.scan_parquet(
+    tracks_with_duplicates = scan_parquet_file(
         TRACK_ORIGINAL_DATA_FILE)
 
-    playlist_tracks_with_duplicates = pl.scan_parquet(
+    playlist_tracks_with_duplicates = scan_parquet_file(
         PLAYLIST_TRACKS_ORIGINAL_DATA_FILE)
 
-    duplicate_to_canonical = pl.scan_parquet(
+    duplicate_to_canonical = scan_parquet_file(
         TRACK_CANONICAL_DATA_FILE)
 
     playlist_tracks = playlist_tracks_with_duplicates\
@@ -325,13 +356,13 @@ def deduplicate_playlist_and_song_data():
 
 def compute_playlist_statistics():
     """Compute song_count and artist_count for all playlists."""
-    playlists = pl.scan_parquet(
+    playlists = scan_parquet_file(
         PLAYLIST_ORIGINAL_DATA_FILE)
 
-    tracks = pl.scan_parquet(
+    tracks = scan_parquet_file(
         TRACK_DATA_FILE)
 
-    playlist_tracks = pl.scan_parquet(
+    playlist_tracks = scan_parquet_file(
         PLAYLIST_TRACKS_DATA_FILE)
 
     track_count_per_playlist = playlist_tracks\
@@ -357,7 +388,7 @@ def process_playlist_tracks_inverse():
     Create a separate copy of playlist_tracks that is optimized
     for track => playlist lookup, to enable certain query optimizations.
     """
-    playlist_tracks = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)
+    playlist_tracks = scan_parquet_file(PLAYLIST_TRACKS_DATA_FILE)
 
     track_playlists = playlist_tracks.sort(Track.id, Playlist.id, PlaylistTrack.number)
 
@@ -369,15 +400,14 @@ def process_song_lyrics():
     temp_file = 'processed_data/temp_song_metadata_by_track_and_artist.parquet'
 
     print(f'Writing {temp_file}...')
-    tracks = pl.scan_parquet(TRACK_DATA_FILE)\
+    tracks = scan_parquet_file(TRACK_DATA_FILE)\
         .select(Track.id, Track.name, Track.artist_names)\
         .sort([Track.name, Track.artist_names])\
         .sink_parquet(temp_file)
 
-    print(f'Reading {temp_file}...')
-    tracks = pl.scan_parquet(temp_file)
+    tracks = scan_parquet_file(temp_file)
 
-    lyrics = pl.scan_parquet('processed_data/song_lyrics.parquet')\
+    lyrics = scan_parquet_file('processed_data/song_lyrics.parquet')\
         .join(tracks,
               how='inner',
               left_on=['song', 'artist'],
@@ -391,12 +421,12 @@ def process_song_lyrics():
 
 
 def process_song_pairings():
-    social_playlists = pl.scan_parquet(PLAYLIST_DATA_FILE)\
+    social_playlists = scan_parquet_file(PLAYLIST_DATA_FILE)\
         .filter(pl.col(Playlist.is_social_set))\
         .filter(~pl.col(Playlist.name).str.contains_any(['The Maine', 'delete', 'SPOTIFY']))\
         .select(Playlist.id)
 
-    songs_df = pl.scan_parquet(PLAYLIST_TRACKS_DATA_FILE)\
+    songs_df = scan_parquet_file(PLAYLIST_TRACKS_DATA_FILE)\
         .with_columns(pl.col(PlaylistTrack.number).cast(pl.Int64))\
         .join(social_playlists, how='semi', on=[Playlist.id])\
         .sort(Playlist.id, PlaylistTrack.number)\
@@ -418,6 +448,9 @@ def process_song_pairings():
 
 def process_everything(merge_duplicates: bool = True):
     """Runs all pre-processing in sequence."""
+    # Reset the internal file tracker (only used for debugging)
+    reset_file_tracker()
+
     # Initial run to split playlists, tracks and playlist entries
     process_playlist_and_song_data(prepare_deduplication=merge_duplicates)
 
