@@ -325,6 +325,9 @@ class TrackSet:
                 pl.lit('https://open.spotify.com/track/'), 'track.id')).alias('track.url'),
         ), is_filtered=self.is_filtered)
 
+    def sort_by(self, by):
+        return TrackSet(self.tracks.sort(by), is_filtered=self.is_filtered) if by is not None else self
+
     def filter_lyrics(self, lyrics_to_filter: TrackLyricsSet, *, include_lyrics: bool = False) -> TrackLyricsSet:
         if not self.is_filtered and not include_lyrics:
             return lyrics_to_filter
@@ -716,6 +719,7 @@ class SearchEngine:
             #
             # Result options
             #
+            sort_by: Literal['playlist_count', 'dj_count'] | None = None,
             skip_num_top_results: int = 0,
             limit: int | None = None,
     ) -> pl.LazyFrame:
@@ -768,7 +772,7 @@ class SearchEngine:
 
         matching_tracks = combined_filter.filter_tracks(self.data)
 
-        return matching_tracks.with_extra_columns()\
+        return matching_tracks.with_extra_columns().sort_by(sort_by)\
             .tracks.slice(skip_num_top_results, limit or None)
 
     def find_playlists(
