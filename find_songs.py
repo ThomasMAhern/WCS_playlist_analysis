@@ -134,7 +134,7 @@ artist_inputs: list[str] = list(filter(bool, artist_input.strip().lower().split(
 # Playlist-specific filters
 country_input: str = ''
 dj_input: str = ''
-playlist_input: str = ''
+playlist_input: str = 'late night'
 anti_playlist_input: str = ''
 
 # Only used for playlist generation
