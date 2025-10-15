@@ -1,4 +1,5 @@
 """Methods for pre-processing the data into more efficient formats at build time."""
+import os
 
 import polars as pl
 
@@ -57,12 +58,16 @@ def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
 
     written_files.add(file_name)
 
+    print(f'- SCHEMA: {data.collect_schema()}')
+
     if isinstance(data, pl.DataFrame):
         data.write_parquet(file_name)
     else:
         data.sink_parquet(file_name)
 
-    # TODO: Print file size of generated file
+    file_size = os.path.getsize(file_name)
+    print(f'- SIZE: {file_size:,} bytes')
+    print('')
 
 
 def scan_parquet_file(file_name: str) -> pl.LazyFrame:
