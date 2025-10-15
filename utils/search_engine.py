@@ -575,6 +575,13 @@ class CombinedFilter:
     lyrics_in_result: bool = True
 
     def get_optimal_filter_order(self) -> list[FilterOrTableName]:
+        # if not self.playlist_filter.has_filters and not self.playlist_track_filter.has_filters:
+        if False:
+            return [
+                'tracks',
+                'playlist_tracks',
+            ]
+
         default_order: list[FilterOrTableName] = [
             'playlists',
             'playlist_tracks',
@@ -590,43 +597,79 @@ class CombinedFilter:
             order: list[FilterOrTableName],
             retrieve: FilterOrTableName,
     ):
-        matching_playlists = PlaylistSet(
-            data.playlists, None, data.playlists, False)
-        matching_playlist_tracks = PlaylistTrackSet(
-            data.playlist_tracks, False)
+        filtered_playlists = False
+        filtered_playlist_tracks = False
+        filtered_tracks = False
+        filtered_lyrics = False
+
+        matching_playlists =\
+            PlaylistSet(data.playlists, None, data.playlists, False)
+        matching_playlist_tracks =\
+            PlaylistTrackSet(data.playlist_tracks, False)
         matching_tracks = TrackSet(data.tracks, False)
         matching_lyrics = TrackLyricsSet(data.track_lyrics, False)
 
         for filter_name in order:
             match filter_name:
                 case 'playlists':
+                    filtered_playlists = True
+
+                    if filtered_playlist_tracks:
+                        matching_playlists =\
+                            matching_playlist_tracks.filter_playlists(
+                                matching_playlists)
+
                     matching_playlists =\
                         self.playlist_filter.filter_playlists(
                             matching_playlists)
 
                 case 'playlist_tracks':
-                    matching_playlist_tracks =\
-                        self.playlist_track_filter.filter_playlist_tracks(
+                    filtered_playlist_tracks = True
+
+                    if filtered_playlists:
+                        matching_playlist_tracks =\
                             matching_playlists.filter_playlist_tracks(
                                 matching_playlist_tracks,
-                                include_playlist_info=self.playlist_in_result))
+                                include_playlist_info=self.playlist_in_result)
 
-                    matching_tracks =\
-                        matching_playlist_tracks.filter_tracks(
-                            matching_tracks,
-                            include_playlist_track_info=self.playlist_track_in_result)
+                    elif filtered_tracks:
+                        matching_playlist_tracks =\
+                            matching_tracks.filter_playlist_tracks(
+                                matching_playlist_tracks)
+
+                    matching_playlist_tracks =\
+                        self.playlist_track_filter.filter_playlist_tracks(
+                            matching_playlist_tracks)
 
                 case 'track_lyrics':
+                    filtered_lyrics = True
+
+                    if filtered_tracks:
+                        matching_lyrics =\
+                            matching_tracks.filter_lyrics(
+                                matching_lyrics,
+                                include_lyrics=self.lyrics_in_result)
+
                     matching_lyrics =\
                         self.lyrics_filter.filter_lyrics(
                             matching_lyrics,
                             include_matched_lyrics=self.lyrics_in_result)
 
-                    matching_tracks = matching_lyrics.filter_tracks(
-                        matching_tracks,
-                        include_lyrics=self.lyrics_in_result)
-
                 case 'tracks':
+                    filtered_tracks = True
+
+                    if filtered_playlist_tracks:
+                        matching_tracks =\
+                            matching_playlist_tracks.filter_tracks(
+                                matching_tracks,
+                                include_playlist_track_info=self.playlist_track_in_result)
+
+                    if filtered_lyrics:
+                        matching_tracks =\
+                            matching_lyrics.filter_tracks(
+                                matching_tracks,
+                                include_lyrics=self.lyrics_in_result)
+
                     matching_tracks =\
                         self.track_filter.filter_tracks(
                             matching_tracks)
