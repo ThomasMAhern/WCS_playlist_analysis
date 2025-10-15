@@ -921,7 +921,9 @@ if lyrics_toggle:
 
 st.markdown("# ")
 st.markdown("# ")
-st.markdown("#### WCS resources/apps by others:")
+st.markdown("#### WCS resources/apps by others:") # Thank you, Clara!
+st.link_button('Routine Database 😯',
+               url='https://wcs-routine-database.streamlit.app/')
 # st.link_button('Follow me so I can add you to the database!',
 #                'https://open.spotify.com/user/225x7krl3utkpzg34gw3lhycy')
 st.link_button('📍 Find a WCS class near you!',
