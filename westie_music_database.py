@@ -9,7 +9,7 @@ from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
 from utils.columns import pull_columns_to_front
 from utils.logging import log_query
 from utils.search_engine import SearchEngine
-from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackLyrics
+from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 
 # avail_threads = pl.threadpool_size()
 
@@ -816,23 +816,36 @@ if songs_together_toggle:
     with song_combo_col1:
         song_input = st.text_input("Song Name/ID:")
     with song_combo_col2:
-        artist_name_input = st.text_input("Song artist name:").lower()
-
-    song_input_prepped = song_input.lower()
+        artist_name_input = st.text_input("Song artist name:")
 
     if st.button("Search songs played together", type="primary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True
 
+        st.markdown("#### Songs"
+                    + (f" matching _{song_input}_" if song_input else "")
+                    + (f" by _{artist_name_input}_" if artist_name_input else "")
+                    + ":")
+        st.dataframe(search_engine.find_songs(song_name=song_input, artist_name=artist_name_input, limit=100)
+                     .select(Track.name, Track.artists, Track.url,
+                             Track.beats_per_minute, Track.release_date),
+                     column_config={Track.url: st.column_config.LinkColumn()})
+
         st.markdown(f"#### Most common songs to play after _{song_input}_:")
-        st.dataframe(search_engine.find_related_songs('next', song_name=song_input, artist_name=artist_name_input)[1],
+        st.dataframe(search_engine.find_related_songs('next', song_name=song_input, artist_name=artist_name_input)[1]
+                     .select(Track.name, Track.artists, TrackAdjacent.times_played_together,
+                             Track.url, Track.beats_per_minute, Track.release_date),
                      column_config={Track.url: st.column_config.LinkColumn()})
 
         st.markdown(f"#### Most common songs to play before _{song_input}_:")
-        st.dataframe(search_engine.find_related_songs('prev', song_name=song_input, artist_name=artist_name_input)[1],
+        st.dataframe(search_engine.find_related_songs('prev', song_name=song_input, artist_name=artist_name_input)[1]
+                     .select(Track.name, Track.artists, TrackAdjacent.times_played_together,
+                             Track.url, Track.beats_per_minute, Track.release_date),
                      column_config={Track.url: st.column_config.LinkColumn()})
 
         st.markdown(f"#### Most common songs to play before _or_ after _{song_input}_:")
-        st.dataframe(search_engine.find_related_songs('any', song_name=song_input, artist_name=artist_name_input)[1],
+        st.dataframe(search_engine.find_related_songs('any', song_name=song_input, artist_name=artist_name_input)[1]
+                     .select(Track.name, Track.artists, TrackAdjacent.times_played_together,
+                             Track.url, Track.beats_per_minute, Track.release_date),
                      column_config={Track.url: st.column_config.LinkColumn()})
 
         st.session_state["processing"] = False
