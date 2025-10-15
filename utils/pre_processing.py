@@ -42,8 +42,8 @@ def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
 
 
 def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
-    source_data = pl.scan_parquet('data_playlists.parquet')
-    bpm_data = pl.scan_parquet('data_song_bpm.parquet')
+    source_data = pl.scan_parquet('processed_data/data_playlists.parquet')
+    bpm_data = pl.scan_parquet('processed_data/data_song_bpm.parquet')
 
     playlists = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias('playlist.id'),
@@ -332,7 +332,7 @@ def process_playlist_tracks_inverse():
 
 def process_song_lyrics():
     """Process the song lyrics into a table sorted by track.id"""
-    temp_file = 'temp_song_metadata_by_track_and_artist.parquet'
+    temp_file = 'processed_data/temp_song_metadata_by_track_and_artist.parquet'
 
     print(f'Writing {temp_file}...')
     tracks = pl.scan_parquet(TRACK_DATA_FILE)\
@@ -343,7 +343,7 @@ def process_song_lyrics():
     print(f'Reading {temp_file}...')
     tracks = pl.scan_parquet(temp_file)
 
-    lyrics = pl.scan_parquet('song_lyrics.parquet')\
+    lyrics = pl.scan_parquet('processed_data/song_lyrics.parquet')\
         .join(tracks,
               how='inner',
               left_on=['song', 'artist'],

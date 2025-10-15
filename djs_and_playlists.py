@@ -38,7 +38,7 @@ def sample_with_bpm_range(df, prev_bpm):
 # makes it so streamlit doesn't have to reload for every sesson.
 @st.cache_resource
 def load_playlist_data():
-    return (pl.scan_parquet('data_playlists.parquet', low_memory=True)
+    return (pl.scan_parquet('processed_data/data_playlists.parquet', low_memory=True)
             .rename({'name': 'playlist_name'})
             # makes a new column filled with a date - this is good indicator if there was a set played
             .with_columns(extracted_date=extract_dates_from_name(pl.col('playlist_name')).cast(pl.List(pl.Categorical)),
@@ -133,13 +133,13 @@ def wcs_specific(df_):
 
 @st.cache_resource
 def load_lyrics():
-    return pl.scan_parquet('song_lyrics.parquet')
+    return pl.scan_parquet('processed_data/song_lyrics.parquet')
 
 
 # makes it so streamlit doesn't have to reload for every sesson.
 @st.cache_resource
 def load_notes():
-    return (pl.scan_csv('data_notes.csv')
+    return (pl.scan_csv('processed_data/data_notes.csv')
             .rename({'Artist': 'track.artists.name', 'Song': 'track.name'})
             .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
             )
@@ -154,7 +154,7 @@ def load_countries():
 def load_stats():
     '''makes it so streamlit doesn't have to reload for every sesson/updated parameter
     should make it much more responsive'''
-    stats_counts = (pl.scan_parquet('data_playlists.parquet')
+    stats_counts = (pl.scan_parquet('processed_data/data_playlists.parquet')
                     .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
                     .select(pl.n_unique('track.name'),
                             pl.n_unique('track.artists.name'),
@@ -207,7 +207,7 @@ st.link_button("Help fill in country info!",
 def sample_of_raw_data():
     return (df
             # .with_columns(pl.col('track.artists.name').cast(pl.String))
-            .join(pl.scan_parquet('data_song_bpm.parquet')
+            .join(pl.scan_parquet('processed_data/data_song_bpm.parquet')
                   .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical)),
                   how='left', on=['track.name', 'track.artists.name'])
             # .with_columns(pl.col('track.artists.name').cast(pl.Categorical))
@@ -243,7 +243,7 @@ def top_songs():
                   how='full',
                   on=['track.artists.name', 'track.name'])
             # add bpm
-            .join((pl.scan_parquet('data_song_bpm.parquet')
+            .join((pl.scan_parquet('processed_data/data_song_bpm.parquet')
                    .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
                    ), how='left', on=['track.name', 'track.artists.name'])
 
@@ -391,7 +391,7 @@ if song_locator_toggle:
                   how='anti',
                   on=['track.id'])
             # add bpm
-            .join((pl.scan_parquet('data_song_bpm.parquet')
+            .join((pl.scan_parquet('processed_data/data_song_bpm.parquet')
                    .with_columns(pl.col(['track.name', 'track.artists.name']).cast(pl.Categorical))
                    ), how='left', on=['track.name', 'track.artists.name'])
             .with_columns(pl.col('bpm').fill_null(pl.col('BPM')))
@@ -905,7 +905,7 @@ if geo_region_toggle:
         st.markdown(
             f"#### What are the most popular songs only played in {region_selectbox}?")
 
-        region_df = (pl.scan_parquet('data_unique_per_region.parquet')
+        region_df = (pl.scan_parquet('processed_data/data_unique_per_region.parquet')
                      #  .pipe(wcs_specific)
                      .filter(pl.col('region').cast(pl.String) == region_selectbox,
                              # pl.col('geographic_region_count').eq(1)
