@@ -449,7 +449,7 @@ class SearchEngine:
         matching_tracks =\
             track_filter.filter_tracks(self.data.all_tracks)
 
-        if matching_tracks.is_filtered:
+        if matching_tracks.is_filtered or tracks_in_result:
             matching_playlists =\
                 playlist_filter.filter_playlists(
                     matching_tracks.filter_playlists(
