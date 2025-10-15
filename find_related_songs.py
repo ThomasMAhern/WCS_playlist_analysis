@@ -36,3 +36,8 @@ print(search_engine.find_related_songs(
     song_name='Josephine - Acoustic',
     artist_name='RITUAL',
 )[1].collect())
+
+print(search_engine.find_related_songs(
+    direction='next',
+    return_pairs=True,
+)[1].collect())

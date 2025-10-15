@@ -220,6 +220,13 @@ class CombinedFilter:
             aggregate_by='track')
 
 
+ColumnAliases = {
+    'query.playlist.name.hit_terms': 'hit_terms',
+    'query.playlist.name.hit_count': 'hit_count',
+    'query.track.lyrics.hit_terms': 'matched_lyrics',
+    'query.track.lyrics.hit_count': 'matched_lyrics_count',
+}
+
 type SortKey = Literal[
     'hit_count',
     'playlist_count',
@@ -504,6 +511,7 @@ class SearchEngine:
         self,
         direction: Literal['any', 'prev', 'next'],
         *,
+        return_pairs: bool = False,
         song_name: str = '',
         artist_name: str = '',
         limit: int | None = 100,
@@ -523,7 +531,16 @@ class SearchEngine:
             track_filter.filter_tracks(
                 self.data.all_tracks)
 
-        def find_adjacent_tracks(starting_tracks, direction: Literal['prev', 'next']):
+        tracks_adjacent = self.data.tracks_adjacent\
+            .rename({Stats.playlist_count: TrackAdjacent.times_played_together})
+
+        if not matching_tracks.is_filtered:
+            # Prefilter to avoid very large join
+            tracks_adjacent = tracks_adjacent\
+                .sort(TrackAdjacent.times_played_together, descending=True)\
+                .slice(0, limit)
+
+        def find_adjacent_tracks(starting_tracks: TrackSet, direction: Literal['prev', 'next']):
             if direction == 'next':
                 this_song_id = TrackAdjacent.FirstTrack.id
                 other_song_id = TrackAdjacent.SecondTrack.id
@@ -533,31 +550,50 @@ class SearchEngine:
             else:
                 raise ValueError(f'Invalid value for direction: {direction}')
 
-            return self.data.tracks_adjacent.join(
-                starting_tracks,
-                how='semi',
-                left_on=this_song_id,
-                right_on=Track.id,
-            ).select(
-                pl.col(other_song_id).alias(Track.id),
-                pl.col(Stats.playlist_count).alias(TrackAdjacent.times_played_together)
-            )
+            return (tracks_adjacent if not starting_tracks.is_filtered else
+                    tracks_adjacent.join(starting_tracks.included_tracks, how='semi',
+                                         left_on=this_song_id, right_on=Track.id))\
+                .select(pl.col(other_song_id).alias(Track.id),
+                        pl.col(this_song_id).alias(TrackAdjacent.FirstTrack.id),
+                        pl.col(other_song_id).alias(TrackAdjacent.SecondTrack.id),
+                        pl.col(TrackAdjacent.times_played_together))
 
-        if direction == 'any':
-            adjacent_track_ids = pl.concat([
-                find_adjacent_tracks(matching_tracks.included_tracks, 'prev'),
-                find_adjacent_tracks(matching_tracks.included_tracks, 'next')
-            ]).group_by(Track.id).agg(
-                pl.col(TrackAdjacent.times_played_together).sum(),
-            )
+        if return_pairs:
+            if direction == 'any':
+                raise NotImplementedError()
+            else:
+                adjacent_track_ids = find_adjacent_tracks(matching_tracks, direction)
+
+            ts = self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.FirstTrack.id),
+                                              pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name))
+
+            adjacent_tracks = TrackSet(
+                adjacent_track_ids
+                .select(TrackAdjacent.FirstTrack.id, TrackAdjacent.SecondTrack.id, TrackAdjacent.times_played_together)
+                .join(self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.FirstTrack.id),
+                                              pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name)),
+                      how='inner', on=TrackAdjacent.FirstTrack.id)
+                .join(self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.SecondTrack.id),
+                                              pl.col(Track.name).alias(TrackAdjacent.SecondTrack.name)),
+                      how='inner', on=TrackAdjacent.SecondTrack.id),
+                is_filtered=True)
+
+            return None, adjacent_tracks.included_tracks
         else:
-            adjacent_track_ids = find_adjacent_tracks(
-                matching_tracks.included_tracks, direction)
+            if direction == 'any':
+                adjacent_track_ids = pl.concat([
+                    find_adjacent_tracks(matching_tracks, 'prev'),
+                    find_adjacent_tracks(matching_tracks, 'next')
+                ]).group_by(Track.id).agg(
+                    pl.col(TrackAdjacent.times_played_together).sum(),
+                )
+            else:
+                adjacent_track_ids = find_adjacent_tracks(matching_tracks, direction)
 
-        adjacent_tracks = TrackSet(adjacent_track_ids.join(
-            self.data.tracks, how='inner', on=Track.id), is_filtered=True)
+            adjacent_tracks = TrackSet(adjacent_track_ids.select(Track.id, TrackAdjacent.times_played_together).join(
+                self.data.tracks, how='inner', on=Track.id), is_filtered=True)
 
-        return (matching_tracks.with_extra_columns().included_tracks.limit(100),
-                adjacent_tracks.with_extra_columns()
-                .included_tracks.sort(TrackAdjacent.times_played_together, descending=True)
-                .slice(0, limit or None))
+            return (matching_tracks.with_extra_columns().included_tracks.limit(100),
+                    adjacent_tracks.with_extra_columns()
+                    .included_tracks.sort(TrackAdjacent.times_played_together, descending=True)
+                    .slice(0, limit or None))
