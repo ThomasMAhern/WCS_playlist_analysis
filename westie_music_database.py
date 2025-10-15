@@ -371,7 +371,7 @@ if song_locator_toggle:
             skip_num_top_results=num_results,
             sort_by=[
                 Playlist.matched_terms_count,
-                'matching_playlist_count',
+                Playlist.matching_playlist_count,
                 Stats.playlist_count,
                 Stats.dj_count
             ],
@@ -578,6 +578,13 @@ if playlist_locator_toggle:
             playlist_exclude=anti_playlist_input2,
             tracks_in_result=True,
             tracks_limit=30,
+            sort_by=[
+                Playlist.matched_terms_count,
+                Playlist.matching_song_count,
+                Stats.song_count,
+                Stats.artist_count,
+            ],
+            descending=True,
             limit=500,
         )
 

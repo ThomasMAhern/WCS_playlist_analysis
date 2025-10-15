@@ -65,6 +65,13 @@ class PlaylistSet:
             .with_playlist_url()\
             .with_owner_url()
 
+    def sort_by(self, by, *more_by, descending: bool):
+        return (self if by is None or (isinstance(by, list) and len(by) == 0) else
+                PlaylistSet(included_playlists=self.included_playlists.sort(by, *more_by, descending=descending),
+                            excluded_playlists=self.excluded_playlists,
+                            all_playlists=self.all_playlists,
+                            is_filtered=self.is_filtered))
+
     def filter_playlist_tracks(self, playlist_tracks: PlaylistTrackSet, *, include_playlist_info: bool) -> PlaylistTrackSet:
         """Filter the specified playlist_tracks to only include tracks from matched playlists."""
 

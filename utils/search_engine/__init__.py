@@ -227,7 +227,7 @@ ColumnAliases = {
     'query.track.lyrics.hit_count': 'matched_lyrics_count',
 }
 
-type SortKey = Literal[
+type TrackSortKey = Literal[
     'hit_count',
     'playlist_count',
     'dj_count',
@@ -235,6 +235,12 @@ type SortKey = Literal[
     'matched_lyrics_count',
 ]
 
+type PlaylistSortKey = Literal[
+    'hit_count',
+    'matching_song_count',
+    'song_count',
+    'artist_count',
+]
 
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
@@ -333,7 +339,7 @@ class SearchEngine:
         #
         # Result options
         #
-        sort_by: SortKey | list[SortKey] | None = None,
+        sort_by: TrackSortKey | list[TrackSortKey] | None = None,
         descending: bool = True,
         skip_num_top_results: int = 0,
         limit: int | None = None,
@@ -341,13 +347,13 @@ class SearchEngine:
         """Returns the songs that match the given query."""
 
         if isinstance(sort_by, str):
-            _sort_by: list[SortKey] = [sort_by]
+            _sort_by: list[TrackSortKey] = [sort_by]
         elif sort_by is None:
-            _sort_by: list[SortKey] = []
+            _sort_by: list[TrackSortKey] = []
         else:
-            _sort_by: list[SortKey] = sort_by
+            _sort_by: list[TrackSortKey] = sort_by
 
-        def is_sorted_by_any_of(*columns: SortKey) -> bool:
+        def is_sorted_by_any_of(*columns: TrackSortKey) -> bool:
             if len(columns) == 0:
                 raise ValueError("No columns specified")
             if len(_sort_by) == 0:
@@ -414,14 +420,25 @@ class SearchEngine:
     def find_playlists(
         self,
         *,
+        #
+        # Track-specific filters
+        #
         song_name: str = '',
         artist_name: str = '',
+        #
+        # Playlist-specific filters
+        #
         country: str = '',
         dj_name: str = '',
         playlist_include: str = '',
         playlist_exclude: str = '',
+        #
+        # Result options
+        #
         tracks_in_result: bool = False,
         tracks_limit: int | None = None,
+        sort_by: PlaylistSortKey | list[PlaylistSortKey] | None = None,
+        descending: bool = True,
         limit: int | None = None,
     ) -> pl.LazyFrame:
         """Returns the playlists that match the given query."""
@@ -465,6 +482,7 @@ class SearchEngine:
                     include_matched_terms=True)
 
         return matching_playlists.with_extra_columns()\
+            .sort_by(sort_by, descending=descending)\
             .included_playlists.slice(0, limit or None)
 
     def find_djs(
@@ -569,7 +587,7 @@ class SearchEngine:
                 adjacent_track_ids = find_adjacent_tracks(matching_tracks, direction)
 
             ts = self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.FirstTrack.id),
-                                              pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name))
+                                         pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name))
 
             adjacent_tracks = TrackSet(
                 adjacent_track_ids
