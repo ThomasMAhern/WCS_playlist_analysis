@@ -33,9 +33,9 @@ pattern_mm_dd = r'\b(?:0[1-9]|1[0-2])[-/. ](?:0[1-9]|[12]\d|3[01])\b'
 
 pattern_month_year_or_reversed = r"\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}|\d{4} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\b"
 
-def extract_dates_from_name(playlist_name: pl.Expr):
+def extract_dates_from_name(playlist_name: pl.Expr, *, sort: bool = False):
     """"Extract a list of calendar dates from the given playlist name."""
-    return pl.concat_list(
+    result = pl.concat_list(
         playlist_name.str.extract_all(pattern_yyyy_mm_dd),
         playlist_name.str.extract_all(pattern_yyyy_dd_mm),
         playlist_name.str.extract_all(pattern_dd_mm_yyyy),
@@ -61,6 +61,8 @@ def extract_dates_from_name(playlist_name: pl.Expr):
         # playlist_name.str.extract_all(pattern_yy_mm),
         # playlist_name.str.extract_all(pattern_mm_dd),
     ).list.unique()
+
+    return result.list.sort() if sort else result
 
 #######################################################
 # Patterns for detecting BPM ranges in playlist names #

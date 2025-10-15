@@ -90,7 +90,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
         pl.col('owner.display_name').cast(OWNER_NAME_DTYPE).alias(PlaylistOwner.name),
         # Only required for extended data below
         pl.col('location').alias('playlist.location'),
-    ).sort(Playlist.id).unique(Playlist.id)
+    ).unique(Playlist.id).sort(Playlist.id)
 
     _is_social_set = (
         pl.col(Playlist.extracted_dates).list.len().gt(0)
@@ -105,7 +105,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     )
 
     playlists_extended = playlists.with_columns(
-        extract_dates_from_name(pl.col(Playlist.name)).cast(
+        extract_dates_from_name(pl.col(Playlist.name), sort=True).cast(
             pl.List(pl.String)).alias(Playlist.extracted_dates),
         pl.col('playlist.location').str.split(' - ').list.get(
             0, null_on_oob=True).cast(pl.Categorical).alias(Playlist.region),
@@ -116,7 +116,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     ).with_columns(
         _is_social_set.alias(Playlist.is_social_set),
         _is_wcs_dj.alias(PlaylistOwner.is_wcs_dj),
-    ).drop('playlist.location')
+    ).drop('playlist.location').sort(Playlist.id)
 
     tracks = source_data.select(
         pl.col(Track.id).cast(TRACK_ID_DTYPE),
@@ -132,10 +132,10 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     ).group_by(Track.id).agg(
         pl.col(Track.name).drop_nulls().first(),
         pl.col(Track.artist_names).drop_nulls()
-        .unique().alias(Track.artists),
+        .unique(maintain_order=True).alias(Track.artists),
         pl.col(Track.release_date).drop_nulls().first(),
-        pl.col(Track.region).drop_nulls().sort().unique(),
-        pl.col(Track.country).drop_nulls().sort().unique(),
+        pl.col(Track.region).drop_nulls().unique().sort(),
+        pl.col(Track.country).drop_nulls().unique().sort(),
         pl.col(Playlist.id).n_unique().alias(Stats.playlist_count),
         pl.col(PlaylistOwner.name).n_unique().alias(Stats.dj_count),
     ).with_columns(
@@ -144,7 +144,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
             ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
         pl.col(Track.country).list.filter(
             ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
-    ).sort(Track.id).unique()
+    ).unique().sort(Track.id)
 
     tracks_extended = tracks.with_columns(
         pl.col(Track.artists).list.join(', ').alias(Track.artist_names),
@@ -275,9 +275,9 @@ def process_song_duplicates(*, use_original_data: bool, print_statistics: bool =
     duplicated_songs = songs_df\
         .filter(has_track_name & has_track_artist)\
         .group_by(Track.name, Track.artist_names)\
-        .agg(pl.col(Track.id),
-             pl.col(Stats.playlist_count).alias(Stats.playlist_count),
-             pl.col(Stats.dj_count),
+        .agg(pl.col(Track.id).unique().sort(),
+             pl.col(Stats.playlist_count).sort(descending=True).alias(Stats.playlist_count),
+             pl.col(Stats.dj_count).sort(descending=True).alias(Stats.dj_count),
              pl.col(Track.id).n_unique().alias('duplicate_count'),
              # This is only an estimate, because we would like playlists
              # which contain multiple different instances of the "same"
@@ -383,7 +383,8 @@ def compute_playlist_statistics():
     playlists_with_stats = playlists\
         .drop(Stats.artist_count, Stats.song_count)\
         .join(track_count_per_playlist, how='inner', on=Playlist.id)\
-        .join(artist_count_per_playlist, how='inner', on=Playlist.id)
+        .join(artist_count_per_playlist, how='inner', on=Playlist.id)\
+        .sort(Playlist.id)
 
     write_to_parquet_file(playlists_with_stats, PLAYLIST_DATA_FILE)
 
@@ -445,7 +446,6 @@ def process_song_pairings():
                 pl.col(Stats.playlist_count))\
         .filter(~pl.col(TrackAdjacent.FirstTrack.id).eq(pl.col(TrackAdjacent.SecondTrack.id)))\
         .sort([TrackAdjacent.FirstTrack.id, TrackAdjacent.SecondTrack.id])
-    # .sort(Stats.playlist_count, descending=True)
 
     # Write pre-processed data to parquet files
     write_to_parquet_file(songs_df, TRACK_ADJACENT_DATA_FILE)
