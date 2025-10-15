@@ -2,5 +2,9 @@
     "git.ignoreLimitWarning": true,
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "autopep8.args": [
+        "--max-line-length",
+        "120"
+    ]
 }
