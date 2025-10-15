@@ -1,5 +1,6 @@
 """Methods for pre-processing the data into more efficient formats at build time."""
 import os
+from typing import Literal
 
 import polars as pl
 
@@ -20,6 +21,7 @@ from utils.search_engine import (
     TRACK_PLAYLISTS_DATA_FILE,
 )
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
+from utils.search_engine.source_data import REGION_DATA_FILE
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet
@@ -45,7 +47,7 @@ def reset_file_tracker():
     written_files.clear()
 
 
-def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
+def write_to_file(data: pl.LazyFrame | pl.DataFrame, file_name: str, format: Literal['parquet', 'csv']):
     print(f'Writing {file_name}...')
 
     if file_name in opened_files:
@@ -61,16 +63,24 @@ def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
     print(f'- SCHEMA: {data.collect_schema()}')
 
     if isinstance(data, pl.DataFrame):
-        data.write_parquet(file_name)
+        getattr(data, 'write_' + format)(file_name)
     else:
-        data.sink_parquet(file_name)
+        getattr(data, 'sink_' + format)(file_name)
 
     file_size = os.path.getsize(file_name)
     print(f'- SIZE: {file_size:,} bytes')
     print('')
 
 
-def scan_parquet_file(file_name: str) -> pl.LazyFrame:
+def write_to_parquet_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
+    write_to_file(data, file_name, 'parquet')
+
+
+def write_to_csv_file(data: pl.LazyFrame | pl.DataFrame, file_name: str):
+    write_to_file(data, file_name, 'csv')
+
+
+def scan_file(file_name: str, format: Literal['parquet', 'csv']) -> pl.LazyFrame:
     if file_name in written_files:
         print(f'<< Reading {file_name} from previous step...')
     else:
@@ -79,9 +89,68 @@ def scan_parquet_file(file_name: str) -> pl.LazyFrame:
     return pl.scan_parquet(file_name)
 
 
+def scan_parquet_file(file_name: str) -> pl.LazyFrame:
+    return scan_file(file_name, 'parquet')
+
+
+def scan_csv_file(file_name: str) -> pl.LazyFrame:
+    return scan_file(file_name, 'csv')
+
+
+def process_country_data():
+    source_data = scan_parquet_file('processed_data/data_playlists.parquet')
+
+    locations = (
+        source_data.select('location')
+        .drop_nulls()
+        .filter(pl.col('location').ne(''))
+        .unique()
+        .select(
+            pl.col('location'),
+            pl.col('location').str.split(' - ').list.get(
+                0, null_on_oob=True).cast(pl.String).alias('region'),
+            pl.col('location').str.split(' - ').list.get(
+                1, null_on_oob=True).cast(pl.String).alias('country'))
+        .sort('location')
+        .collect(engine='streaming'))
+
+    countries = (
+        locations.lazy()
+                 .select(pl.col('country').cast(pl.String))
+                 .filter(pl.col('country').ne(''))
+                 .drop_nulls()
+                 .unique()
+                 .sort('country')
+                 .collect(engine='streaming'))
+
+    regions = (
+        locations.lazy()
+                 .select(pl.col('region').cast(pl.String))
+                 .filter(pl.col('region').ne(''))
+                 .drop_nulls()
+                 .unique()
+                 .sort('region')
+                 .collect(engine='streaming'))
+
+    # Write pre-processed data to csv files
+    write_to_csv_file(regions, REGION_DATA_FILE)
+    write_to_csv_file(countries, COUNTRY_DATA_FILE)
+
+
+def get_region_enum() -> pl.Enum:
+    return pl.Enum(pl.read_csv(REGION_DATA_FILE)['region'])
+
+
+def get_country_enum() -> pl.Enum:
+    return pl.Enum(pl.read_csv(COUNTRY_DATA_FILE)['country'])
+
+
 def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     source_data = scan_parquet_file('processed_data/data_playlists.parquet')
     bpm_data = scan_parquet_file('processed_data/data_song_bpm.parquet')
+
+    def null_if_empty(expr: pl.Expr) -> pl.Expr:
+        return pl.when(expr.eq('')).then(pl.lit(None)).otherwise(expr)
 
     playlists = source_data.select(
         pl.col('playlist_id').cast(PLAYLIST_ID_DTYPE).alias(Playlist.id),
@@ -89,7 +158,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
         pl.col(PlaylistOwner.id).cast(OWNER_ID_DTYPE),
         pl.col('owner.display_name').cast(OWNER_NAME_DTYPE).alias(PlaylistOwner.name),
         # Only required for extended data below
-        pl.col('location').alias('playlist.location'),
+        pl.col('location').pipe(null_if_empty).alias('playlist.location'),
     ).unique(Playlist.id).sort(Playlist.id)
 
     _is_social_set = (
@@ -107,10 +176,14 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     playlists_extended = playlists.with_columns(
         extract_dates_from_name(pl.col(Playlist.name), sort=True).cast(
             pl.List(pl.String)).alias(Playlist.extracted_dates),
-        pl.col('playlist.location').str.split(' - ').list.get(
-            0, null_on_oob=True).cast(pl.Categorical).alias(Playlist.region),
-        pl.col('playlist.location').str.split(' - ').list.get(
-            1, null_on_oob=True).cast(pl.Categorical).alias(Playlist.country),
+        pl.col('playlist.location').str.split(' - ')
+          .list.get(0, null_on_oob=True)
+          .pipe(null_if_empty).cast(get_region_enum())
+          .alias(Playlist.region),
+        pl.col('playlist.location').str.split(' - ')
+          .list.get(1, null_on_oob=True)
+          .pipe(null_if_empty).cast(get_country_enum())
+          .alias(Playlist.country),
         pl.lit(None).cast(pl.UInt32).alias(Stats.song_count),  # Stub, will be be calculated after deduplication
         pl.lit(None).cast(pl.UInt32).alias(Stats.artist_count),  # Stub, will be calculated after deduplication
     ).with_columns(
@@ -123,10 +196,14 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
         pl.col(Track.name).cast(TRACK_NAME_DTYPE),
         pl.col(Track.artist_names).cast(TRACK_ARTIST_DTYPE),
         pl.col(Track.release_date).cast(pl.Date),
-        pl.col('location').str.split(' - ').list.get(
-            0, null_on_oob=True).cast(pl.Categorical).alias(Track.region),
-        pl.col('location').str.split(' - ').list.get(
-            1, null_on_oob=True).cast(pl.Categorical).alias(Track.country),
+        pl.col('location').str.split(' - ')
+          .list.get(0, null_on_oob=True)
+          .pipe(null_if_empty).cast(get_region_enum())
+          .alias(Track.region),
+        pl.col('location').str.split(' - ')
+          .list.get(1, null_on_oob=True)
+          .pipe(null_if_empty).cast(get_country_enum())
+          .alias(Track.country),
         pl.col('playlist_id').alias(Playlist.id),
         pl.col('owner.display_name').alias(PlaylistOwner.name),
     ).group_by(Track.id).agg(
@@ -140,10 +217,8 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
         pl.col(PlaylistOwner.name).n_unique().alias(Stats.dj_count),
     ).with_columns(
         pl.col(Track.release_date).cast(pl.Date),
-        pl.col(Track.region).list.filter(
-            ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
-        pl.col(Track.country).list.filter(
-            ~pl.element().eq('')).cast(pl.List(pl.Categorical)),
+        pl.col(Track.region).list.filter(pl.element().ne('')).cast(pl.List(get_region_enum())),
+        pl.col(Track.country).list.filter(pl.element().ne('')).cast(pl.List(get_country_enum())),
     ).unique().sort(Track.id)
 
     tracks_extended = tracks.with_columns(
@@ -173,16 +248,7 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
     ).unique([Playlist.id, Track.id, PlaylistTrack.number])\
         .sort(Playlist.id, Track.id, PlaylistTrack.number)
 
-    countries_df = (
-        playlists_extended.select(
-            pl.col(Playlist.country).alias('country').cast(pl.String))
-        .unique()
-        .drop_nulls()
-        .sort('country')
-        .collect(engine='streaming'))
-
     # Write pre-processed data to parquet files
-    write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
     write_to_parquet_file(
         playlists_extended,
         PLAYLIST_ORIGINAL_DATA_FILE if prepare_deduplication else PLAYLIST_DATA_FILE)
@@ -455,6 +521,9 @@ def process_everything(merge_duplicates: bool = True):
     """Runs all pre-processing in sequence."""
     # Reset the internal file tracker (only used for debugging)
     reset_file_tracker()
+
+    # Extract country & region enums
+    process_country_data()
 
     # Initial run to split playlists, tracks and playlist entries
     process_playlist_and_song_data(prepare_deduplication=merge_duplicates)

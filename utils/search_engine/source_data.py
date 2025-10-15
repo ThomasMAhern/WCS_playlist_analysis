@@ -18,7 +18,8 @@ TRACK_DATA_FILE: Final = DATA_DIR + 'data_song_metadata.parquet'
 TRACK_ORIGINAL_DATA_FILE: Final = DATA_DIR + 'data_song_metadata.original.parquet'
 TRACK_ADJACENT_DATA_FILE: Final = DATA_DIR + 'data_song_adjacent.parquet'
 TRACK_LYRICS_DATA_FILE: Final = DATA_DIR + 'data_song_lyrics.parquet'
-COUNTRY_DATA_FILE: Final = DATA_DIR + 'data_countries.parquet'
+COUNTRY_DATA_FILE: Final = DATA_DIR + 'data_countries.csv'
+REGION_DATA_FILE: Final = DATA_DIR + 'data_regions.csv'
 
 TRACK_DUPLICATES_DATA_FILE: Final = DATA_DIR + 'data_song_duplicates.parquet'
 TRACK_CANONICAL_DATA_FILE: Final = DATA_DIR + 'data_song_canonical.parquet'
@@ -66,5 +67,5 @@ class CombinedData:
             tracks=pl.scan_parquet(TRACK_DATA_FILE),
             tracks_adjacent=pl.scan_parquet(TRACK_ADJACENT_DATA_FILE),
             track_lyrics=pl.scan_parquet(TRACK_LYRICS_DATA_FILE),
-            countries=pl.read_parquet(COUNTRY_DATA_FILE)['country'].to_list(),
+            countries=pl.read_csv(COUNTRY_DATA_FILE)['country'].to_list(),
         )
