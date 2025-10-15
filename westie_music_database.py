@@ -750,8 +750,7 @@ if geo_region_toggle:
                                     regions)
 
     if region_selectbox != 'Select One':
-        st.markdown(
-            f"#### What are the most popular songs only played in {region_selectbox}?")
+        st.markdown(f"#### What are the most popular songs only played in {region_selectbox}?")
 
         region_df = (pl.scan_parquet('processed_data/data_unique_per_region.parquet')
                      #  .pipe(wcs_specific)
@@ -762,8 +761,8 @@ if geo_region_toggle:
                      # .agg(pl.col(PlaylistOwner.name).unique())
                      # .with_columns(pl.col(PlaylistOwner.name).list.unique())
                      # .unique()
-                     .sort(Stats.playlist_count, Stats.dj_count, descending=True)
-                     )
+                     .rename({'song_url': Track.url, 'owner.display_name': PlaylistOwner.name})
+                     .sort(Stats.playlist_count, Stats.dj_count, descending=True))
 
         st.dataframe(region_df.head(1000).collect(streaming=True),
                      column_config={Track.url: st.column_config.LinkColumn()})
