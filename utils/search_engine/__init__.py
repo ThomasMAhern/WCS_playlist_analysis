@@ -242,6 +242,7 @@ type PlaylistSortKey = Literal[
     'artist_count',
 ]
 
+
 class SearchEngine:
     """Encapsulates the logic of filtering for specific songs, playlists etc."""
 
@@ -586,25 +587,34 @@ class SearchEngine:
 
         if return_pairs:
             if direction == 'any':
-                raise NotImplementedError()
+                adjacent_track_ids = (
+                    pl.concat([
+                        find_adjacent_tracks(matching_tracks, 'prev'),
+                        find_adjacent_tracks(matching_tracks, 'next')
+                    ])
+                    # We only want to keep one of [T1,T2,N] and [T2,T1,N]
+                    .filter(pl.col(TrackAdjacent.FirstTrack.id).lt(pl.col(TrackAdjacent.SecondTrack.id)))
+                    .group_by(TrackAdjacent.FirstTrack.id, TrackAdjacent.SecondTrack.id)
+                    .agg(pl.col(TrackAdjacent.times_played_together).sum()))
             else:
                 adjacent_track_ids = find_adjacent_tracks(matching_tracks, direction)
-
-            ts = self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.FirstTrack.id),
-                                         pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name))
 
             adjacent_tracks = TrackSet(
                 adjacent_track_ids
                 .select(TrackAdjacent.FirstTrack.id, TrackAdjacent.SecondTrack.id, TrackAdjacent.times_played_together)
                 .join(self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.FirstTrack.id),
-                                              pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name)),
+                                              pl.col(Track.name).alias(TrackAdjacent.FirstTrack.name),
+                                              pl.col(Track.artists).alias(TrackAdjacent.FirstTrack.artists)),
                       how='inner', on=TrackAdjacent.FirstTrack.id)
                 .join(self.data.tracks.select(pl.col(Track.id).alias(TrackAdjacent.SecondTrack.id),
-                                              pl.col(Track.name).alias(TrackAdjacent.SecondTrack.name)),
+                                              pl.col(Track.name).alias(TrackAdjacent.SecondTrack.name),
+                                              pl.col(Track.artists).alias(TrackAdjacent.SecondTrack.artists)),
                       how='inner', on=TrackAdjacent.SecondTrack.id),
                 is_filtered=True)
 
-            return None, adjacent_tracks.included_tracks
+            return (None,
+                    adjacent_tracks.included_tracks.sort(TrackAdjacent.times_played_together, descending=True)
+                    .slice(0, limit or None))
         else:
             if direction == 'any':
                 adjacent_track_ids = pl.concat([

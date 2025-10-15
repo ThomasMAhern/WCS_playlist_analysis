@@ -807,6 +807,15 @@ if geo_region_toggle:
         st.markdown(f"#### ")
 
 
+@st.cache_data
+def top_related_songs():
+    return (search_engine.find_related_songs('any', return_pairs=True, limit=1000)[1]
+            .select(TrackAdjacent.FirstTrack.name, TrackAdjacent.FirstTrack.artists,
+                    TrackAdjacent.times_played_together,
+                    TrackAdjacent.SecondTrack.name, TrackAdjacent.SecondTrack.artists)
+            .collect(engine='streaming'))
+
+
 # Courtesy of Vincent M.
 songs_together_toggle = st.toggle("Songs most played together")
 
@@ -817,6 +826,12 @@ if songs_together_toggle:
         song_input = st.text_input("Song Name/ID:")
     with song_combo_col2:
         artist_name_input = st.text_input("Song artist name:")
+
+    if not song_input and not artist_name_input:
+        st.markdown("#### Most common songs to play next to each other")
+        top_related_songs = top_related_songs()
+        st.dataframe(top_related_songs,
+                     column_config={Track.url: st.column_config.LinkColumn()})
 
     if st.button("Search songs played together", type="primary", disabled=st.session_state["processing"]):
         st.session_state["processing"] = True

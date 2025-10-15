@@ -202,10 +202,12 @@ class TrackAdjacent(Entity):
     class FirstTrack(SubEntity[Track]):
         id: Final = Track.id.alias("pair1.track.id")
         name: Final = Track.name.alias("pair1.track.name")
+        artists: Final = Track.name.alias("pair1.track.artists")
 
     class SecondTrack(SubEntity[Track]):
         id: Final = Track.id.alias("pair2.track.id")
         name: Final = Track.name.alias("pair2.track.name")
+        artists: Final = Track.artists.alias("pair2.track.artists")
 
 
 class TrackLyrics(Entity):
