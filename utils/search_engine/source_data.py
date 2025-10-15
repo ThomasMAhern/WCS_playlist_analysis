@@ -10,6 +10,7 @@ from utils.search_engine.filters import PlaylistSet, PlaylistTrackSet, TrackLyri
 DATA_DIR: Final = 'processed_data/'
 
 PLAYLIST_DATA_FILE: Final = DATA_DIR + 'data_playlist_metadata.parquet'
+PLAYLIST_ORIGINAL_DATA_FILE: Final = DATA_DIR + 'data_playlist_metadata.original.parquet'
 PLAYLIST_TRACKS_DATA_FILE: Final = DATA_DIR + 'data_playlist_songs.parquet'
 PLAYLIST_TRACKS_ORIGINAL_DATA_FILE: Final = DATA_DIR + 'data_playlist_songs.original.parquet'
 TRACK_PLAYLISTS_DATA_FILE: Final = DATA_DIR + 'data_song_playlists.parquet'

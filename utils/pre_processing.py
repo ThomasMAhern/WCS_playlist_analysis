@@ -7,6 +7,7 @@ from utils.playlist_classifiers import extract_dates_from_name
 from utils.search_engine import (
     COUNTRY_DATA_FILE,
     PLAYLIST_DATA_FILE,
+    PLAYLIST_ORIGINAL_DATA_FILE,
     PLAYLIST_TRACKS_DATA_FILE,
     PLAYLIST_TRACKS_ORIGINAL_DATA_FILE,
     TRACK_ADJACENT_DATA_FILE,
@@ -74,6 +75,8 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
             0, null_on_oob=True).cast(pl.Categorical).alias(Playlist.region),
         pl.col('playlist.location').str.split(' - ').list.get(
             1, null_on_oob=True).cast(pl.Categorical).alias(Playlist.country),
+        pl.lit(None).cast(pl.UInt32).alias(Stats.song_count), # Stub, will be be calculated after deduplication
+        pl.lit(None).cast(pl.UInt32).alias(Stats.artist_count), # Stub, will be calculated after deduplication
     ).with_columns(
         _is_social_set.alias(Playlist.is_social_set),
         _is_wcs_dj.alias(PlaylistOwner.is_wcs_dj),
@@ -144,7 +147,9 @@ def process_playlist_and_song_data(*, prepare_deduplication: bool = False):
 
     # Write pre-processed data to parquet files
     write_to_parquet_file(countries_df, COUNTRY_DATA_FILE)
-    write_to_parquet_file(playlists_extended, PLAYLIST_DATA_FILE)
+    write_to_parquet_file(
+        playlists_extended,
+        PLAYLIST_ORIGINAL_DATA_FILE if prepare_deduplication else PLAYLIST_DATA_FILE)
     write_to_parquet_file(
         tracks_extended,
         TRACK_ORIGINAL_DATA_FILE if prepare_deduplication else TRACK_DATA_FILE)
@@ -279,7 +284,7 @@ def deduplicate_playlist_and_song_data():
     """Replace all duplicate tracks with their canonical versions."""
 
     playlists = pl.scan_parquet(
-        PLAYLIST_DATA_FILE)
+        PLAYLIST_ORIGINAL_DATA_FILE)
 
     tracks_with_duplicates = pl.scan_parquet(
         TRACK_ORIGINAL_DATA_FILE)
@@ -316,6 +321,35 @@ def deduplicate_playlist_and_song_data():
 
     write_to_parquet_file(tracks, TRACK_DATA_FILE)
     write_to_parquet_file(playlist_tracks, PLAYLIST_TRACKS_DATA_FILE)
+
+
+def compute_playlist_statistics():
+    """Compute song_count and artist_count for all playlists."""
+    playlists = pl.scan_parquet(
+        PLAYLIST_ORIGINAL_DATA_FILE)
+
+    tracks = pl.scan_parquet(
+        TRACK_DATA_FILE)
+
+    playlist_tracks = pl.scan_parquet(
+        PLAYLIST_TRACKS_DATA_FILE)
+
+    track_count_per_playlist = playlist_tracks\
+        .group_by(Playlist.id)\
+        .agg(pl.col(Track.id).n_unique().alias(Stats.song_count))
+
+    artist_count_per_playlist = playlist_tracks\
+        .join(tracks, how='inner', on=Track.id)\
+        .select(Playlist.id, Track.artist_names)\
+        .group_by(Playlist.id)\
+        .agg(pl.col(Track.artist_names).n_unique().alias(Stats.artist_count))
+
+    playlists_with_stats = playlists\
+        .drop(Stats.artist_count, Stats.song_count)\
+        .join(track_count_per_playlist, how='inner', on=Playlist.id)\
+        .join(artist_count_per_playlist, how='inner', on=Playlist.id)
+
+    write_to_parquet_file(playlists_with_stats, PLAYLIST_DATA_FILE)
 
 
 def process_playlist_tracks_inverse():
@@ -392,6 +426,7 @@ def process_everything(merge_duplicates: bool = True):
 
     if merge_duplicates:
         deduplicate_playlist_and_song_data()
+        compute_playlist_statistics()
 
     # Inverse track => playlist lookup reuses the (possibly deduplicated) data generated above
     process_playlist_tracks_inverse()
