@@ -644,7 +644,7 @@ if search_dj_toggle:
                          .select(Track.id, Track.name, Track.artist_names, PlaylistOwner.name,
                                  Stats.dj_count, Stats.playlist_count, Playlist.name, Track.url))
 
-            st.text(f"Music unique to _{', '.join(dj_input.split(','))}_")
+            st.markdown(f"Music unique to _{', '.join(dj_input.split(','))}_")
             st.dataframe(djs_music.filter(pl.col(Stats.dj_count).eq(1))
                          .group_by(pl.all().exclude(Playlist.name))
                          .agg(Playlist.name)
@@ -652,7 +652,7 @@ if search_dj_toggle:
                          .head(100),
                          column_config={Track.url: st.column_config.LinkColumn()})
 
-            # st.text(f"Popular music _{', '.join(dj_input)}_ doesn't play")
+            # st.markdown(f"Popular music _{', '.join(dj_input)}_ doesn't play")
             # st.dataframe(others_music.join(djs_music, how='anti',
             #                 on=[Track.name, Stats.dj_count,
             #                 Stats.playlist_count, Track.url])
@@ -712,7 +712,7 @@ if search_dj_toggle:
         dj_2_df = search_engine.find_songs(dj_name=dj_compare_2).select(
             Track.name, Track.url, Stats.dj_count, Stats.playlist_count)
 
-        st.text(f"Music {dj_compare_1} has, but {dj_compare_2} doesn't.")
+        st.markdown(f"Music _{dj_compare_1}_ has, but _{dj_compare_2}_ doesn't.")
         st.dataframe(dj_1_df
                      .join(dj_2_df, how='anti', on=[Track.name, Track.url])
                      .unique()
