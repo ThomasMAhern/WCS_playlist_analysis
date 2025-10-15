@@ -515,9 +515,13 @@ class SearchEngine:
                 self.data.all_playlists,
                 include_matched_terms=False)
 
-        return matching_playlists\
-            .filter_tracks(self.data.all_playlist_tracks(Playlist.id), self.data.all_tracks)\
-            .included_tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
+        return self.data.all_tracks\
+            .filter_playlist_tracks(
+                matching_playlists.filter_playlist_tracks(
+                    self.data.all_playlist_tracks(Playlist.id),
+                    include_playlist_info=True),
+                include_track_info=True)\
+            .included_playlist_tracks.group_by(PlaylistOwner.name, PlaylistOwner.id)\
             .agg(pl.n_unique(Track.id).alias(Stats.song_count),
                  pl.n_unique(Track.artist_names).alias(Stats.artist_count),
                  pl.n_unique(Playlist.name).alias(Stats.playlist_count),
