@@ -43,6 +43,8 @@ class Track(Entity):
     has_poc_artist: Final = "track.artists.is_poc_artist"
     release_date: Final = "track.album.release_date"
     beats_per_minute: Final = "track.bpm"
+    region: Final = "track.region"
+    country: Final = "track.country"
     url: Final = "track.url"
 
     pass
@@ -64,9 +66,11 @@ class TrackAdjacent(Entity):
 
     class FirstTrack(SubEntity[Track]):
         id: Final = "pair1.track.id"
+        name: Final = "pair1.track.name"
 
     class SecondTrack(SubEntity[Track]):
         id: Final = "pair2.track.id"
+        name: Final = "pair2.track.name"
 
 
 class TrackLyrics(Entity):

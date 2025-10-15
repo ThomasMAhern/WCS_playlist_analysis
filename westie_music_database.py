@@ -10,7 +10,7 @@ from utils.columns import pull_columns_to_front
 from utils.logging import log_query
 from utils.playlist_classifiers import extract_dates_from_name
 from utils.search_engine import SearchEngine
-from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack
+from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track
 
 # avail_threads = pl.threadpool_size()
 
@@ -777,24 +777,24 @@ if geo_region_toggle:
         )
 
         country_1_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[0]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count'))
+                        .filter(pl.col(Track.country).cast(pl.String).eq(countries_selectbox[0]))
+                        .select(pl.col(Track.country).alias('country'), Track.id,
+                                Track.name, Track.url, Stats.dj_count, Stats.playlist_count))
 
         country_2_df = (countries_df
-                        .filter(pl.col('country').cast(pl.String).eq(countries_selectbox[1]))
-                        .select('track.name', 'song_url', 'dj_count', 'playlist_count'))
+                        .filter(pl.col(Track.country).cast(pl.String).eq(countries_selectbox[1]))
+                        .select(pl.col(Track.country).alias('country'), Track.id,
+                                Track.name, Track.url, Stats.dj_count, Stats.playlist_count))
 
-        # st.dataframe(country_1_df._fetch(10000))
-        st.text(
-            f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
-        st.dataframe(country_1_df.join(country_2_df,
-                                       how='anti',
-                                       on=['track.name', 'track.url'])
-                     .unique()
-                     .sort('dj_count', descending=True)
-                     .head(300).collect(streaming=True),
-                     # ._fetch(10000),
-                     column_config={"track.url": st.column_config.LinkColumn()})
+        st.text(f"{countries_selectbox[0]} music not in {countries_selectbox[1]}")
+        compare_df = (country_1_df.join(country_2_df, how='anti', on=Track.id)
+                      .unique()
+                      .drop(Track.id)
+                      .sort(Stats.dj_count, descending=True)
+                      .head(300))
+        print(compare_df.explain(engine='streaming', format='plain'))
+        st.dataframe(compare_df.collect(engine='streaming'),
+                     column_config={Track.url: st.column_config.LinkColumn()})
         st.session_state["processing"] = False
         st.markdown(f"#### ")
 
