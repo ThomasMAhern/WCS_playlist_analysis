@@ -79,8 +79,8 @@ class PlaylistSet:
         if not self.is_filtered and not include_playlist_info:
             return playlist_tracks
 
-        matching_playlist_tracks = self.included_playlists.join(
-            playlist_tracks.included_playlist_tracks,
+        matching_playlist_tracks = playlist_tracks.included_playlist_tracks.join(
+            self.included_playlists,
             how='inner' if include_playlist_info else 'semi',
             on=Playlist.id)
 
