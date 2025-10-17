@@ -46,7 +46,7 @@ class PlaylistSet:
         return PlaylistSet(
             included_playlists=self.included_playlists.with_columns(
                 pl.when(pl.col(Playlist.id).is_not_null()).then(pl.concat_str(
-                    pl.lit('https://open.spotify.com/track/'), Playlist.id)).alias(Playlist.url)),
+                    pl.lit('https://open.spotify.com/playlist/'), Playlist.id)).alias(Playlist.url)),
             excluded_playlists=self.excluded_playlists,
             all_playlists=self.all_playlists,
             is_filtered=self.is_filtered)
