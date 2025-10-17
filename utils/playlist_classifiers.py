@@ -76,4 +76,4 @@ pattern_bpm_loose_fallback = r'\b(\d{2,3})\s*(?:bpm|BPM)\b'  # 117 BPM”
 
 def extract_bpm_from_name(playlist_name: pl.Expr):
     """"Extract a list of possible BPM specifications from the given playlist name."""
-    raise NotImplemented()
+    raise NotImplementedError()
