@@ -259,7 +259,7 @@ class SearchEngine:
         artists_count, = count_n_unique(
             self.data.tracks, [Track.artist_names])
         playlists_count, djs_count = count_n_unique(
-            self.data.playlists, [Playlist.name, PlaylistOwner.name])
+            self.data.playlists, [Playlist.id, PlaylistOwner.name])
         lyrics_count = count_n_unique(
             self.data.track_lyrics.join(
                 self.data.tracks, how='inner', on=Track.id),
