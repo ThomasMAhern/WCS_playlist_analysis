@@ -107,16 +107,16 @@ st.link_button("Help fill in country info!",
 # st.markdown(f"#### ")
 
 
-st.markdown(f"#### Random Song")
-st.dataframe((df
-              .filter(pl.col(Stats.playlist_count).lt(800),
-                      pl.col(Stats.playlist_count).gt(20),
-                      pl.col(Stats.dj_count).lt(300),
-                      pl.col(Stats.dj_count).gt(20))
-              .collect(streaming=True).sample(1)
-             ),
-                 column_config={Track.url: st.column_config.LinkColumn()})
-st.markdown(f"#### ")
+# st.markdown(f"#### Random Song")
+# st.dataframe((df
+#               .filter(pl.col(Stats.playlist_count).lt(800),
+#                       pl.col(Stats.playlist_count).gt(20),
+#                       pl.col(Stats.dj_count).lt(300),
+#                       pl.col(Stats.dj_count).gt(20))
+#               .collect(streaming=True).sample(1)
+#              ),
+#                  column_config={Track.url: st.column_config.LinkColumn()})
+# st.markdown(f"#### ")
 
 
 # @st.cache_data
