@@ -265,7 +265,6 @@ if top_songs_toggle:
     st.dataframe(top_songs.drop(Stats.playlist_count),
                  column_config={Track.url: st.column_config.LinkColumn()})
 
-
     st.markdown("Top 100 🏳️‍🌈 songs!")
     top_queer_songs = top_queer_songs()
 
@@ -274,7 +273,6 @@ if top_songs_toggle:
 
     st.dataframe(top_queer_songs.drop(Stats.playlist_count),
                  column_config={Track.url: st.column_config.LinkColumn()})
-
 
     st.markdown("Top 100 POC songs!")
     top_poc_songs = top_poc_songs()
@@ -912,7 +910,7 @@ if lyrics_toggle:
 
 st.markdown("# ")
 st.markdown("# ")
-st.markdown("#### WCS resources/apps by others:") # Thank you, Clara!
+st.markdown("#### WCS resources/apps by others:")  # Thank you, Clara!
 st.link_button('Routine Database 😯',
                url='https://wcs-routine-database.streamlit.app/')
 # st.link_button('Follow me so I can add you to the database!',
