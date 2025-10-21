@@ -193,7 +193,7 @@ def top_queer_songs():
             artist_is_queer=True,
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=100,
+            limit=101,
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
@@ -228,7 +228,7 @@ def top_poc_songs():
             artist_is_poc=True,
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=100,
+            limit=101,
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
