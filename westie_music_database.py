@@ -917,11 +917,7 @@ if lyrics_toggle:
 
 st.markdown("# ")
 st.markdown("# ")
-<<<<<<< HEAD
-st.markdown("#### WCS resources/apps by others:")  # Thank you, Clara!
-=======
 st.markdown("#### WCS resources/apps by others:") # Thank you, Clara!
->>>>>>> parent of e5b9dbb (Update westie_music_database.py)
 st.link_button('Routine Database 😯',
                url='https://wcs-routine-database.streamlit.app/')
 # st.link_button('Follow me so I can add you to the database!',
