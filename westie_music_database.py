@@ -106,16 +106,8 @@ st.link_button("Help fill in country info!",
 
 # st.markdown(f"#### ")
 
-st.markdown(f"#### ")
-st.markdown(f"#### Random Song")
 
-#revamped by Lukas W
-st.dataframe(search_engine.find_random_songs(playlist_count_range=(20, 800),
-                                             dj_count_range=(20, 300),
-                                             limit=1)
-             .select(Track.name, Track.artists, Track.url),
-             column_config={Track.url: st.column_config.LinkColumn()})
-
+# st.markdown(f"#### Random Song")
 # st.dataframe((df
 #               .filter(pl.col(Stats.playlist_count).lt(800),
 #                       pl.col(Stats.playlist_count).gt(20),
@@ -124,7 +116,7 @@ st.dataframe(search_engine.find_random_songs(playlist_count_range=(20, 800),
 #               .collect(streaming=True).sample(1)
 #              ),
 #                  column_config={Track.url: st.column_config.LinkColumn()})
-st.markdown(f"#### ")
+# st.markdown(f"#### ")
 
 
 # @st.cache_data
