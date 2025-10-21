@@ -88,7 +88,7 @@ songs_count, artists_count, playlists_count, djs_count, lyrics_count = load_stat
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
+st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc.")
 
 # st.markdown('''468,348 **Songs** (160,661 wcs specific)
 # 124,957 **Artists** (53,789 wcs specific)
@@ -258,7 +258,6 @@ def top_poc_songs():
 top_songs_toggle = st.toggle("Top 100 WCS songs!")
 if top_songs_toggle:
     top_songs = top_songs()
-    st.markdown(f"Top 100 WCS songs!")
     st.link_button('Playlist of the top 100',
                    url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
@@ -935,7 +934,7 @@ st.link_button('Weekenders Events Calendar',
 st.link_button('Leave feedback/suggestions!/Report issues/bugs',
                url='https://forms.gle/19mALUpmM9Z5XCA28')
 
-
+#removing "It Broke" portion to Lukas W revamping errthang and making it delicately sip memory
 st.markdown("""####
 ### Westie Music Database FAQ
 #### How can I help?
@@ -981,10 +980,10 @@ st.markdown("""####
 #### Artists are kinda messed up
 * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
 
-#### It broke ☹️
-* The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
-* Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️
-* It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
+# #### It broke ☹️
+# * The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
+# * Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️
+# * It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
 #### Errors:
 * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
