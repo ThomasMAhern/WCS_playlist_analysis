@@ -158,7 +158,7 @@ def top_songs():
         .find_songs(
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=100
+            limit=101
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
