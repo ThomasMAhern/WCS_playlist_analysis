@@ -82,7 +82,6 @@ class CombinedFilter:
                 'artist',
             ] = 'track'
     ):
-        print(order)
         if order == FilterOrder.Playlists_First:
             # Filter playlists, then filter the entries in those playlists,
             # then filter the tracks referenced by those entries
@@ -100,7 +99,7 @@ class CombinedFilter:
             matching_lyrics =\
                 self.lyrics_filter.filter_lyrics(
                     data.all_track_lyrics,
-                    include_full_lyrics=self.lyrics_in_result,
+                    include_full_lyrics=False,
                     include_matched_lyrics=self.lyrics_in_result)
 
             matching_tracks =\
@@ -124,7 +123,7 @@ class CombinedFilter:
             matching_lyrics =\
                 self.lyrics_filter.filter_lyrics(
                     data.all_track_lyrics,
-                    include_full_lyrics=self.lyrics_in_result,
+                    include_full_lyrics=False,
                     include_matched_lyrics=self.lyrics_in_result)
 
             matching_tracks =\
@@ -175,12 +174,9 @@ class CombinedFilter:
 
                     case FilterType.Lyrics:
                         lyrics = self.lyrics_filter.filter_lyrics(
-                            lyrics,
-                            include_full_lyrics=self.lyrics_in_result,
-                            include_matched_lyrics=self.lyrics_in_result)
+                            lyrics, include_full_lyrics=False, include_matched_lyrics=self.lyrics_in_result)
                         tracks = lyrics.filter_tracks(
-                            tracks,
-                            include_lyrics=self.lyrics_in_result)
+                            tracks, include_lyrics=self.lyrics_in_result)
 
                     case FilterType.Track:
                         tracks = self.track_filter.filter_tracks(tracks)
