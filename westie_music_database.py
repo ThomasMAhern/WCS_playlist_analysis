@@ -897,20 +897,13 @@ if lyrics_toggle:
                 lyrics_exclude=anti_lyrics_input,
                 lyrics_in_result=True,
             )
-            # TODO: See whether we can remove this because we have implemented deduplication
-            # Otherwise there will be multiple rows for each song variation
-            .group_by(Track.name, Track.artist_names)
-            .agg(pl.col(Track.url).first(),
-                 pl.col(Track.artists).first(),
-                 pl.col(TrackLyrics.matched_lyrics).first(),
-                 # TODO: Adding up playlist_count may lead to slightly inflated numbers
-                 #       when different instances of a song are include in a single playlist.
-                 pl.col(Stats.playlist_count).sum(),
-                 # TODO: The merged dj_count will very likely be too large, since
-                 #       it double-counts DJs if multiple instances of a song are present.
-                 #       The only good way to deal with this is to unify those instances
-                 #       during the pre-processing of the data.
-                 pl.col(Stats.dj_count).sum())
+            .select(Track.name,
+                    Track.artists,
+                    Track.url,
+                    TrackLyrics.matched_lyrics,
+                    TrackLyrics.lyrics,
+                    Stats.playlist_count,
+                    Stats.dj_count)
             .sort(pl.col(TrackLyrics.matched_lyrics).list.len(), descending=True, nulls_last=True),
             column_config={Track.url: st.column_config.LinkColumn()})
 
