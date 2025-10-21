@@ -258,7 +258,7 @@ def top_poc_songs():
 top_songs_toggle = st.toggle("Top 100 WCS songs!")
 if top_songs_toggle:
     top_songs = top_songs()
-
+    st.markdown(f"Top 100 WCS songs!")
     st.link_button('Playlist of the top 100',
                    url='https://open.spotify.com/playlist/7f5hPmFnIPy7lcj8EXX90V')
 
@@ -266,8 +266,7 @@ if top_songs_toggle:
                  column_config={Track.url: st.column_config.LinkColumn()})
 
 
-top_queer_songs_toggle = st.toggle("Top 100 🏳️‍🌈 songs!")
-if top_queer_songs_toggle:
+    st.markdown("Top 100 🏳️‍🌈 songs!")
     top_queer_songs = top_queer_songs()
 
     # st.link_button('Playlist of the top 100',
@@ -277,8 +276,7 @@ if top_queer_songs_toggle:
                  column_config={Track.url: st.column_config.LinkColumn()})
 
 
-top_poc_songs_toggle = st.toggle("Top 100 POC songs!")
-if top_poc_songs_toggle:
+    st.markdown("Top 100 POC songs!")
     top_poc_songs = top_poc_songs()
 
     # st.link_button('Playlist of the top 100',
