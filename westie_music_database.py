@@ -158,7 +158,7 @@ def top_songs():
         .find_songs(
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=101
+            limit=501
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
@@ -193,7 +193,7 @@ def top_queer_songs():
             artist_is_queer=True,
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=101,
+            limit=501,
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
@@ -228,7 +228,7 @@ def top_poc_songs():
             artist_is_poc=True,
             sort_by=Stats.playlist_count,
             descending=True,
-            limit=101,
+            limit=501,
         )\
         .rename({Track.country: 'country'})\
         .drop(Track.region)\
@@ -255,7 +255,7 @@ def top_poc_songs():
         .collect(engine='streaming')
 
 
-top_songs_toggle = st.toggle("Top 100 WCS songs!")
+top_songs_toggle = st.toggle("Top 500 WCS songs!")
 if top_songs_toggle:
     top_songs = top_songs()
     st.link_button('Playlist of the top 100',
@@ -265,7 +265,7 @@ if top_songs_toggle:
                  column_config={Track.url: st.column_config.LinkColumn()})
 
 
-    st.markdown("Top 100 🏳️‍🌈 songs!")
+    st.markdown("Top 500 🏳️‍🌈 songs!")
     top_queer_songs = top_queer_songs()
 
     # st.link_button('Playlist of the top 100',
@@ -275,7 +275,7 @@ if top_songs_toggle:
                  column_config={Track.url: st.column_config.LinkColumn()})
 
 
-    st.markdown("Top 100 POC songs!")
+    st.markdown("Top 500 POC songs!")
     top_poc_songs = top_poc_songs()
 
     # st.link_button('Playlist of the top 100',
