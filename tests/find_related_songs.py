@@ -11,7 +11,7 @@ sys.path.append(PROJ_DIR)  # noqa
 import polars as pl
 
 from utils.pre_processing import process_song_pairings
-from utils.search_engine import PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_ADJACENT_DATA_FILE, SearchEngine
+from utils.search import PLAYLIST_DATA_FILE, PLAYLIST_TRACKS_DATA_FILE, TRACK_ADJACENT_DATA_FILE, SearchEngine
 
 if len(sys.argv) >= 2:
     mode = sys.argv[1] or 'load'

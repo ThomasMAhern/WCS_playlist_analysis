@@ -6,7 +6,7 @@ import polars as pl
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
-from utils.search_engine import (
+from utils.search import (
     COUNTRY_DATA_FILE,
     PLAYLIST_DATA_FILE,
     PLAYLIST_ORIGINAL_DATA_FILE,
@@ -21,7 +21,7 @@ from utils.search_engine import (
     TRACK_ORIGINAL_DATA_FILE,
     TRACK_PLAYLISTS_DATA_FILE,
 )
-from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
+from utils.tables import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet

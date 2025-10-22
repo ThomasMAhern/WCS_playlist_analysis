@@ -7,8 +7,8 @@ import psutil
 
 from utils.common.columns import pull_columns_to_front
 from utils.common.logging import log_query
-from utils.search_engine import SearchEngine
-from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
+from utils.search import SearchEngine
+from utils.tables import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 
 # avail_threads = pl.threadpool_size()
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)

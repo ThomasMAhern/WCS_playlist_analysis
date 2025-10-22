@@ -1,3 +1,4 @@
+"""Provides typed column name constants."""
 from typing import Final
 
 import polars as pl

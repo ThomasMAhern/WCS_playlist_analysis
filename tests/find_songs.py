@@ -13,8 +13,8 @@ import polars.selectors as cs
 
 from utils.common.columns import pull_columns_to_front
 from utils.pre_processing import process_playlist_and_song_data
-from utils.search_engine import SearchEngine
-from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Track
+from utils.search import SearchEngine
+from utils.tables import Playlist, PlaylistOwner, PlaylistTrack, Track
 
 if len(sys.argv) >= 2:
     mode = sys.argv[1] or 'load'
