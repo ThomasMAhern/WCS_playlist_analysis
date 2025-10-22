@@ -3,7 +3,7 @@ from typing import LiteralString#
 import polars as pl
 import polars.selectors as cs
 
-from utils.typing import get_type_args_of_base
+from utils.common.typing import get_type_args_of_base
 
 
 class Entity:
