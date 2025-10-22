@@ -1,8 +1,9 @@
+"""Provides typed column name constants."""
 from typing import Final
 
 import polars as pl
 
-from utils.search_engine.entity_base import Entity, SubEntity, field
+from utils.common.entities import Entity, SubEntity, field
 
 
 class Stats(Entity):

@@ -1,5 +1,4 @@
-"""This module provides logging utilities."""
-
+"""Utility functions for logging queries to Supabase."""
 from supabase import create_client, Client
 import os
 
@@ -13,10 +12,11 @@ if url and key:
 else:
     supabase = None
 
+
 def log_query(query_type, params):
     """Send query logs to Supabase."""
     if supabase:
-        supabase.table("WestieMusicDatabase").insert( {
+        supabase.table("WestieMusicDatabase").insert({
             "query_type": query_type,
             "params": params,
         }).execute()

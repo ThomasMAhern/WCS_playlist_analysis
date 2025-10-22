@@ -5,7 +5,7 @@ import polars as pl
 import psutil
 
 from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
-from utils.logging import log_query
+from utils.common.logging import log_query
 from utils.playlist_classifiers import extract_dates_from_name
 
 

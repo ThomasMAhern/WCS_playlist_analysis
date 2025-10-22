@@ -1,3 +1,4 @@
+"""Utility functions for parsing query parameters into polars filters."""
 import polars as pl
 
 IntoExpr = str | list[str] | pl.Expr
