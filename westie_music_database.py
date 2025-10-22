@@ -6,7 +6,7 @@ import polars.selectors as cs
 import psutil
 
 from utils.common.columns import pull_columns_to_front
-from utils.logging import log_query
+from utils.common.logging import log_query
 from utils.search_engine import SearchEngine
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 
