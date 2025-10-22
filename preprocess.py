@@ -549,3 +549,8 @@ def process_everything(merge_duplicates: bool = True):
 
     # Song pairings reuses the playlist entries data generated above
     process_song_pairings()
+
+
+# Run full pre-processing when invoked via `python preprocess.py`
+if __name__ == '__main__':
+    process_everything()
