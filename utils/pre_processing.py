@@ -12,6 +12,7 @@ from utils.search_engine import (
     PLAYLIST_ORIGINAL_DATA_FILE,
     PLAYLIST_TRACKS_DATA_FILE,
     PLAYLIST_TRACKS_ORIGINAL_DATA_FILE,
+    REGION_DATA_FILE,
     TRACK_ADJACENT_DATA_FILE,
     TRACK_CANONICAL_DATA_FILE,
     TRACK_DATA_FILE,
@@ -21,7 +22,6 @@ from utils.search_engine import (
     TRACK_PLAYLISTS_DATA_FILE,
 )
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
-from utils.search_engine.source_data import REGION_DATA_FILE
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet
