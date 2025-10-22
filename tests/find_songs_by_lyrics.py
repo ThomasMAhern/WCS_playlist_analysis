@@ -1,5 +1,14 @@
+##################################################
+from os.path import dirname, abspath, join  # noqa
+import sys  # noqa
+
+# Make sure we can import code from utils/
+THIS_DIR = dirname(__file__)  # noqa
+PROJ_DIR = abspath(join(THIS_DIR, '..'))  # noqa
+sys.path.append(PROJ_DIR)  # noqa
+##################################################
+
 import polars as pl
-import sys
 
 from utils.pre_processing import process_song_lyrics
 from utils.search_engine import SearchEngine
