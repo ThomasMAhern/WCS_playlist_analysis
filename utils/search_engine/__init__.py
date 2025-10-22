@@ -70,10 +70,10 @@ from typing import Final, Literal, NamedTuple
 import polars as pl
 import polars.selectors as cs
 
+from utils.common.entities import PolarsLazyFrame
 from utils.common.filters import create_date_filter, create_text_filter, or_filter
 from utils.common.stats import count_n_unique
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
-from utils.search_engine.entity_base import PolarsLazyFrame
 
 
 ####################

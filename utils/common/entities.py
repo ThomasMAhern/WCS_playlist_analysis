@@ -1,3 +1,4 @@
+"""Utility classes for creating table definitions that provide column names in a self-documenting manner."""
 from typing import LiteralString#
 
 import polars as pl
