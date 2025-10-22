@@ -3,11 +3,11 @@ from typing import Literal
 
 import polars as pl
 
+from utils.common.stats import count_n_unique
 from utils.search_engine.entity import Playlist, PlaylistOwner, Stats, Track, TrackAdjacent
 from utils.search_engine.filters import FilterOrder, FilterType, PlaylistFilter, PlaylistTrackFilter, PreFilterOptions, TrackFilter, TrackLyricsFilter, TrackSet
 from utils.search_engine.source_data import CombinedData
 from utils.search_engine.source_data import *  # Export all constants
-from utils.search_utils.stats import count_n_unique
 
 
 @dataclass(slots=True)

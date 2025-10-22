@@ -1,4 +1,4 @@
-from __future__ import annotations
+"""Utilities for calculating database statistics."""
 from typing import Literal, overload
 
 import polars as pl

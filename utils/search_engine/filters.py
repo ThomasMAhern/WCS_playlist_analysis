@@ -6,9 +6,9 @@ from typing import NamedTuple
 import polars as pl
 import polars.selectors as cs
 
+from utils.common.filters import create_date_filter, create_text_filter, or_filter
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Track, TrackLyrics
 from utils.search_engine.entity_base import PolarsLazyFrame
-from utils.search_utils.filters import create_date_filter, create_text_filter, or_filter
 
 
 class FilterOrder(StrEnum):
