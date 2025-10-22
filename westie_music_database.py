@@ -5,14 +5,12 @@ import polars as pl
 import polars.selectors as cs
 import psutil
 
-from utils.additional_data import actual_wcs_djs, poc_artists, queer_artists
-from utils.columns import pull_columns_to_front
+from utils.common.columns import pull_columns_to_front
 from utils.logging import log_query
 from utils.search_engine import SearchEngine
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
 
 # avail_threads = pl.threadpool_size()
-
 pl.Config.set_tbl_rows(100).set_fmt_str_lengths(100)
 pl.enable_string_cache()  # for Categoricals
 # st.text(f"{avail_threads}")

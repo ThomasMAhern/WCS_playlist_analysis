@@ -2,7 +2,7 @@ import polars as pl
 import polars.selectors as cs
 import sys
 
-from utils.columns import pull_columns_to_front
+from utils.common.columns import pull_columns_to_front
 from utils.pre_processing import process_playlist_and_song_data
 from utils.search_engine import SearchEngine
 from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Track
