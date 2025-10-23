@@ -1,4 +1,3 @@
-"""Utility functions for dealing with Python generic types."""
 from typing import get_args, get_origin
 import types
 

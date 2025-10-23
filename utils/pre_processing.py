@@ -6,13 +6,12 @@ import polars as pl
 
 from utils.additional_data import actual_wcs_djs, queer_artists, poc_artists
 from utils.playlist_classifiers import extract_dates_from_name
-from utils.search import (
+from utils.search_engine import (
     COUNTRY_DATA_FILE,
     PLAYLIST_DATA_FILE,
     PLAYLIST_ORIGINAL_DATA_FILE,
     PLAYLIST_TRACKS_DATA_FILE,
     PLAYLIST_TRACKS_ORIGINAL_DATA_FILE,
-    REGION_DATA_FILE,
     TRACK_ADJACENT_DATA_FILE,
     TRACK_CANONICAL_DATA_FILE,
     TRACK_DATA_FILE,
@@ -21,7 +20,8 @@ from utils.search import (
     TRACK_ORIGINAL_DATA_FILE,
     TRACK_PLAYLISTS_DATA_FILE,
 )
-from utils.tables import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
+from utils.search_engine.entity import Playlist, PlaylistOwner, PlaylistTrack, Stats, Track, TrackAdjacent, TrackLyrics
+from utils.search_engine.source_data import REGION_DATA_FILE
 
 # NOTE: Setting TRACK_ID_DTYPE and PLAYLIST_ID_DTYPE to pl.Categorical
 #       instead of pl.String blows up the size of data_playlist_songs.parquet
@@ -549,8 +549,3 @@ def process_everything(merge_duplicates: bool = True):
 
     # Song pairings reuses the playlist entries data generated above
     process_song_pairings()
-
-
-# Run full pre-processing when invoked via `python preprocess.py`
-if __name__ == '__main__':
-    process_everything()
