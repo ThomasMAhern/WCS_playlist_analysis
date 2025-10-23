@@ -88,7 +88,7 @@ songs_count, artists_count, playlists_count, djs_count, lyrics_count = load_stat
 
 # st.write(f"Memory Usage: {psutil.virtual_memory().percent}%")
 st.markdown("## Westie Music Database:")
-st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. (The free service I'm using is a delicate 🌷 with limited memory and may crash if queried multiple times before it can finish 🥲 )")
+st.text("An aggregated collection of West Coast Swing (WCS) music and playlists from DJs, Spotify users, etc. ") #byebye memory issues courtesy of Lukas W
 
 # st.markdown('''468,348 **Songs** (160,661 wcs specific)
 # 124,957 **Artists** (53,789 wcs specific)
@@ -978,11 +978,6 @@ st.markdown("""####
 
 #### Artists are kinda messed up
 * Yes, they're a pain, I'll handle it eventually, right now I'm ignoring it.
-
-# #### It broke ☹️
-# * The back-end I'm using is free, but I would upgrade to a new system once there are enough users willing to help pay for it.
-# * Yes, we're doing some expensive processing on 600MB+ data with a machine of 1GB memory 😬 (You usually need 5x-10x more memory in order to open a file of a particular size… never mind do anything with it. I'm using lots of clever memory tricks so it can just baaaaarely squeeze inside the memory limits, but if multiple people hit it... ☠️
-# * It requires a manual reboot - so if you're working on something critical, ping me so I can restart it (whatsapp/fb)
 
 #### Errors:
 * Please report any errors you notice, or anything that doesn't make sense and I'll try to get to it!
